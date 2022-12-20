@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "spyglass_astronomy",
+  "version": "${version}",
+
+  "name": "Spyglass Astronomy",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Nettakrim"
+  ],
+  "contact": {
+
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/spyglass_astronomy/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient"
+    ]
+  },
+  "mixins": [
+    "spyglass_astronomy.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": "~1.19",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
