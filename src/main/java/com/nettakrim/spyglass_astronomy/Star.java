@@ -1,46 +1,66 @@
 package com.nettakrim.spyglass_astronomy;
 
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.util.math.MathHelper;
+
+//https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java
 
 public class Star {
-    public Star() {
+    private final float xCoord;
+    private final float yCoord;
+    private final float zCoord;
+
+    private final float longitudeSin;
+    private final float longitudeCos;
+
+    private final float latitudeSin;
+    private final float latitudeCos;
+
+    private final int r;
+    private final int g;
+    private final int b;
+
+    private float angle;
+    private float size;
+
+    public Star(float posX, float posY, float posZ, float size, float angle, int[] color) {
+        this.r = color[0];
+        this.g = color[1];
+        this.b = color[2];
+
+        this.xCoord = posX;
+        this.yCoord = posY;
+        this.zCoord = posZ;
+
+        double polarAngle = Math.atan2(posX, posZ);
+        this.longitudeSin = (float) Math.sin(polarAngle);
+        this.longitudeCos = (float) Math.cos(polarAngle);
+
+        double proj = Math.atan2(Math.sqrt(posX * posX + posZ * posZ), posY);
+        this.latitudeSin = (float) Math.sin(proj);
+        this.latitudeCos = (float) Math.cos(proj);
+
+        this.size = size;
+        this.angle = angle;
+    }
+
+    public void Update() {
 
     }
 
-    public void render(BufferBuilder buffer) {
-        double d = random.nextFloat() * 2.0f - 1.0f;
-        double e = random.nextFloat() * 2.0f - 1.0f;
-        double f = random.nextFloat() * 2.0f - 1.0f;
-        double g = 0.15f + random.nextFloat() * 0.1f;
-        double h = d * d + e * e + f * f;
-        if (!(h < 1.0) || !(h > 0.01)) continue;
-        h = 1.0 / Math.sqrt(h);
-        double j = (d *= h) * 100.0;
-        double k = (e *= h) * 100.0;
-        double l = (f *= h) * 100.0;
-        double m = Math.atan2(d, f);
-        double n = Math.sin(m);
-        double o = Math.cos(m);
-        double p = Math.atan2(Math.sqrt(d * d + f * f), e);
-        double q = Math.sin(p);
-        double r = Math.cos(p);
-        double s = random.nextDouble() * Math.PI * 2.0;
-        double t = Math.sin(s);
-        double u = Math.cos(s);
-        for (int v = 0; v < 4; ++v) {
-            double ab;
-            double w = 0.0;
-            double x = (double)((v & 2) - 1) * g;
-            double y = (double)((v + 1 & 2) - 1) * g;
-            double z = 0.0;
-            double aa = x * u - y * t;
-            double ac = ab = y * u + x * t;
-            double ad = aa * q + 0.0 * r;
-            double ae = 0.0 * q - aa * r;
-            double af = ae * n - ac * o;
-            double ag = ad;
-            double ah = ac * n + ae * o;
-            buffer.vertex(j + af, k + ag, l + ah).next();
+    public void SetVertices(BufferBuilder bufferBuilder) {
+        float angleSin = MathHelper.sin(angle);
+        float angleCos = MathHelper.cos(angle);
+        for (int corner = 0; corner < 4; ++corner) {
+           float x = ((corner & 2) - 1) * size;
+           float y = ((corner + 1 & 2) - 1) * size;
+           float rotatedA = x * angleCos - y * angleSin;
+           float rotatedB = y * angleCos + x * angleSin;
+           float rotatedALat = rotatedA * latitudeSin;
+           float rotatedBLat = -(rotatedA * latitudeCos);
+           float noIdea1 = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
+           float noIdea2 = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
+           bufferBuilder.vertex(xCoord*100 + noIdea1, yCoord*100 + rotatedALat, zCoord*100 + noIdea2).color(r, g, b, 255).next();
         }
     }
 }
