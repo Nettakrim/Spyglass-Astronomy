@@ -2,6 +2,7 @@ package com.nettakrim.spyglass_astronomy;
 
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3f;
 
 //https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java
 
@@ -71,5 +72,13 @@ public class Star {
            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
            bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r, g, b, currentAlpha).next();
         }
+    }
+
+    public Vec3f getRenderedPosition() {
+        return new Vec3f(xCoord*100, yCoord*100, zCoord*100);
+    }
+
+    public int[] getColor() {
+        return new int[]{r,g,b,a};
     }
 }

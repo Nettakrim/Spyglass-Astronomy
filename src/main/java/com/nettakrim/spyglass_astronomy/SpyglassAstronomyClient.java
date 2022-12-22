@@ -25,6 +25,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static ArrayList<Star> stars = new ArrayList<>();
 
+    public static ArrayList<Constellation> constellations = new ArrayList<>();
+
     public static StarRenderingManager starRenderingManager;
 
 	@Override
@@ -83,6 +85,14 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         starRenderingManager = new StarRenderingManager();
         starRenderingManager.UpdateStars(0);
+
+        Constellation constellation = new Constellation();
+        constellation.AddLine(0, 1);
+        constellation.AddLine(2, 3);
+        constellation.AddLine(3, 4);
+        constellations.add(constellation);
+
+        starRenderingManager.UpdateConstellations(0);
     }
 
     public static float getPreciseMoonPhase() {
