@@ -18,7 +18,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("Spyglass Astronomy");
 
-    private static final int starCount = 1500;
+    private static final int starCount = 1024;
 
     public static MinecraftClient client;
     public static ClientWorld world;
@@ -42,20 +42,25 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         world = client.world;
 
         Random random = Random.create(10L);
-        for (int i = 0; i < starCount; ++i) {
+
+        int currentStars = 0;
+        while (currentStars < starCount) {
             float posX = random.nextFloat() * 2.0f - 1.0f;
             float posY = random.nextFloat() * 2.0f - 1.0f;
             float posZ = random.nextFloat() * 2.0f - 1.0f;
+            float galaxyBias = 0.5f;
+            posX = (galaxyBias * posX * MathHelper.abs(posX))+((1-galaxyBias) * posX);
 
-            float h = posX * posX + posY * posY + posZ * posZ;
-            if (!(h < 1.0) || !(h > 0.01)) continue;
-            h = MathHelper.fastInverseSqrt(h);
-            posX *= h;
-            posY *= h;
-            posZ *= h;
+            //makes sure position is a uniform point in a sphere, then normalises position to the outside of a sphere
+            float distance = posX * posX + posY * posY + posZ * posZ;
+            if (!(distance < 1.0) || !(distance > 0.01)) continue;
+            distance = MathHelper.fastInverseSqrt(distance);
+            posX *= distance;
+            posY *= distance;
+            posZ *= distance;
 
             float sizeRaw = random.nextFloat();
-            float size = 0.15f + sizeRaw * 0.1f;
+            float size = 0.15f + sizeRaw * 0.2f;
             float rotationSpeed = (random.nextFloat() * 2f)-1;
 
             float range = 0.8f;
@@ -63,16 +68,19 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float gradientPos = random.nextFloat();
             int[] color = new int[]{
                 (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
-                255,
+                (int)(255 - random.nextFloat() * 20),
                 (int)(Math.min(range - offsetRange * gradientPos, 1f)*255),
                 //(int)(((random.nextFloat()+sizeRaw)/2)*255f)
                 (int)(MathHelper.sqrt(random.nextFloat()*sizeRaw)*255f)
             };
 
-            float twinkleSpeed = random.nextFloat()*0.01f+0.025f;
+            float twinkleSpeed = random.nextFloat()*0.025f+0.035f;
 
             stars.add(new Star(posX, posY, posZ, size, rotationSpeed, color, twinkleSpeed));
+
+            currentStars++;
         }
+
         starRenderingManager = new StarRenderingManager();
         starRenderingManager.UpdateStars(0);
     }

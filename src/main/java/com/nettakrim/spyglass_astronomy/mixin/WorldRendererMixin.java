@@ -48,6 +48,7 @@ public class WorldRendererMixin {
             matrices.push();
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*45.0f));
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             RenderSystem.setShaderColor(starVisibility, starVisibility, starVisibility, starVisibility);
             BackgroundRenderer.clearFog();
             

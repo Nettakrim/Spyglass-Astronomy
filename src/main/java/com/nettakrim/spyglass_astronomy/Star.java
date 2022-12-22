@@ -54,8 +54,7 @@ public class Star {
 
     public void Update(int ticks) {
         angle += rotationSpeed;
-        currentAlpha = (int) (a * Math.min((MathHelper.sin(ticks*twinkleSpeed)/4)+1,1));
-        //currentTwinkle
+        currentAlpha = (int) (a * (1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0)));
     }
 
     public void SetVertices(BufferBuilder bufferBuilder) {
