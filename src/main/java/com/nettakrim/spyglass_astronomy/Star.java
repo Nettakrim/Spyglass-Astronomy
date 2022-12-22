@@ -19,14 +19,20 @@ public class Star {
     private final int r;
     private final int g;
     private final int b;
+    private final int a;
 
     private float angle;
     private float size;
 
-    public Star(float posX, float posY, float posZ, float size, float angle, int[] color) {
+    private float rotationSpeed;
+    private final float twinkleSpeed;
+    private int currentAlpha;
+
+    public Star(float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float twinkleSpeed) {
         this.r = color[0];
         this.g = color[1];
         this.b = color[2];
+        this.a = color[3];
 
         this.xCoord = posX;
         this.yCoord = posY;
@@ -41,11 +47,15 @@ public class Star {
         this.latitudeCos = (float) Math.cos(proj);
 
         this.size = size;
-        this.angle = angle;
+        this.angle = rotationSpeed * MathHelper.PI;
+        this.rotationSpeed = rotationSpeed * 0.005f;
+        this.twinkleSpeed = twinkleSpeed;
     }
 
-    public void Update() {
-
+    public void Update(int ticks) {
+        angle += rotationSpeed;
+        currentAlpha = (int) (a * Math.min((MathHelper.sin(ticks*twinkleSpeed)/4)+1,1));
+        //currentTwinkle
     }
 
     public void SetVertices(BufferBuilder bufferBuilder) {
@@ -58,9 +68,9 @@ public class Star {
            float rotatedB = y * angleCos + x * angleSin;
            float rotatedALat = rotatedA * latitudeSin;
            float rotatedBLat = -(rotatedA * latitudeCos);
-           float noIdea1 = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
-           float noIdea2 = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.vertex(xCoord*100 + noIdea1, yCoord*100 + rotatedALat, zCoord*100 + noIdea2).color(r, g, b, 255).next();
+           float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
+           float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
+           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r, g, b, currentAlpha).next();
         }
     }
 }

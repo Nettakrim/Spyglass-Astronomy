@@ -54,13 +54,24 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             posY *= h;
             posZ *= h;
 
-            float size = 0.15f + random.nextFloat() * 0.1f;
-            float angle = random.nextFloat() * MathHelper.PI * 2.0f;
+            float sizeRaw = random.nextFloat();
+            float size = 0.15f + sizeRaw * 0.1f;
+            float rotationSpeed = (random.nextFloat() * 2f)-1;
 
-            float colorFloat = random.nextFloat();
-            
-            int[] color = new int[]{255,0,255};
-            stars.add(new Star(posX, posY, posZ, size, angle, color));
+            float range = 0.8f;
+            float offsetRange = 2*range-2;
+            float gradientPos = random.nextFloat();
+            int[] color = new int[]{
+                (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
+                255,
+                (int)(Math.min(range - offsetRange * gradientPos, 1f)*255),
+                //(int)(((random.nextFloat()+sizeRaw)/2)*255f)
+                (int)(MathHelper.sqrt(random.nextFloat()*sizeRaw)*255f)
+            };
+
+            float twinkleSpeed = random.nextFloat()*0.01f+0.025f;
+
+            stars.add(new Star(posX, posY, posZ, size, rotationSpeed, color, twinkleSpeed));
         }
         starRenderingManager = new StarRenderingManager();
         starRenderingManager.UpdateStars(0);

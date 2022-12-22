@@ -14,7 +14,7 @@ public class StarRenderingManager {
         starBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         for (Star star : SpyglassAstronomyClient.stars) {
-            star.Update();
+            star.Update(ticks);
             star.SetVertices(starBufferBuilder);
         }
 

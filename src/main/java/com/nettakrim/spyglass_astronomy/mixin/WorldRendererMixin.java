@@ -64,8 +64,8 @@ public class WorldRendererMixin {
         SpyglassAstronomyClient.starRenderingManager.UpdateStars(ticks);
     }
 
-    @Inject(at = @At("HEAD"), method = "setWorld")
-    private void setWorld(CallbackInfo ci) {
-        //SpyglassAstronomyClient.GenerateStars();
-    }
+    //@Inject(at = @At("HEAD"), method = "setWorld")
+    //private void setWorld(CallbackInfo ci) {
+    //    SpyglassAstronomyClient.GenerateStars();
+    //}
 }
