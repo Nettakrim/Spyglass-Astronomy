@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3f;
 public class StarLine {
     public static float distance = 1.1f;
     public static float width = 0.15f;
-    public static float visibilityMultiplier = 0.5f;
+    public static float visibilityMultiplier = 0.35f;
 
     private final int starAIndex;
     private final int starBIndex;
@@ -82,5 +82,9 @@ public class StarLine {
 
     public Star[] getStars() {
         return new Star[]{SpyglassAstronomyClient.stars.get(starAIndex),SpyglassAstronomyClient.stars.get(starBIndex)};
+    }
+
+    public boolean isSame(int start, int end) {
+        return (start == this.starAIndex && end == this.starBIndex) || (start == this.starBIndex && end == this.starAIndex);
     }
 }

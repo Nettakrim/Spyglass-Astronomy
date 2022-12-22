@@ -81,4 +81,8 @@ public class Star {
     public int[] getColor() {
         return new int[]{r,g,b,a};
     }
+
+    public float[] getPosition() {
+        return new float[]{xCoord, yCoord, zCoord};
+    }
 }

@@ -18,6 +18,9 @@ public class Constellation {
     }
 
     public void AddLine(int start, int end) {
+        for (StarLine line : lines) {
+            if (line.isSame(start, end)) return;
+        }
         lines.add(new StarLine(start, end));
     }
 }

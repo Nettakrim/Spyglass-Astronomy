@@ -87,9 +87,19 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         starRenderingManager.UpdateStars(0);
 
         Constellation constellation = new Constellation();
-        constellation.AddLine(0, 1);
-        constellation.AddLine(2, 3);
-        constellation.AddLine(3, 4);
+        for (int i = 0; i < starCount; i++) {
+            Star star = stars.get(i);
+            float[] position = star.getPosition();
+            for (int i2 = 0; i2 < starCount-i; i2++) {
+                if (random.nextFloat() < 0.7f) continue;
+                Star star2 = stars.get(i2);
+                float[] position2 = star2.getPosition();
+                float distance = MathHelper.abs((position[0]-position2[0]))+MathHelper.abs((position[1]-position2[1]))+MathHelper.abs((position[2]-position2[2]));
+                if (distance != 0 && distance < random.nextFloat()/4) {
+                    constellation.AddLine(i, i2);
+                }
+            }    
+        }
         constellations.add(constellation);
 
         starRenderingManager.UpdateConstellations(0);
