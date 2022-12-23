@@ -106,8 +106,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void startDrawingConstellation() {
-        float[] lookVector = getLookVector();
-        Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
+        Vec3f lookVector = getLookVector();
+        rotateVectorToStarRotation(lookVector);
+        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
         if (star == null) return;
 
         drawingLine = new StarLine(star);
@@ -123,8 +124,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static void stopDrawingConstellation() {
         isDrawingConstellation = false;
 
-        float[] lookVector = getLookVector();
-        Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
+        Vec3f lookVector = getLookVector();
+        rotateVectorToStarRotation(lookVector);
+        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
 
         if (star == null) {
             return;
@@ -159,16 +161,17 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             isDrawingConstellation = false;
             return;
         }
-        float[] lookVector = getLookVector();
-        Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
+        Vec3f lookVector = getLookVector();
+        rotateVectorToStarRotation(lookVector);
+        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
         if (star == null) {
-            drawingLine.updateDrawing(new Vec3f(lookVector[0] * 100, lookVector[1] * 100, lookVector[2] * 100));
+            drawingLine.updateDrawing(new Vec3f(lookVector.getX() * 100, lookVector.getY() * 100, lookVector.getZ() * 100));
         } else {
             drawingLine.updateDrawing(star.getRenderedPosition());
         }
     }
 
-    public static float[] getLookVector() {
+    public static Vec3f getLookVector() {
         float pitch = client.player.getPitch() / 180 * MathHelper.PI;
         float yaw = client.player.getYaw() / 180 * MathHelper.PI;
         float x = -MathHelper.sin(yaw);
@@ -177,7 +180,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float scale = MathHelper.cos(pitch);
         x *= scale;
         z *= scale;
-        return new float[]{x, y, z};        
+        return new Vec3f(x, y, z);        
+    }
+
+    public static void rotateVectorToStarRotation(Vec3f vector) {
+        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
+        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*-45.0f));
+        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
     }
 
     public static Star getNearestStar(float x, float y, float z) {
@@ -193,7 +202,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             }
         }
 
-        if (nearestDistance > 1) return null;
+        if (nearestDistance > 0.0005f) return null;
+        
+        //LOGGER.info(Float.toString(nearestStar.getCurrentNonTwinkledAlpha()));
+        if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
 
         return nearestStar;
     }

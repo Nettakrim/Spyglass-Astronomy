@@ -66,15 +66,13 @@ public class Star {
     }
 
     public float getCurrentNonTwinkledAlpha() {
+        float heightScale = SpyglassAstronomyClient.getHeightScale();
+        float brightness = (((1-heightScale) * alpha * alpha * alpha + heightScale * heightScale));
+        brightness = MathHelper.clamp((brightness+alpha)/2, 3*alpha-2, brightness);
         if (connectedStars == 0) {
-            float heightScale = SpyglassAstronomyClient.getHeightScale();
-            float brightness = (((1-heightScale) * alpha * alpha * alpha + heightScale * heightScale));
-            brightness = MathHelper.clamp((brightness+alpha)/2, 3*alpha-2, brightness);
             return brightness;
         }
-        else {
-            return (0.5f * alpha + 0.5f);
-        }        
+        return (brightness + (0.5f * alpha + 0.5f))/2;      
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
