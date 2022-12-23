@@ -11,7 +11,6 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -27,8 +26,8 @@ public class StarRenderingManager {
         constellationBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         for (Constellation constellation : SpyglassAstronomyClient.constellations) {
-            constellation.Update(ticks);
-            constellation.Render(constellationBufferBuilder);
+            constellation.update(ticks);
+            constellation.render(constellationBufferBuilder);
         }
 
         constellationBuffer.bind();
@@ -39,8 +38,8 @@ public class StarRenderingManager {
         starBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         for (Star star : SpyglassAstronomyClient.stars) {
-            star.Update(ticks);
-            star.SetVertices(starBufferBuilder);
+            star.update(ticks);
+            star.setVertices(starBufferBuilder);
         }
 
         starsBuffer.bind();
@@ -51,9 +50,9 @@ public class StarRenderingManager {
         float starVisibility = SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
             matrices.push();
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*45.0f));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
+            //matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
+            //matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*45.0f));
+            //matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             RenderSystem.setShaderColor(starVisibility, starVisibility, starVisibility, starVisibility);
             BackgroundRenderer.clearFog();
             

@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "MouseMixin",
+    "SpyglassItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -7,20 +7,42 @@ import net.minecraft.client.render.BufferBuilder;
 public class Constellation {
     private ArrayList<StarLine> lines = new ArrayList<>();
 
-    public void Render(BufferBuilder bufferBuilder) {
+    public Constellation() {
+
+    };
+
+    public Constellation(StarLine starLine) {
+        lines.add(starLine);
+    }
+
+    public void render(BufferBuilder bufferBuilder) {
         for (StarLine line : lines) {
-            line.SetVertices(bufferBuilder);
+            line.setVertices(bufferBuilder);
         }
     }
 
-    public void Update(int ticks) {
+    public void update(int ticks) {
 
     }
 
-    public void AddLine(int start, int end) {
+    public void addLine(int start, int end) {
         for (StarLine line : lines) {
             if (line.isSame(start, end)) return;
         }
         lines.add(new StarLine(start, end));
+    }
+
+    public void addLine(StarLine starLine) {
+        for (StarLine line : lines) {
+            if (line.isSame(starLine)) return;
+        }
+        lines.add(starLine);
+    }
+
+    public boolean lineIntersects(StarLine starLine) {
+        for (StarLine line : lines) {
+            if (line.intersects(starLine)) return true;
+        }
+        return false;
     }
 }

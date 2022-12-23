@@ -7,6 +7,8 @@ import net.minecraft.util.math.Vec3f;
 //https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java
 
 public class Star {
+    public final int index;
+
     private final float xCoord;
     private final float yCoord;
     private final float zCoord;
@@ -29,15 +31,17 @@ public class Star {
     private final float twinkleSpeed;
     private int currentAlpha;
 
-    public Star(float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float twinkleSpeed) {
+    public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float twinkleSpeed) {
+        this.index = index;
+ 
+        this.xCoord = posX;
+        this.yCoord = posY;
+        this.zCoord = posZ;
+ 
         this.r = color[0];
         this.g = color[1];
         this.b = color[2];
         this.a = color[3];
-
-        this.xCoord = posX;
-        this.yCoord = posY;
-        this.zCoord = posZ;
 
         double polarAngle = Math.atan2(posX, posZ);
         this.longitudeSin = (float) Math.sin(polarAngle);
@@ -53,12 +57,12 @@ public class Star {
         this.twinkleSpeed = twinkleSpeed;
     }
 
-    public void Update(int ticks) {
+    public void update(int ticks) {
         angle += rotationSpeed;
         currentAlpha = (int) (a * (1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0)));
     }
 
-    public void SetVertices(BufferBuilder bufferBuilder) {
+    public void setVertices(BufferBuilder bufferBuilder) {
         float angleSin = MathHelper.sin(angle);
         float angleCos = MathHelper.cos(angle);
         for (int corner = 0; corner < 4; ++corner) {

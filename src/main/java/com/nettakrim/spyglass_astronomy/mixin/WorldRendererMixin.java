@@ -34,7 +34,7 @@ public class WorldRendererMixin {
     )
     public void renderSky(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
         if (SpyglassAstronomyClient.world == null) {
-            SpyglassAstronomyClient.GenerateStars();
+            SpyglassAstronomyClient.generateStars();
         }
         SpyglassAstronomyClient.starRenderingManager.Render(matrices, projectionMatrix, tickDelta, camera, bl, runnable);
     }
