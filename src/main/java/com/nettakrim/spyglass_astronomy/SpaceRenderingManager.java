@@ -15,26 +15,41 @@ import net.minecraft.util.math.Matrix4f;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 
-public class StarRenderingManager {
+public class SpaceRenderingManager {
     private VertexBuffer starsBuffer = new VertexBuffer();
     private BufferBuilder starBufferBuilder = Tessellator.getInstance().getBuffer();
 
-    public VertexBuffer constellationBuffer = new VertexBuffer();
-    private BufferBuilder constellationBufferBuilder = Tessellator.getInstance().getBuffer();
+    private VertexBuffer constellationsBuffer = new VertexBuffer();
+    private BufferBuilder constellationsBufferBuilder = Tessellator.getInstance().getBuffer();
+    private boolean constellationsNeedsUpdate = true;
 
-    public void UpdateConstellations(int ticks) {
-        constellationBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+    private VertexBuffer drawingConstellationsBuffer = new VertexBuffer();
+    private BufferBuilder drawingConstellationsBufferBuilder = Tessellator.getInstance().getBuffer();
 
-        for (Constellation constellation : SpyglassAstronomyClient.constellations) {
-            constellation.update(ticks);
-            constellation.render(constellationBufferBuilder);
+    public void UpdateSpace(int ticks) {
+        if (constellationsNeedsUpdate) {
+            updateConstellations();
+            constellationsNeedsUpdate = false;
         }
-
-        constellationBuffer.bind();
-        constellationBuffer.upload(constellationBufferBuilder.end());
+        updateStars(ticks);
     }
 
-    public void UpdateStars(int ticks) {
+    public void scheduleConstellationsUpdate() {
+        constellationsNeedsUpdate = true;
+    }
+
+    private void updateConstellations() {
+        constellationsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        for (Constellation constellation : SpyglassAstronomyClient.constellations) {
+            constellation.render(constellationsBufferBuilder);
+        }
+
+        constellationsBuffer.bind();
+        constellationsBuffer.upload(constellationsBufferBuilder.end());
+    }
+
+    private void updateStars(int ticks) {
         starBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         for (Star star : SpyglassAstronomyClient.stars) {
@@ -44,6 +59,15 @@ public class StarRenderingManager {
 
         starsBuffer.bind();
         starsBuffer.upload(starBufferBuilder.end());
+    }
+
+    private void updateDrawingConstellation() {
+        drawingConstellationsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        SpyglassAstronomyClient.drawingConstellation.render(drawingConstellationsBufferBuilder);
+
+        drawingConstellationsBuffer.bind();
+        drawingConstellationsBuffer.upload(drawingConstellationsBufferBuilder.end());
     }
 
     public void Render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable) {
@@ -60,9 +84,15 @@ public class StarRenderingManager {
             starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
             VertexBuffer.unbind();
 
-            constellationBuffer.bind();
-            constellationBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+            constellationsBuffer.bind();
+            constellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
             VertexBuffer.unbind();
+
+            if (SpyglassAstronomyClient.isDrawingConstellation) {
+                updateDrawingConstellation();
+                drawingConstellationsBuffer.bind();
+                drawingConstellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+            }
 
             runnable.run();
             matrices.pop();

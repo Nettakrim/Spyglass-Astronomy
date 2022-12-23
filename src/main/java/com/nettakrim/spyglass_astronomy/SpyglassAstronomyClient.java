@@ -28,11 +28,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static ArrayList<Constellation> constellations = new ArrayList<>();
 
-    public static StarRenderingManager starRenderingManager;
+    public static SpaceRenderingManager spaceRenderingManager;
 
     public static boolean isUsingSpyglass;
     public static boolean isDrawingConstellation;
     private static StarLine drawingLine;
+    public static Constellation drawingConstellation;
 
 	@Override
 	public void onInitializeClient() {
@@ -73,12 +74,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float range = 0.8f;
             float offsetRange = 2*range-2;
             float gradientPos = random.nextFloat();
+            float alphaRaw = random.nextFloat();
             int[] color = new int[]{
                 (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
                 (int)(255 - random.nextFloat() * 20),
                 (int)(Math.min(range - offsetRange * gradientPos, 1f)*255),
-                //(int)(((random.nextFloat()+sizeRaw)/2)*255f)
-                (int)(MathHelper.sqrt(random.nextFloat()*sizeRaw)*255f)
+                (int)(Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f))*255f)
             };
 
             float twinkleSpeed = random.nextFloat()*0.025f+0.035f;
@@ -88,26 +89,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             currentStars++;
         }
 
-        starRenderingManager = new StarRenderingManager();
-        starRenderingManager.UpdateStars(0);
-
-        //Constellation constellation = new Constellation();
-        //for (int i = 0; i < starCount; i++) {
-        //    Star star = stars.get(i);
-        //    float[] position = star.getPosition();
-        //    for (int i2 = 0; i2 < starCount-i; i2++) {
-        //        if (random.nextFloat() < 0.7f) continue;
-        //        Star star2 = stars.get(i2);
-        //        float[] position2 = star2.getPosition();
-        //        float distance = MathHelper.abs((position[0]-position2[0]))+MathHelper.abs((position[1]-position2[1]))+MathHelper.abs((position[2]-position2[2]));
-        //        if (distance != 0 && distance < random.nextFloat()/4) {
-        //            constellation.AddLine(i, i2);
-        //        }
-        //    }    
-        //}
-        //constellations.add(constellation);
-
-        starRenderingManager.UpdateConstellations(0);
+        spaceRenderingManager = new SpaceRenderingManager();
+        spaceRenderingManager.UpdateSpace(0);
     }
 
     public static float getPreciseMoonPhase() {
@@ -120,63 +103,69 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void stopUsingSpyglass() {
         isUsingSpyglass = false;
-        if (isDrawingConstellation) {
-            constellations.remove(constellations.size()-1);
-            starRenderingManager.UpdateConstellations(0);
-            isDrawingConstellation = false;
-        }
     }
 
     public static void startDrawingConstellation() {
         float[] lookVector = getLookVector();
         Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
+        if (star == null) return;
 
         drawingLine = new StarLine(star);
-        constellations.add(new Constellation(drawingLine));
+        drawingConstellation = new Constellation(drawingLine);
 
         isDrawingConstellation = true;
     }
 
-    private static float getSquaredDistance(float x, float y, float z) {
+    public static float getSquaredDistance(float x, float y, float z) {
         return x * x + y * y + z * z;
     }
 
     public static void stopDrawingConstellation() {
+        isDrawingConstellation = false;
+
         float[] lookVector = getLookVector();
         Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
 
+        if (star == null) {
+            return;
+        }
+
         if(!drawingLine.finishDrawing(star)) {
-            constellations.remove(constellations.size()-1);
             return;
         }
 
         Constellation target = null;
-        int end = constellations.size()-1;
-        if (end > 0) {
-            for (int i = 0; i < end; i++) {
-                Constellation constellation = constellations.get(i);
-                if (constellation.lineIntersects(drawingLine)) {
-                    if (target != null) {
-                        LOGGER.info("New StarLine would merge two constellations");
-                        constellations.remove(constellations.size()-1);
-                        return;
-                    }
-                    target = constellation;
+        int end = constellations.size();
+        for (int i = 0; i < end; i++) {
+            Constellation constellation = constellations.get(i);
+            if (constellation.lineIntersects(drawingLine)) {
+                if (target != null) {
+                    LOGGER.info("New StarLine would merge two constellations");
+                    return;
                 }
+                target = constellation;
             }
         }
         if (target != null) {
-            target.addLine(drawingLine);
-            constellations.remove(constellations.size()-1);
+            target.addLine(drawingLine, true);
+        } else {
+            constellations.add(drawingConstellation);
         }
-        starRenderingManager.UpdateConstellations(0);
-        isDrawingConstellation = false;
+        spaceRenderingManager.scheduleConstellationsUpdate();
     }
 
     public static void updateDrawingConstellation() {
+        if (!isUsingSpyglass) {
+            isDrawingConstellation = false;
+            return;
+        }
         float[] lookVector = getLookVector();
-        drawingLine.updateDrawing(new Vec3f(lookVector[0] * 100, lookVector[1] * 100, lookVector[2] * 100));
-        starRenderingManager.UpdateConstellations(0);
+        Star star = getNearestStar(lookVector[0], lookVector[1], lookVector[2]);
+        if (star == null) {
+            drawingLine.updateDrawing(new Vec3f(lookVector[0] * 100, lookVector[1] * 100, lookVector[2] * 100));
+        } else {
+            drawingLine.updateDrawing(star.getRenderedPosition());
+        }
     }
 
     public static float[] getLookVector() {
@@ -204,6 +193,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             }
         }
 
+        if (nearestDistance > 1) return null;
+
         return nearestStar;
+    }
+
+    public static float getHeightScale() {
+        if (client.player == null) return 1;
+        return MathHelper.clamp((((float)client.player.getPos().y)-64f)/192f, 0f, 1f);
     }
 }

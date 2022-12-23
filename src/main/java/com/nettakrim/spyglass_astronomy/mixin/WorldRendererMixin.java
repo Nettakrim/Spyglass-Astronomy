@@ -36,12 +36,12 @@ public class WorldRendererMixin {
         if (SpyglassAstronomyClient.world == null) {
             SpyglassAstronomyClient.generateStars();
         }
-        SpyglassAstronomyClient.starRenderingManager.Render(matrices, projectionMatrix, tickDelta, camera, bl, runnable);
+        SpyglassAstronomyClient.spaceRenderingManager.Render(matrices, projectionMatrix, tickDelta, camera, bl, runnable);
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void updateStars(CallbackInfo ci) {
-        SpyglassAstronomyClient.starRenderingManager.UpdateStars(ticks);
+        SpyglassAstronomyClient.spaceRenderingManager.UpdateSpace(ticks);
     }
 
     //@Inject(at = @At("HEAD"), method = "setWorld")

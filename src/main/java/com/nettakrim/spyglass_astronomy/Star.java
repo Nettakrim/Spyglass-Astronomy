@@ -22,7 +22,7 @@ public class Star {
     private final int r;
     private final int g;
     private final int b;
-    private final int a;
+    private final float alpha;
 
     private float angle;
     private float size;
@@ -30,6 +30,8 @@ public class Star {
     private float rotationSpeed;
     private final float twinkleSpeed;
     private int currentAlpha;
+
+    private int connectedStars = 0;
 
     public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float twinkleSpeed) {
         this.index = index;
@@ -41,7 +43,7 @@ public class Star {
         this.r = color[0];
         this.g = color[1];
         this.b = color[2];
-        this.a = color[3];
+        this.alpha = ((float)color[3])/255f;
 
         double polarAngle = Math.atan2(posX, posZ);
         this.longitudeSin = (float) Math.sin(polarAngle);
@@ -59,7 +61,20 @@ public class Star {
 
     public void update(int ticks) {
         angle += rotationSpeed;
-        currentAlpha = (int) (a * (1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0)));
+        float twinkle = 1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0);
+        currentAlpha = (int) (getCurrentNonTwinkledAlpha() * twinkle * 255);
+    }
+
+    public float getCurrentNonTwinkledAlpha() {
+        if (connectedStars == 0) {
+            float heightScale = SpyglassAstronomyClient.getHeightScale();
+            float brightness = (((1-heightScale) * alpha * alpha * alpha + heightScale * heightScale));
+            brightness = MathHelper.clamp((brightness+alpha)/2, 3*alpha-2, brightness);
+            return brightness;
+        }
+        else {
+            return (0.5f * alpha + 0.5f);
+        }        
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
@@ -83,10 +98,18 @@ public class Star {
     }
 
     public int[] getColor() {
-        return new int[]{r,g,b,a};
+        return new int[]{r,g,b,(int) ((0.5f * alpha + 0.5f) * 255)};
     }
 
     public float[] getPosition() {
         return new float[]{xCoord, yCoord, zCoord};
+    }
+
+    public void connect() {
+        connectedStars++;
+    }
+
+    public void disconnect() {
+        if (connectedStars > 0) connectedStars --;
     }
 }

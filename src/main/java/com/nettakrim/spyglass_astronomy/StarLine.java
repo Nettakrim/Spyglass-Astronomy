@@ -30,10 +30,12 @@ public class StarLine {
         Star starA = SpyglassAstronomyClient.stars.get(startIndex);
         this.starAPosition = starA.getRenderedPosition();
         this.starAColor = starA.getColor();
+        starA.connect();
 
         Star starB = SpyglassAstronomyClient.stars.get(endIndex);
         this.starBPosition = starB.getRenderedPosition();
         this.starBColor = starB.getColor();
+        starB.connect();
 
         calculateVertices();
     }
@@ -46,7 +48,7 @@ public class StarLine {
         this.starAColor = startStar.getColor();
 
         this.starBPosition = startStar.getRenderedPosition();
-        this.starBColor = new int[]{255,255,255,255};                
+        this.starBColor = new int[]{255,255,255,255};
     }
 
     public void updateDrawing(Vec3f position) {
@@ -56,11 +58,21 @@ public class StarLine {
 
     public boolean finishDrawing(Star endStar) {
         if (this.starAIndex == endStar.index) return false;
+        if (getSquaredLength() > 20000) return false;
         this.starBIndex = endStar.index;
         this.starBPosition = endStar.getRenderedPosition();
-        this.starBColor = endStar.getColor();   
+        this.starBColor = endStar.getColor();
+
+        endStar.connect();
+        SpyglassAstronomyClient.stars.get(starAIndex).connect();
         calculateVertices();     
         return true;
+    }
+
+    public float getSquaredLength() {
+        Vec3f length = new Vec3f(starAPosition.getX(), starAPosition.getY(), starAPosition.getZ());
+        length.subtract(starBPosition);
+        return SpyglassAstronomyClient.getSquaredDistance(length.getX(), length.getY(), length.getZ());
     }
 
     public void calculateVertices() {
@@ -99,6 +111,8 @@ public class StarLine {
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
+        if (vertexA1 == null) calculateVertices();
+        
         bufferBuilder.vertex(
             vertexA1.getX(),
             vertexA1.getY(),
@@ -122,6 +136,11 @@ public class StarLine {
             vertexB2.getY(),
             vertexB2.getZ())
         .color(starBColor[0], starBColor[1], starBColor[2], (int)(starBColor[3] * visibilityMultiplier)).next();
+    }
+
+    public void clear() {
+        SpyglassAstronomyClient.stars.get(starAIndex).disconnect();
+        SpyglassAstronomyClient.stars.get(starBIndex).disconnect();
     }
 
     public Star[] getStars() {

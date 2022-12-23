@@ -21,18 +21,21 @@ public class Constellation {
         }
     }
 
-    public void update(int ticks) {
-
-    }
-
-    public void addLine(int start, int end) {
-        for (StarLine line : lines) {
-            if (line.isSame(start, end)) return;
+    public void addLine(StarLine starLine, boolean canRemove) {
+        if (canRemove) {
+            int end = lines.size();
+            for (int i = 0; i < end; i++) {
+                StarLine line = lines.get(i);
+                if (line.isSame(starLine)) {
+                    line.clear();
+                    lines.remove(i);
+                    return;
+                }
+            }
+            lines.add(starLine);
+            return;
         }
-        lines.add(new StarLine(start, end));
-    }
 
-    public void addLine(StarLine starLine) {
         for (StarLine line : lines) {
             if (line.isSame(starLine)) return;
         }
