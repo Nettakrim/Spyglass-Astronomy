@@ -6,7 +6,6 @@ import net.minecraft.util.TypedActionResult;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.Inject;
 
@@ -17,10 +16,5 @@ public class SpyglassItemMixin {
     @Inject(at = @At("TAIL"), method = "use")
     private void use(CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
         SpyglassAstronomyClient.startUsingSpyglass();
-    }
-
-    @Inject(at = @At("TAIL"), method = "onStoppedUsing")
-    private void finishUsing(CallbackInfo ci) {
-        SpyglassAstronomyClient.stopUsingSpyglass();
     }
 }

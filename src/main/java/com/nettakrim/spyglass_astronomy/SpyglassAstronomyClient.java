@@ -17,7 +17,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
+    public static final String MODID = "spyglass_astronomy";
 	public static final Logger LOGGER = LoggerFactory.getLogger("Spyglass Astronomy");
+
+    public static boolean ready;
 
     private static final int starCount = 1024;
 
@@ -30,7 +33,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static SpaceRenderingManager spaceRenderingManager;
 
-    public static boolean isUsingSpyglass;
+    public static boolean isInEditMode;
     public static boolean isDrawingConstellation;
     private static StarLine drawingLine;
     public static Constellation drawingConstellation;
@@ -88,7 +91,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
             currentStars++;
         }
-
+        
+        ready = true;
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.UpdateSpace(0);
     }
@@ -98,11 +102,11 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void startUsingSpyglass() {
-        isUsingSpyglass = true;
+        isInEditMode = false;
     }
 
-    public static void stopUsingSpyglass() {
-        isUsingSpyglass = false;
+    public static void toggleEditMode() {
+        isInEditMode = !isInEditMode;
     }
 
     public static void startDrawingConstellation() {
@@ -157,7 +161,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void updateDrawingConstellation() {
-        if (!isUsingSpyglass) {
+        if (!client.player.isUsingSpyglass()) {
             isDrawingConstellation = false;
             return;
         }

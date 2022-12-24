@@ -13,7 +13,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 public class MouseMixin {
     @Inject(at = @At("TAIL"), method = "onMouseButton")
     private void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
-        if (SpyglassAstronomyClient.isUsingSpyglass && button == 0) {
+        if (!SpyglassAstronomyClient.ready || SpyglassAstronomyClient.client.player == null) return;
+        if (SpyglassAstronomyClient.client.player.isUsingSpyglass() && button == 2 && action == 1) {
+            SpyglassAstronomyClient.toggleEditMode();
+        }        
+        if (SpyglassAstronomyClient.isInEditMode && button == 0) {
             if (action == 1) {
                 SpyglassAstronomyClient.startDrawingConstellation();
             } else {

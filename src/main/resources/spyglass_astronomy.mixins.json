@@ -8,7 +8,8 @@
   "client": [
     "WorldRendererMixin",
     "MouseMixin",
-    "SpyglassItemMixin"
+    "SpyglassItemMixin",
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
