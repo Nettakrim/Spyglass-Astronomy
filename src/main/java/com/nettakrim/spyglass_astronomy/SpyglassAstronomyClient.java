@@ -59,7 +59,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float posX = random.nextFloat() * 2.0f - 1.0f;
             float posY = random.nextFloat() * 2.0f - 1.0f;
             float posZ = random.nextFloat() * 2.0f - 1.0f;
-            float galaxyBias = 0.5f;
+            float galaxyBias = 0.75f;
             posX = (galaxyBias * posX * MathHelper.abs(posX))+((1-galaxyBias) * posX);
 
             //makes sure position is a uniform point in a sphere, then normalises position to the outside of a sphere
@@ -70,7 +70,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             posY *= distance;
             posZ *= distance;
 
+
             float sizeRaw = random.nextFloat();
+            if (currentStars % 2 == 0) {
+                float galaxyCloseness = (0.12f/(MathHelper.abs(posX)+0.1f))-0.2f;
+                if (galaxyCloseness > 0) sizeRaw = (1-galaxyCloseness)*sizeRaw + galaxyCloseness*((sizeRaw*sizeRaw)/2);
+            }
             float size = 0.15f + sizeRaw * 0.2f;
             float rotationSpeed = (random.nextFloat() * 2f)-1;
 
@@ -78,16 +83,17 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float offsetRange = 2*range-2;
             float gradientPos = random.nextFloat();
             float alphaRaw = random.nextFloat();
+            float alpha = Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
+
             int[] color = new int[]{
                 (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
                 (int)(255 - random.nextFloat() * 20),
-                (int)(Math.min(range - offsetRange * gradientPos, 1f)*255),
-                (int)(Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f))*255f)
+                (int)(Math.min(range - offsetRange * gradientPos, 1f)*255)
             };
 
             float twinkleSpeed = random.nextFloat()*0.025f+0.035f;
 
-            stars.add(new Star(currentStars, posX, posY, posZ, size, rotationSpeed, color, twinkleSpeed));
+            stars.add(new Star(currentStars, posX, posY, posZ, size, rotationSpeed, color, alpha, twinkleSpeed));
 
             currentStars++;
         }
@@ -189,7 +195,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void rotateVectorToStarRotation(Vec3f vector) {
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
-        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*-45.0f));
+        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*-405f));
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
     }
 
@@ -208,14 +214,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         if (nearestDistance > 0.0005f) return null;
         
-        //LOGGER.info(Float.toString(nearestStar.getCurrentNonTwinkledAlpha()));
         if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
 
         return nearestStar;
     }
 
-    public static float getHeightScale() {
-        if (client.player == null) return 1;
-        return MathHelper.clamp((((float)client.player.getPos().y)-64f)/192f, 0f, 1f);
+    public static float getHeight() {
+        if (client.player == null) return 128;
+        return (float)client.player.getPos().y;
     }
 }

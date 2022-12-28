@@ -33,7 +33,7 @@ public class Star {
 
     private int connectedStars = 0;
 
-    public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float twinkleSpeed) {
+    public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float alpha, float twinkleSpeed) {
         this.index = index;
  
         this.xCoord = posX;
@@ -43,7 +43,7 @@ public class Star {
         this.r = color[0];
         this.g = color[1];
         this.b = color[2];
-        this.alpha = ((float)color[3])/255f;
+        this.alpha = alpha;
 
         double polarAngle = Math.atan2(posX, posZ);
         this.longitudeSin = (float) Math.sin(polarAngle);
@@ -66,14 +66,10 @@ public class Star {
     }
 
     public float getCurrentNonTwinkledAlpha() {
-        float heightScale = SpyglassAstronomyClient.getHeightScale();
-
+        float heightScale = SpaceRenderingManager.getHeightScale();
         float brightness = heightScale*Math.max(alpha/2 + heightScale/2, 2*alpha-1) + (1-heightScale) * alpha * alpha * alpha;
-
         //float brightness = (((1-heightScale) * alpha * alpha * alpha + heightScale * heightScale));
         //brightness = MathHelper.clamp((brightness+alpha)/2, 3*alpha-2, brightness);
-
-
         if (connectedStars == 0) {
             return brightness;
         }

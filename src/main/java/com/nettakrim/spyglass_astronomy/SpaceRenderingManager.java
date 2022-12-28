@@ -10,6 +10,7 @@ import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
@@ -27,7 +28,11 @@ public class SpaceRenderingManager {
     private VertexBuffer drawingConstellationsBuffer = new VertexBuffer();
     private BufferBuilder drawingConstellationsBufferBuilder = Tessellator.getInstance().getBuffer();
 
+    private static float heightScale = 1;
+    private static float unclampedHeightScale = 1;
+
     public void UpdateSpace(int ticks) {
+        updateHeightScale();
         if (constellationsNeedsUpdate) {
             updateConstellations();
             constellationsNeedsUpdate = false;
@@ -76,9 +81,10 @@ public class SpaceRenderingManager {
         if (starVisibility > 0) {
             matrices.push();
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*45.0f));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*405f));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
-            RenderSystem.setShaderColor(starVisibility, starVisibility, starVisibility, starVisibility);
+            float colorScale = starVisibility;
+            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2)/2));
             BackgroundRenderer.clearFog();
             
             starsBuffer.bind();
@@ -98,5 +104,14 @@ public class SpaceRenderingManager {
             runnable.run();
             matrices.pop();
         }
+    }
+
+    public static void updateHeightScale() {
+        unclampedHeightScale = (SpyglassAstronomyClient.getHeight()-64f)/192f;
+        heightScale = MathHelper.clamp(unclampedHeightScale, 0f, 1f);
+    }
+
+    public static float getHeightScale() {
+        return heightScale;
     }
 }
