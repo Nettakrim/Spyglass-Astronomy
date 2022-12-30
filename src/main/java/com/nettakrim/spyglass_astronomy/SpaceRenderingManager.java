@@ -83,7 +83,7 @@ public class SpaceRenderingManager {
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*405f));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
-            float colorScale = starVisibility;
+            float colorScale = starVisibility+Math.min(heightScale, 0.5f);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2)/2));
             BackgroundRenderer.clearFog();
             
@@ -107,7 +107,7 @@ public class SpaceRenderingManager {
     }
 
     public static void updateHeightScale() {
-        unclampedHeightScale = (SpyglassAstronomyClient.getHeight()-64f)/192f;
+        unclampedHeightScale = (SpyglassAstronomyClient.getHeight()-32f)/256f;
         heightScale = MathHelper.clamp(unclampedHeightScale, 0f, 1f);
     }
 

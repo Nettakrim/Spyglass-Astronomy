@@ -109,6 +109,6 @@ public class Star {
     }
 
     public void disconnect() {
-        if (connectedStars > 0) connectedStars --;
+        if (connectedStars > 0) connectedStars -= 2;
     }
 }

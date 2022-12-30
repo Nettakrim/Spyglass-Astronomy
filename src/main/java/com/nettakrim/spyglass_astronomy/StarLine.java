@@ -110,32 +110,60 @@ public class StarLine {
         vertexB2 = new Vec3f(posBX - perpendicular.getX(), posBY - perpendicular.getY(), posBZ - perpendicular.getZ());
     }
 
-    public void setVertices(BufferBuilder bufferBuilder) {
+    public void setVertices(BufferBuilder bufferBuilder, boolean isActive) {
         if (vertexA1 == null) calculateVertices();
+        float drawingMultipler = 1;
+        if (starBIndex == -1) {
+            drawingMultipler = MathHelper.clamp((20000f-getSquaredLength())/5000f, 0f, 1f);
+        }
         
+        int ar = starAColor[0];
+        int br = starBColor[0];
+
+        int bg = starAColor[1];
+        int ag = starBColor[1];
+
+        int bb = starAColor[2];
+        int ab = starBColor[2];
+
+        int aa = (int)(starAColor[3] * visibilityMultiplier * drawingMultipler);
+        int ba = (int)(starBColor[3] * visibilityMultiplier * drawingMultipler);
+
+        if (isActive) {
+            ar = (int)(ag*0.8f);
+            br = (int)(bg*0.8f);
+            ag = (int)(ag*0.5f);
+            bg = (int)(bg*0.5f);
+            ab = (int)Math.min(ab*1.5f, 255f);
+            bb = (int)Math.min(bb*1.5f, 255f);
+
+            aa = aa*2;
+            ba = ba*2;
+        }
+
         bufferBuilder.vertex(
             vertexA1.getX(),
             vertexA1.getY(),
             vertexA1.getZ())
-        .color(starAColor[0], starAColor[1], starAColor[2], (int)(starAColor[3] * visibilityMultiplier)).next();
+        .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
             vertexA2.getX(),
             vertexA2.getY(),
             vertexA2.getZ())
-        .color(starAColor[0], starAColor[1], starAColor[2], (int)(starAColor[3] * visibilityMultiplier)).next();
+        .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
             vertexB1.getX(),
             vertexB1.getY(),
             vertexB1.getZ())
-        .color(starBColor[0], starBColor[1], starBColor[2], (int)(starBColor[3] * visibilityMultiplier)).next();
+        .color(br, bg, bb, ba).next();
 
         bufferBuilder.vertex(
             vertexB2.getX(),
             vertexB2.getY(),
             vertexB2.getZ())
-        .color(starBColor[0], starBColor[1], starBColor[2], (int)(starBColor[3] * visibilityMultiplier)).next();
+        .color(br, bg, bb, ba).next();
     }
 
     public void clear() {
@@ -161,5 +189,13 @@ public class StarLine {
 
     public boolean intersects(StarLine other) {
         return intersects(other.starAIndex, other.starBIndex);
+    }
+
+    public boolean hasStar(int star) {
+        return this.starAIndex == star || this.starBIndex == star;
+    }
+
+    public int getOtherStar(int star) {
+        return this.starAIndex == star ? this.starBIndex : this.starAIndex;
     }
 }

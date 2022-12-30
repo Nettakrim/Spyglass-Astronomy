@@ -37,6 +37,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static boolean isDrawingConstellation;
     private static StarLine drawingLine;
     public static Constellation drawingConstellation;
+    public static Constellation activeConstellation;
 
 	@Override
 	public void onInitializeClient() {
@@ -84,6 +85,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float gradientPos = random.nextFloat();
             float alphaRaw = random.nextFloat();
             float alpha = Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
+            alpha = (alpha + (alpha*alpha))/2;
 
             int[] color = new int[]{
                 (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
@@ -97,7 +99,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
             currentStars++;
         }
-        
+
         ready = true;
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.UpdateSpace(0);
@@ -121,10 +123,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
         if (star == null) return;
 
+        setActiveConstellation(star, true);
+
         drawingLine = new StarLine(star);
         drawingConstellation = new Constellation(drawingLine);
 
+        drawingConstellation.isActive = true;
         isDrawingConstellation = true;
+
+        spaceRenderingManager.scheduleConstellationsUpdate();
     }
 
     public static float getSquaredDistance(float x, float y, float z) {
@@ -138,11 +145,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         rotateVectorToStarRotation(lookVector);
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
 
-        if (star == null) {
-            return;
-        }
-
-        if(!drawingLine.finishDrawing(star)) {
+        if(star == null || !drawingLine.finishDrawing(star)) {
             return;
         }
 
@@ -152,17 +155,27 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             Constellation constellation = constellations.get(i);
             if (constellation.lineIntersects(drawingLine)) {
                 if (target != null) {
-                    LOGGER.info("New StarLine would merge two constellations");
-                    return;
+                    for (StarLine line : constellation.getLines()) {
+                        target.addLine(line);
+                    }
+                    LOGGER.info("New StarLine merged two constellations");
+                    constellations.remove(i);
+                    break;
                 }
                 target = constellation;
             }
         }
         if (target != null) {
-            target.addLine(drawingLine, true);
+            Constellation potentialNew = target.addLineCanRemove(drawingLine);
+            if (potentialNew != null) {
+                LOGGER.info("New StarLine split constellation into two");
+                constellations.add(potentialNew);
+            }
         } else {
             constellations.add(drawingConstellation);
         }
+        setActiveConstellation(star, false);
+
         spaceRenderingManager.scheduleConstellationsUpdate();
     }
 
@@ -222,5 +235,20 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static float getHeight() {
         if (client.player == null) return 128;
         return (float)client.player.getPos().y;
+    }
+
+    public static void setActiveConstellation(Star star, boolean clear) {
+        boolean found = false;
+        for (Constellation constellation : constellations) {
+            constellation.isActive = false;
+            if (constellation.hasStar(star)) {
+                constellation.isActive = true;
+                activeConstellation = constellation;
+                found = true;
+            }
+        }
+        if (!clear && !found && activeConstellation != null) {
+            activeConstellation.isActive = true;
+        }
     }
 }
