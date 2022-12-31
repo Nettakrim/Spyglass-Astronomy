@@ -79,12 +79,13 @@ public class SpaceRenderingManager {
     public void Render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable) {
         float starVisibility = SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
+            matrices.pop();
             matrices.push();
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*405f));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
-            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2)/2));
+            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, Math.min(starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2))/2,1));
             BackgroundRenderer.clearFog();
             
             starsBuffer.bind();
@@ -102,7 +103,6 @@ public class SpaceRenderingManager {
             }
 
             runnable.run();
-            matrices.pop();
         }
     }
 

@@ -135,4 +135,10 @@ public class Constellation {
     public ArrayList<StarLine> getLines() {
         return lines;
     }
+
+    public void initaliseStarLines() {
+        for (StarLine line : lines) {
+            line.initialise();
+        }
+    }
 }

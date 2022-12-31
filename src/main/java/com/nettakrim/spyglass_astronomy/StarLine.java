@@ -23,21 +23,27 @@ public class StarLine {
     private Vec3f vertexB1;
     private Vec3f vertexB2;
 
-    public StarLine(int startIndex, int endIndex) {
+    public StarLine(int startIndex, int endIndex, boolean starsReady) {
         this.starAIndex = startIndex;
         this.starBIndex = endIndex;
 
-        Star starA = SpyglassAstronomyClient.stars.get(startIndex);
+        if (starsReady) {
+            initialise();
+        }
+    }
+
+    public void initialise() {
+        Star starA = SpyglassAstronomyClient.stars.get(this.starAIndex);
         this.starAPosition = starA.getRenderedPosition();
         this.starAColor = starA.getColor();
         starA.connect();
 
-        Star starB = SpyglassAstronomyClient.stars.get(endIndex);
+        Star starB = SpyglassAstronomyClient.stars.get(this.starBIndex);
         this.starBPosition = starB.getRenderedPosition();
         this.starBColor = starB.getColor();
         starB.connect();
 
-        calculateVertices();
+        calculateVertices();        
     }
 
     public StarLine(Star startStar) {
@@ -172,7 +178,7 @@ public class StarLine {
     }
 
     public Star[] getStars() {
-        return new Star[]{SpyglassAstronomyClient.stars.get(starAIndex),SpyglassAstronomyClient.stars.get(starBIndex)};
+        return new Star[]{SpyglassAstronomyClient.stars.get(starAIndex), SpyglassAstronomyClient.stars.get(starBIndex)};
     }
 
     public boolean isSame(int a, int b) {

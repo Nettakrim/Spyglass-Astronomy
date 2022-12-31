@@ -9,7 +9,9 @@
     "WorldRendererMixin",
     "MouseMixin",
     "SpyglassItemMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "MinecraftClientMixin",
+    "BiomeAccessAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

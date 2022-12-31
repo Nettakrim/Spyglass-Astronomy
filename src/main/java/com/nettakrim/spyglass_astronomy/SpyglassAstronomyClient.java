@@ -22,7 +22,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static boolean ready;
 
-    private static final int starCount = 1024;
+    private static final int starCount = 1024; //encoding will break at 4097, so stay at 4096 and below :)
 
     public static MinecraftClient client;
     public static ClientWorld world;
@@ -39,6 +39,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static Constellation drawingConstellation;
     public static Constellation activeConstellation;
 
+    public static SpaceDataManager spaceDataManager;
+
 	@Override
 	public void onInitializeClient() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -50,10 +52,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         
 	}
 
-    public static void generateStars() {
-        world = client.world;
+    public static void saveSpace() {
+        if (spaceDataManager != null) {
+            spaceDataManager.saveData();
+        }
+    }
 
-        Random random = Random.create(10L);
+    public static void loadSpace(ClientWorld clientWorld) {
+        world = clientWorld;
+
+        spaceDataManager = new SpaceDataManager(clientWorld);
+
+        generateSpace();
+    }
+
+    public static void generateSpace() {
+        Random random = Random.create(spaceDataManager.getStarSeed());
 
         int currentStars = 0;
         while (currentStars < starCount) {
@@ -70,7 +84,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             posX *= distance;
             posY *= distance;
             posZ *= distance;
-
 
             float sizeRaw = random.nextFloat();
             if (currentStars % 2 == 0) {
@@ -101,6 +114,11 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         ready = true;
+
+        for (Constellation constellation : constellations) {
+            constellation.initaliseStarLines();
+        }
+
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.UpdateSpace(0);
     }
@@ -139,6 +157,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void stopDrawingConstellation() {
+        if (!isDrawingConstellation) return;
         isDrawingConstellation = false;
 
         Vec3f lookVector = getLookVector();
@@ -226,7 +245,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         if (nearestDistance > 0.0005f) return null;
-        
+
         if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
 
         return nearestStar;
@@ -250,5 +269,5 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (!clear && !found && activeConstellation != null) {
             activeConstellation.isActive = true;
         }
-    }
+    }  
 }

@@ -30,12 +30,9 @@ public class WorldRendererMixin {
 
     @Inject(
         method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V",
-        at = @At(value = "INVOKE", ordinal = 0, target="Lcom/mojang/blaze3d/systems/RenderSystem;defaultBlendFunc()V")
+        at = @At(value = "INVOKE", ordinal = 0, target="Lnet/minecraft/client/world/ClientWorld;method_23787(F)F")
     )
     public void renderSky(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-        if (SpyglassAstronomyClient.world == null) {
-            SpyglassAstronomyClient.generateStars();
-        }
         SpyglassAstronomyClient.spaceRenderingManager.Render(matrices, projectionMatrix, tickDelta, camera, bl, runnable);
     }
 
@@ -43,9 +40,4 @@ public class WorldRendererMixin {
     private void updateStars(CallbackInfo ci) {
         SpyglassAstronomyClient.spaceRenderingManager.UpdateSpace(ticks);
     }
-
-    //@Inject(at = @At("HEAD"), method = "setWorld")
-    //private void setWorld(CallbackInfo ci) {
-    //    SpyglassAstronomyClient.GenerateStars();
-    //}
 }
