@@ -3,11 +3,18 @@ package com.nettakrim.spyglass_astronomy;
 import java.util.ArrayList;
 
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3f;
 
 public class Constellation {
     private ArrayList<StarLine> lines = new ArrayList<>();
 
     public boolean isActive;
+    
+    public String name = "Unnamed";
+
+    private Vec3f averagePositionBuffer;
+    private boolean averagePositionValid;
 
     public Constellation() {
 
@@ -17,13 +24,14 @@ public class Constellation {
         lines.add(starLine);
     }
 
-    public void render(BufferBuilder bufferBuilder) {
+    public void setVertices(BufferBuilder bufferBuilder) {
         for (StarLine line : lines) {
             line.setVertices(bufferBuilder, isActive);
         }
     }
 
     public Constellation addLineCanRemove(StarLine starLine) {
+        averagePositionValid = false;
         int end = lines.size();
         for (int i = 0; i < end; i++) {
             StarLine line = lines.get(i);
@@ -42,6 +50,7 @@ public class Constellation {
             if (line.isSame(starLine)) return null;
         }
         lines.add(starLine);
+        averagePositionValid = false;
         return null;
     }
 
@@ -55,6 +64,7 @@ public class Constellation {
 
         found.add(start);
 
+        //flood outwards from one end, stop if other end found (as in a loop exists), otherwise log all found
         while (continueSearch) {
             continueSearch = false;
             for (StarLine line : lines) {
@@ -74,6 +84,7 @@ public class Constellation {
             }
         }
 
+        //get all stars in the original constellation
         ArrayList<Integer> all = new ArrayList<Integer>();
         for (StarLine line : lines) {
             Star[] stars = line.getStars();
@@ -87,7 +98,9 @@ public class Constellation {
             }
         }
 
+        //if the amount of stars found is not the entire constellation (i dont remember what purpose this serves >_>)
         if (found.size() != all.size()) {
+            //add all lines that were not found to the new constellation
             Constellation newConstellation = new Constellation();
             for (StarLine line : lines) {
                 boolean isFound = false;
@@ -101,6 +114,13 @@ public class Constellation {
                     newConstellation.addLine(line);
                 }
             }
+
+            //i wouldve thought this is equivalent to the if statement this is within, but apparently not
+            if (newConstellation.lines.size() == lines.size()) {
+                return null;
+            }
+
+            //remove the lines of the old constellation from the new one
             for (StarLine newLine : newConstellation.lines) {
                 int index = 0;
                 while (index < lines.size()) {
@@ -111,6 +131,7 @@ public class Constellation {
                     }
                 }
             }
+            newConstellation.name = name;
             return newConstellation;
         }
 
@@ -140,5 +161,28 @@ public class Constellation {
         for (StarLine line : lines) {
             line.initialise();
         }
+    }
+
+    public Vec3f getAveragePosition() {
+        if (averagePositionValid) return averagePositionBuffer;
+
+        averagePositionBuffer = new Vec3f();
+        ArrayList<Star> stars = new ArrayList<Star>();
+        for (StarLine line : lines) {
+            Star[] lineStars = line.getStars();
+            if (!stars.contains(lineStars[0])) stars.add(lineStars[0]);
+            if (!stars.contains(lineStars[1])) stars.add(lineStars[1]);
+        }
+        for (Star star : stars) {
+            averagePositionBuffer.add(star.getPositionAsVec3f());
+        }
+        float x = averagePositionBuffer.getX();
+        float y = averagePositionBuffer.getY();
+        float z = averagePositionBuffer.getZ();
+        float isqrt = MathHelper.fastInverseSqrt(x * x + y * y + z * z);
+        averagePositionBuffer.scale(isqrt);
+        averagePositionValid = true;
+
+        return averagePositionBuffer;
     }
 }

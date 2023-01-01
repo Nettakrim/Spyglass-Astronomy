@@ -3,6 +3,7 @@ package com.nettakrim.spyglass_astronomy;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 
 import org.slf4j.Logger;
@@ -49,7 +50,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
 		LOGGER.info("Hello Fabric world!");
         client = MinecraftClient.getInstance();
-        
+
+        SpyglassAstronomyCommands.initialize();
 	}
 
     public static void saveSpace() {
@@ -177,7 +179,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                     for (StarLine line : constellation.getLines()) {
                         target.addLine(line);
                     }
-                    LOGGER.info("New StarLine merged two constellations");
+                    say(String.format("New line merged two Constellations \"%s\" and \"%s\"", activeConstellation.name, target.name));
                     constellations.remove(i);
                     break;
                 }
@@ -187,9 +189,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (target != null) {
             Constellation potentialNew = target.addLineCanRemove(drawingLine);
             if (potentialNew != null) {
-                LOGGER.info("New StarLine split constellation into two");
+                say(String.format("Removing Line split Constellation \"%s\" into two", target.name));
                 constellations.add(potentialNew);
             }
+            if (target.getLines().size() == 0) constellations.remove(target);
         } else {
             constellations.add(drawingConstellation);
         }
@@ -206,7 +209,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         Vec3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
-        if (star == null) {
+        if (star == null || drawingLine.hasStar(star.index)) {
             drawingLine.updateDrawing(new Vec3f(lookVector.getX() * 100, lookVector.getY() * 100, lookVector.getZ() * 100));
         } else {
             drawingLine.updateDrawing(star.getRenderedPosition());
@@ -269,5 +272,62 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (!clear && !found && activeConstellation != null) {
             activeConstellation.isActive = true;
         }
-    }  
+        if (activeConstellation != null && activeConstellation.isActive) {
+            sayActionBar(activeConstellation.name == "Unnamed" ? "Use /nameconstellation to name this Constellation!" : activeConstellation.name);
+        }
+    }
+
+    public static boolean nameActiveConstellation(String name) {
+        if (activeConstellation == null || !activeConstellation.isActive) {
+            say(String.format("No Constellation selected"));
+            return false;
+        }
+
+        if (activeConstellation.name == "Unnamed") {
+            say(String.format("Named new Constellation \"%s\"", name));
+        } else {
+            say(String.format("Renamed Constellation \"%s\" to \"%s\"", activeConstellation.name, name));
+        }
+
+        activeConstellation.name = name;
+        return true;
+    }
+
+    public static void say(String message) {
+        Text text = Text.of("[Spyglass Astronomy] "+message);
+        client.player.sendMessage(text);
+    }
+
+    public static void longSay(String message) {
+        Text text = Text.of("- [Spyglass Astronomy] -\n"+message);
+        client.player.sendMessage(text);
+    }
+
+    public static void sayActionBar(String message) {
+        Text text = Text.of(message);
+        client.player.sendMessage(text, true);        
+    }
+
+    public static String getMoonPhaseName(int phase) {
+        switch (phase) {
+            case 0:
+                return "Full Moon";
+            case 1:
+                return "Waning Gibbous";
+            case 2:
+                return "Last Quarter";
+            case 3:
+                return "Waning Cresent";
+            case 4:
+                return "New Moon";
+            case 5:
+                return "Waxing Crescent";
+            case 6:
+                return "First Quarter";
+            case 7:
+                return "Waxing Gibbous";
+            default:
+                return "Unkown";
+        }
+    }
 }

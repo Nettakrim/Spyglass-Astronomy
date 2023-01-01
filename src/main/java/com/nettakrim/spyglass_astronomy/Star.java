@@ -104,6 +104,10 @@ public class Star {
         return new float[]{xCoord, yCoord, zCoord};
     }
 
+    public Vec3f getPositionAsVec3f() {
+        return new Vec3f(xCoord, yCoord, zCoord);
+    }
+
     public void connect() {
         connectedStars++;
     }

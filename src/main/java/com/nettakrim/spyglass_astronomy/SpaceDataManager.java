@@ -70,8 +70,11 @@ public class SpaceDataManager {
                         break;
                     case 2:
                         Constellation constellation = new Constellation();
-                        for (int x = 0; x < s.length(); x+=5) {
-                            constellation.addLine(decodeStarLine(decoder, s.substring(x, x+5)));
+                        String[] parts = s.split(" \\| ");
+                        constellation.name = parts[0];
+                        String lines = parts[1];
+                        for (int x = 0; x < lines.length(); x+=5) {
+                            constellation.addLine(decodeStarLine(decoder, lines.substring(x, x+5)));
                         }
                         SpyglassAstronomyClient.constellations.add(constellation);
                         break;
@@ -95,13 +98,11 @@ public class SpaceDataManager {
             Encoder encoder = Base64.getEncoder();
             for (Constellation constellation : SpyglassAstronomyClient.constellations) {
                 s.append('\n');
+                s.append(constellation.name+" | ");
                 for (StarLine line : constellation.getLines()) {
                     s.append(encodeStarLine(encoder, line.getStars()));
                 }
             }
-
-            s.append('\n');
-            s.append(encodeStarLine(encoder, new Star[]{new Star(4095, 0, 0, 0, 0, 0, new int[]{0,0,0}, 0, 0),new Star(4095, 0, 0, 0, 0, 0, new int[]{0,0,0}, 0, 0)}));
 
             s.append("\n---");
 

@@ -1,6 +1,7 @@
 package com.nettakrim.spyglass_astronomy;
 
 import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -10,6 +11,8 @@ import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
@@ -31,8 +34,18 @@ public class SpaceRenderingManager {
     private static float heightScale = 1;
     private static float unclampedHeightScale = 1;
 
+    private ItemStack spyglass = new ItemStack(Items.SPYGLASS);
+
     public void UpdateSpace(int ticks) {
         updateHeightScale();
+        Constellation activeConstellation = SpyglassAstronomyClient.activeConstellation;
+        if (activeConstellation != null && activeConstellation.isActive) {
+            ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
+            if (player == null || !player.getMainHandStack().isItemEqual(spyglass) && !player.getOffHandStack().isItemEqual(spyglass)) {
+                activeConstellation.isActive = false;
+                constellationsNeedsUpdate = true;
+            }
+        }
         if (constellationsNeedsUpdate) {
             updateConstellations();
             constellationsNeedsUpdate = false;
@@ -48,7 +61,7 @@ public class SpaceRenderingManager {
         constellationsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         for (Constellation constellation : SpyglassAstronomyClient.constellations) {
-            constellation.render(constellationsBufferBuilder);
+            constellation.setVertices(constellationsBufferBuilder);
         }
 
         constellationsBuffer.bind();
@@ -70,7 +83,7 @@ public class SpaceRenderingManager {
     private void updateDrawingConstellation() {
         drawingConstellationsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
-        SpyglassAstronomyClient.drawingConstellation.render(drawingConstellationsBufferBuilder);
+        SpyglassAstronomyClient.drawingConstellation.setVertices(drawingConstellationsBufferBuilder);
 
         drawingConstellationsBuffer.bind();
         drawingConstellationsBuffer.upload(drawingConstellationsBufferBuilder.end());
