@@ -9,12 +9,13 @@ import net.minecraft.util.math.Vec3f;
 public class Constellation {
     private ArrayList<StarLine> lines = new ArrayList<>();
 
-    public boolean isActive;
-    
     public String name = "Unnamed";
 
     private Vec3f averagePositionBuffer;
     private boolean averagePositionValid;
+
+    public static Constellation selected;
+    private boolean isSelected;
 
     public Constellation() {
 
@@ -24,9 +25,9 @@ public class Constellation {
         lines.add(starLine);
     }
 
-    public void setVertices(BufferBuilder bufferBuilder) {
+    public void setVertices(BufferBuilder bufferBuilder, boolean forceSelected) {
         for (StarLine line : lines) {
-            line.setVertices(bufferBuilder, isActive);
+            line.setVertices(bufferBuilder, isSelected || forceSelected);
         }
     }
 
@@ -184,5 +185,19 @@ public class Constellation {
         averagePositionValid = true;
 
         return averagePositionBuffer.copy();
+    }
+
+    public void select() {
+        Star.deselect();
+        if (selected != null) selected.isSelected = false;
+        isSelected = true;
+        selected = this;
+        SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+    }
+
+    public static void deselect() {
+        if (selected != null) selected.isSelected = false;
+        selected = null;
+        SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
     }
 }

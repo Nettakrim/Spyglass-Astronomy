@@ -116,7 +116,7 @@ public class StarLine {
         vertexB2 = new Vec3f(posBX - perpendicular.getX(), posBY - perpendicular.getY(), posBZ - perpendicular.getZ());
     }
 
-    public void setVertices(BufferBuilder bufferBuilder, boolean isActive) {
+    public void setVertices(BufferBuilder bufferBuilder, boolean isSelected) {
         if (vertexA1 == null) calculateVertices();
         float drawingMultipler = 1;
         if (starBIndex == -1) {
@@ -135,7 +135,7 @@ public class StarLine {
         int aa = (int)(starAColor[3] * visibilityMultiplier * drawingMultipler);
         int ba = (int)(starBColor[3] * visibilityMultiplier * drawingMultipler);
 
-        if (isActive) {
+        if (isSelected) {
             ar = (int)(ag*0.8f);
             br = (int)(bg*0.8f);
             ag = (int)(ag*0.5f);

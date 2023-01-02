@@ -33,6 +33,9 @@ public class Star {
 
     private int connectedStars = 0;
 
+    public static Star selected;
+    private boolean isSelected;
+
     public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float alpha, float twinkleSpeed) {
         this.index = index;
  
@@ -79,6 +82,7 @@ public class Star {
     public void setVertices(BufferBuilder bufferBuilder) {
         float angleSin = MathHelper.sin(angle);
         float angleCos = MathHelper.cos(angle);
+        int colorMult = isSelected ? 1 : 0;
         for (int corner = 0; corner < 4; ++corner) {
            float x = ((corner & 2) - 1) * size;
            float y = ((corner + 1 & 2) - 1) * size;
@@ -88,7 +92,7 @@ public class Star {
            float rotatedBLat = -(rotatedA * latitudeCos);
            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r, g, b, currentAlpha).next();
+           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha << colorMult).next();
         }
     }
 
@@ -114,5 +118,17 @@ public class Star {
 
     public void disconnect() {
         if (connectedStars > 0) connectedStars -= 2;
+    }
+
+    public void select() {
+        Constellation.deselect();
+        if (selected != null) selected.isSelected = false;
+        isSelected = true;
+        selected = this;
+    }
+
+    public static void deselect() {
+        if (selected != null) selected.isSelected = false;
+        selected = null;
     }
 }

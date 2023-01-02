@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 
@@ -39,7 +40,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static boolean isDrawingConstellation;
     private static StarLine drawingLine;
     public static Constellation drawingConstellation;
-    public static Constellation activeConstellation;
 
     public static SpaceDataManager spaceDataManager;
 
@@ -129,19 +129,49 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
     }
 
-    public void update() {
+    public static void update() {
         if (!ready) return;
         boolean spyglassing = client.player.isUsingSpyglass();
         boolean toggle = client.options.pickItemKey.isPressed();
+
         if (spyglassing && toggle && !lastToggle) {
             toggleEditMode();
         }
+
         if (spyglassing && editMode == 1 && client.options.attackKey.isPressed()) {
             if (!isDrawingConstellation) SpyglassAstronomyClient.startDrawingConstellation();
         } else if (isDrawingConstellation) {
             stopDrawingConstellation();
         }
+
+        if (spyglassing && editMode == 2 && client.options.attackKey.isPressed()) {
+            selectStar();
+        }
+
+        if (spyglassing) {
+            updateHover();
+        }
         lastToggle = toggle;
+    }
+
+    private static void updateHover() {
+        if (editMode != 0) {
+            Vec3f lookVector = getLookVector();
+            rotateVectorToStarRotation(lookVector);
+            Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+            if (star == null) return;
+
+            if (editMode == 1) {
+                for (Constellation constellation : constellations) {
+                    if (constellation.hasStar(star)) {
+                        sayActionBar(constellation.name.equals("Unnamed") ? "Use /nameconstellation to name this Constellation!" : constellation.name);
+                        return;
+                    }
+                }
+            } else {
+                //star
+            }
+        }
     }
 
     public static void startUsingSpyglass() {
@@ -152,18 +182,25 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         editMode = (editMode+1)%3;
     }
 
+    public static void selectStar() {
+        Vec3f lookVector = getLookVector();
+        rotateVectorToStarRotation(lookVector);
+        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+        if (star == null) return;
+        star.select();
+    }
+
     public static void startDrawingConstellation() {
         Vec3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
         if (star == null) return;
 
-        setActiveConstellation(star, true);
+        selectConstellation(star, true);
 
         drawingLine = new StarLine(star);
         drawingConstellation = new Constellation(drawingLine);
 
-        drawingConstellation.isActive = true;
         isDrawingConstellation = true;
 
         spaceRenderingManager.scheduleConstellationsUpdate();
@@ -194,7 +231,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                     for (StarLine line : constellation.getLines()) {
                         target.addLine(line);
                     }
-                    say(String.format("New line merged two Constellations \"%s\" and \"%s\"", activeConstellation.name, target.name));
+                    say(String.format("New line merged two Constellations \"%s\" and \"%s\"", Constellation.selected.name, target.name));
                     constellations.remove(i);
                     break;
                 }
@@ -211,7 +248,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         } else {
             constellations.add(drawingConstellation);
         }
-        setActiveConstellation(star, false);
+        selectConstellation(star, false);
 
         spaceRenderingManager.scheduleConstellationsUpdate();
     }
@@ -270,26 +307,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         return (float)client.player.getPos().y;
     }
 
-    public static void setActiveConstellation(Star star, boolean clear) {
-        boolean found = false;
+    public static void selectConstellation(Star star, boolean clear) {
+        Constellation oldSelected = Constellation.selected;
+        Constellation.deselect();
         for (Constellation constellation : constellations) {
-            constellation.isActive = false;
             if (constellation.hasStar(star)) {
-                constellation.isActive = true;
-                activeConstellation = constellation;
-                found = true;
+                constellation.select();
+                break;
             }
         }
-        if (!clear && !found && activeConstellation != null) {
-            activeConstellation.isActive = true;
-        }
-        if (activeConstellation != null && activeConstellation.isActive) {
-            sayActionBar(activeConstellation.name == "Unnamed" ? "Use /nameconstellation to name this Constellation!" : activeConstellation.name);
+        if (!clear && Constellation.selected == null && oldSelected != null) {
+            oldSelected.select();
         }
     }
 
-    public static boolean nameActiveConstellation(String name) {
-        if (activeConstellation == null || !activeConstellation.isActive) {
+    public static boolean nameSelectedConstellation(String name) {
+        if (Constellation.selected == null) {
             say(String.format("No Constellation selected"));
             return false;
         }
@@ -297,13 +330,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         name = name.replace("|", "");
         name = name.replaceAll("^ +| +$|( )+", "$1"); //remove double spaces
 
-        if (activeConstellation.name == "Unnamed") {
+        if (Constellation.selected.name == "Unnamed") {
             say(String.format("Named new Constellation \"%s\"", name));
         } else {
-            say(String.format("Renamed Constellation \"%s\" to \"%s\"", activeConstellation.name, name));
+            say(String.format("Renamed Constellation \"%s\" to \"%s\"", Constellation.selected.name, name));
         }
 
-        activeConstellation.name = name;
+        Constellation.selected.name = name;
         return true;
     }
 
@@ -343,5 +376,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             default:
                 return "Unkown";
         }
+    }
+
+    public static boolean isHoldingSpyglass() {
+        if (!ready) return false;
+        return client.player.getMainHandStack().isOf(Items.SPYGLASS) || client.player.getOffHandStack().isOf(Items.SPYGLASS);
     }
 }
