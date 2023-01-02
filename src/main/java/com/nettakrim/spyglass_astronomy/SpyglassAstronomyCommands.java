@@ -8,10 +8,8 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.command.argument.MessageArgumentType.MessageFormat;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
@@ -88,9 +86,7 @@ public class SpyglassAstronomyCommands {
         if (constellation == null) {
             return -1;
         }
-        ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-        ItemStack spyglass = new ItemStack(Items.SPYGLASS);
-        if (!player.getMainHandStack().isItemEqual(spyglass) && !player.getOffHandStack().isItemEqual(spyglass)) {
+        if (!SpyglassAstronomyClient.client.player.getActiveItem().isOf(Items.SPYGLASS)) {
             SpyglassAstronomyClient.say("Spyglass must be held to be able to select constellations");
             return -1;
         }
@@ -112,12 +108,12 @@ public class SpyglassAstronomyCommands {
     }
 
     private static void GetInfo(Constellation constellation) {
-        Vec3f averagePosition = constellation.getAveragePosition().copy();
+        Vec3f averagePosition = constellation.getAveragePosition();
         averagePosition.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
         averagePosition.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(1.75f * 405f));
         averagePosition.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
         String mostVisisbleDuring;
-        if (MathHelper.abs(averagePosition.getX()) < 0.8f) {
+        if (MathHelper.abs(averagePosition.getX()) < 0.9f) {
             float angle = (float)(MathHelper.atan2(averagePosition.getY(), averagePosition.getZ())*180d/Math.PI);
             int mostVisiblePhase = Math.round(angle/45)-1;
             if (mostVisiblePhase < 0) mostVisiblePhase += 8;

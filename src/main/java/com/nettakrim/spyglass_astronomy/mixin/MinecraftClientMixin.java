@@ -15,6 +15,7 @@ public class MinecraftClientMixin {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
     private void saveSpace(CallbackInfo ci) {
         SpyglassAstronomyClient.saveSpace();
+        SpyglassAstronomyClient.ready = false;
     }
 
     @Inject(method = "joinWorld(Lnet/minecraft/client/world/ClientWorld;)V", at = @At("RETURN"))

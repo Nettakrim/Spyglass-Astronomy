@@ -1,6 +1,7 @@
 package com.nettakrim.spyglass_astronomy;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
@@ -34,7 +35,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static SpaceRenderingManager spaceRenderingManager;
 
-    public static boolean isInEditMode;
+    public static int editMode;
     public static boolean isDrawingConstellation;
     private static StarLine drawingLine;
     public static Constellation drawingConstellation;
@@ -42,16 +43,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static SpaceDataManager spaceDataManager;
 
+    private static boolean lastToggle = false;
+
 	@Override
 	public void onInitializeClient() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-
-		LOGGER.info("Hello Fabric world!");
         client = MinecraftClient.getInstance();
 
         SpyglassAstronomyCommands.initialize();
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {update();});
 	}
 
     public static void saveSpace() {
@@ -129,12 +129,27 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
     }
 
+    public void update() {
+        if (!ready) return;
+        boolean spyglassing = client.player.isUsingSpyglass();
+        boolean toggle = client.options.pickItemKey.isPressed();
+        if (spyglassing && toggle && !lastToggle) {
+            toggleEditMode();
+        }
+        if (spyglassing && editMode == 1 && client.options.attackKey.isPressed()) {
+            if (!isDrawingConstellation) SpyglassAstronomyClient.startDrawingConstellation();
+        } else if (isDrawingConstellation) {
+            stopDrawingConstellation();
+        }
+        lastToggle = toggle;
+    }
+
     public static void startUsingSpyglass() {
-        isInEditMode = false;
+        editMode = 0;
     }
 
     public static void toggleEditMode() {
-        isInEditMode = !isInEditMode;
+        editMode = (editMode+1)%3;
     }
 
     public static void startDrawingConstellation() {
@@ -202,10 +217,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void updateDrawingConstellation() {
-        if (!client.player.isUsingSpyglass()) {
-            isDrawingConstellation = false;
-            return;
-        }
         Vec3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
@@ -282,6 +293,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             say(String.format("No Constellation selected"));
             return false;
         }
+
+        name = name.replace("|", "");
+        name = name.replaceAll("^ +| +$|( )+", "$1"); //remove double spaces
 
         if (activeConstellation.name == "Unnamed") {
             say(String.format("Named new Constellation \"%s\"", name));

@@ -183,6 +183,6 @@ public class Constellation {
         averagePositionBuffer.scale(isqrt);
         averagePositionValid = true;
 
-        return averagePositionBuffer;
+        return averagePositionBuffer.copy();
     }
 }

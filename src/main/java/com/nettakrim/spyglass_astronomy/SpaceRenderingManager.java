@@ -11,7 +11,6 @@ import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
@@ -34,14 +33,12 @@ public class SpaceRenderingManager {
     private static float heightScale = 1;
     private static float unclampedHeightScale = 1;
 
-    private ItemStack spyglass = new ItemStack(Items.SPYGLASS);
-
     public void UpdateSpace(int ticks) {
         updateHeightScale();
         Constellation activeConstellation = SpyglassAstronomyClient.activeConstellation;
         if (activeConstellation != null && activeConstellation.isActive) {
             ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-            if (player == null || !player.getMainHandStack().isItemEqual(spyglass) && !player.getOffHandStack().isItemEqual(spyglass)) {
+            if (player == null || !player.getActiveItem().isOf(Items.SPYGLASS)) {
                 activeConstellation.isActive = false;
                 constellationsNeedsUpdate = true;
             }
