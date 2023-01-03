@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
 import java.util.Base64.Decoder;
@@ -23,6 +24,8 @@ public class SpaceDataManager {
     private long starSeed;
 
     private File data = null;
+
+    public ArrayList<StarData> starDatas;
 
     public SpaceDataManager(ClientWorld world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
@@ -55,6 +58,8 @@ public class SpaceDataManager {
             Scanner scanner = new Scanner(data);
             int stage = 0;
             Decoder decoder = Base64.getDecoder();
+            int starIndex = 0;
+            starDatas = new ArrayList<StarData>();
             while (scanner.hasNextLine()) {
                 String s = scanner.nextLine();
                 if (s.equals("---")) {
@@ -77,6 +82,12 @@ public class SpaceDataManager {
                             constellation.addLine(decodeStarLine(decoder, lines.substring(x, x+5)));
                         }
                         SpyglassAstronomyClient.constellations.add(constellation);
+                        break;
+                    case 3:
+                        int split = s.indexOf(' ');
+                        starIndex += Integer.parseInt(s.substring(0, split));
+                        String name = s.substring(split);
+                        starDatas.add(new StarData(starIndex, name));
                         break;
                 }
             }           
@@ -103,7 +114,15 @@ public class SpaceDataManager {
                     s.append(encodeStarLine(encoder, line.getStars()));
                 }
             }
-
+            s.append("\n---");
+            int lastIndex = 0;
+            for (Star star : SpyglassAstronomyClient.stars) {
+                if (star.name != null) {
+                    s.append('\n');
+                    s.append(Integer.toString(star.index-lastIndex)+" "+star.name);
+                    lastIndex = star.index;
+                }
+            }            
             s.append("\n---");
 
             writer.write(s.toString());
@@ -156,5 +175,22 @@ public class SpaceDataManager {
         }
 
         return "unknown";
+    }
+
+    public void loadStarDatas() {
+        for (StarData starData : starDatas) {
+            SpyglassAstronomyClient.stars.get(starData.index).name = starData.name;
+        }
+        starDatas = null;
+    }
+
+    public class StarData {
+        public int index;
+        public String name;
+
+        public StarData(int index, String name) {
+            this.index = index;
+            this.name = name;
+        }
     }
 }

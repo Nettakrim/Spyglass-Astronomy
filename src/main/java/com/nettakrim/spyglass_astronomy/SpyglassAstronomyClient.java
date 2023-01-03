@@ -11,6 +11,8 @@ import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
+
 import java.util.ArrayList;
 
 import net.minecraft.util.math.MathHelper;
@@ -121,6 +123,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             constellation.initaliseStarLines();
         }
 
+        spaceDataManager.loadStarDatas();
+
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.UpdateSpace(0);
     }
@@ -161,16 +165,20 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
             if (star == null) return;
 
-            if (editMode == 1) {
-                for (Constellation constellation : constellations) {
-                    if (constellation.hasStar(star)) {
-                        sayActionBar(constellation.name.equals("Unnamed") ? "Use /nameconstellation to name this Constellation!" : constellation.name);
-                        return;
+            for (Constellation constellation : constellations) {
+                if (constellation.hasStar(star)) {
+                    if (constellation.name.equals("Unnamed")) {
+                        sayActionBar("Use /sga:name to name this Constellation!");
+                    } else if (star.name == null) {
+                        sayActionBar(constellation.name);
+                    } else {
+                        sayActionBar(constellation.name+" | "+star.name);
                     }
+                    return;
                 }
-            } else {
-                //star
             }
+
+            if (editMode == 2) sayActionBar(star.name == null ? "Use /sga:name to name this Star" : star.name);
         }
     }
 
@@ -319,25 +327,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (!clear && Constellation.selected == null && oldSelected != null) {
             oldSelected.select();
         }
-    }
-
-    public static boolean nameSelectedConstellation(String name) {
-        if (Constellation.selected == null) {
-            say(String.format("No Constellation selected"));
-            return false;
-        }
-
-        name = name.replace("|", "");
-        name = name.replaceAll("^ +| +$|( )+", "$1"); //remove double spaces
-
-        if (Constellation.selected.name == "Unnamed") {
-            say(String.format("Named new Constellation \"%s\"", name));
-        } else {
-            say(String.format("Renamed Constellation \"%s\" to \"%s\"", Constellation.selected.name, name));
-        }
-
-        Constellation.selected.name = name;
-        return true;
     }
 
     public static void say(String message) {

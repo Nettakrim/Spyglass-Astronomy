@@ -36,6 +36,8 @@ public class Star {
     public static Star selected;
     private boolean isSelected;
 
+    public String name;
+
     public Star(int index, float posX, float posY, float posZ, float size, float rotationSpeed, int[] color, float alpha, float twinkleSpeed) {
         this.index = index;
  
@@ -92,7 +94,7 @@ public class Star {
            float rotatedBLat = -(rotatedA * latitudeCos);
            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha << colorMult).next();
+           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha).next();
         }
     }
 
