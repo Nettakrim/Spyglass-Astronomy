@@ -38,6 +38,6 @@ public class WorldRendererMixin {
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void updateStars(CallbackInfo ci) {
-        SpyglassAstronomyClient.spaceRenderingManager.UpdateSpace(ticks);
+        SpyglassAstronomyClient.spaceRenderingManager.updateSpace(ticks);
     }
 }

@@ -86,7 +86,7 @@ public class SpaceDataManager {
                     case 3:
                         int split = s.indexOf(' ');
                         starIndex += Integer.parseInt(s.substring(0, split));
-                        String name = s.substring(split);
+                        String name = s.substring(split+1);
                         starDatas.add(new StarData(starIndex, name));
                         break;
                 }

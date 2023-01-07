@@ -29,10 +29,13 @@ public class SpaceRenderingManager {
     private VertexBuffer drawingConstellationsBuffer = new VertexBuffer();
     private BufferBuilder drawingConstellationsBufferBuilder = Tessellator.getInstance().getBuffer();
 
+    private VertexBuffer orbitingBodiesBuffer = new VertexBuffer();
+    private BufferBuilder orbitingBodiesBufferBuilder = Tessellator.getInstance().getBuffer();
+
     private static float heightScale = 1;
     private static float unclampedHeightScale = 1;
 
-    public void UpdateSpace(int ticks) {
+    public void updateSpace(int ticks) {
         updateHeightScale();
         if (Constellation.selected != null) {
             ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
@@ -54,6 +57,8 @@ public class SpaceRenderingManager {
         }
 
         updateStars(ticks);
+
+        updateOrbits();
     }
 
     public void scheduleConstellationsUpdate() {
@@ -81,6 +86,21 @@ public class SpaceRenderingManager {
 
         starsBuffer.bind();
         starsBuffer.upload(starBufferBuilder.end());
+    }
+
+    private void updateOrbits() {
+        orbitingBodiesBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        float t = SpyglassAstronomyClient.getPreciseDay();
+
+        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(t);
+
+        for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+            orbitingBody.setVertices(constellationsBufferBuilder, referencePosition, t);
+        }
+
+        orbitingBodiesBuffer.bind();
+        orbitingBodiesBuffer.upload(orbitingBodiesBufferBuilder.end());
     }
 
     private void updateDrawingConstellation() {
@@ -117,6 +137,16 @@ public class SpaceRenderingManager {
                 drawingConstellationsBuffer.bind();
                 drawingConstellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
             }
+
+            matrices.pop();
+            matrices.push();
+            
+            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()/SpyglassAstronomyClient.earthOrbit.period)*-360f));
+            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()*360f)+180));
+
+            orbitingBodiesBuffer.bind();
+            orbitingBodiesBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+            VertexBuffer.unbind();
 
             runnable.run();
         }

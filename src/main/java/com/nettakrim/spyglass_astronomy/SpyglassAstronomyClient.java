@@ -47,8 +47,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static boolean lastToggle = false;
 
+    public static Orbit earthOrbit = new Orbit(8, 0, 0, 0);
+    public static ArrayList<OrbitingBody> orbitingBodies = new ArrayList<OrbitingBody>();
+
 	@Override
 	public void onInitializeClient() {
+        orbitingBodies.add(new OrbitingBody(16, 0, 0, 0));
+
         client = MinecraftClient.getInstance();
 
         SpyglassAstronomyCommands.initialize();
@@ -126,11 +131,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager.loadStarDatas();
 
         spaceRenderingManager = new SpaceRenderingManager();
-        spaceRenderingManager.UpdateSpace(0);
+        spaceRenderingManager.updateSpace(0);
     }
 
     public static float getPreciseMoonPhase() {
         return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
+    }
+
+    public static float getPreciseDay() {
+        return world.getLunarTime()%24000/24000.0f + (world.getTimeOfDay()/24000);
     }
 
     public static void update() {
