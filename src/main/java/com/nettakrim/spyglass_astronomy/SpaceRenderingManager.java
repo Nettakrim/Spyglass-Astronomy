@@ -29,8 +29,8 @@ public class SpaceRenderingManager {
     private VertexBuffer drawingConstellationsBuffer = new VertexBuffer();
     private BufferBuilder drawingConstellationsBufferBuilder = Tessellator.getInstance().getBuffer();
 
-    private VertexBuffer orbitingBodiesBuffer = new VertexBuffer();
-    private BufferBuilder orbitingBodiesBufferBuilder = Tessellator.getInstance().getBuffer();
+    private VertexBuffer planetsBuffer = new VertexBuffer();
+    private BufferBuilder planetsBufferBuilder = Tessellator.getInstance().getBuffer();
 
     private static float heightScale = 1;
     private static float unclampedHeightScale = 1;
@@ -89,7 +89,7 @@ public class SpaceRenderingManager {
     }
 
     private void updateOrbits() {
-        orbitingBodiesBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        planetsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         float t = SpyglassAstronomyClient.getPreciseDay();
 
@@ -99,8 +99,8 @@ public class SpaceRenderingManager {
             orbitingBody.setVertices(constellationsBufferBuilder, referencePosition, t);
         }
 
-        orbitingBodiesBuffer.bind();
-        orbitingBodiesBuffer.upload(orbitingBodiesBufferBuilder.end());
+        planetsBuffer.bind();
+        planetsBuffer.upload(planetsBufferBuilder.end());
     }
 
     private void updateDrawingConstellation() {
@@ -118,7 +118,7 @@ public class SpaceRenderingManager {
             matrices.pop();
             matrices.push();
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*405f));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngleMultiplier()));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, Math.min(starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2))/2,1));
@@ -140,12 +140,11 @@ public class SpaceRenderingManager {
 
             matrices.pop();
             matrices.push();
-            
             matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()/SpyglassAstronomyClient.earthOrbit.period)*-360f));
             matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()*360f)+180));
 
-            orbitingBodiesBuffer.bind();
-            orbitingBodiesBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+            planetsBuffer.bind();
+            planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
             VertexBuffer.unbind();
 
             runnable.run();

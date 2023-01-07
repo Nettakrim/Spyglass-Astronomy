@@ -22,6 +22,7 @@ public class SpaceDataManager {
     public static final int SAVE_FORMAT = 0;
 
     private long starSeed;
+    private long planetSeed;
 
     private File data = null;
 
@@ -39,9 +40,7 @@ public class SpaceDataManager {
         try {
             Files.createDirectories(storagePath);
             data = new File(storagePath.toString()+"/"+seedHash + ".txt");
-            if (data.createNewFile()) {
-                saveData();
-            } else {
+            if (!data.createNewFile()) {
                 useDefault = !loadData();
             }
         } catch (IOException e) {
@@ -50,6 +49,8 @@ public class SpaceDataManager {
 
         if (useDefault) {
             starSeed = seedHash;
+            planetSeed = seedHash;
+            saveData();
         }
     }
 
@@ -71,7 +72,14 @@ public class SpaceDataManager {
                         //format
                         break;
                     case 1:
-                        starSeed = Long.parseLong(s);
+                        String[] seeds =  s.split(" ");
+                        if (seeds.length == 1) {
+                            starSeed = Long.parseLong(s);
+                            planetSeed = starSeed;
+                        } else {
+                            starSeed = Long.parseLong(seeds[0]);
+                            planetSeed = Long.parseLong(seeds[1]);                         
+                        }
                         break;
                     case 2:
                         Constellation constellation = new Constellation();
@@ -105,6 +113,10 @@ public class SpaceDataManager {
             StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
             s.append("\n---\n");
             s.append(starSeed);
+            if (planetSeed != starSeed) {
+                s.append(' ');
+                s.append(planetSeed);
+            }
             s.append("\n---");
             Encoder encoder = Base64.getEncoder();
             for (Constellation constellation : SpyglassAstronomyClient.constellations) {
@@ -157,6 +169,10 @@ public class SpaceDataManager {
         return starSeed;
     }
 
+    public long getPlanetSeed() {
+        return planetSeed;
+    }
+
     private static String getCurrentWorldOrServerName() {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L342
         IntegratedServer integratedServer = SpyglassAstronomyClient.client.getServer();
@@ -178,6 +194,7 @@ public class SpaceDataManager {
     }
 
     public void loadStarDatas() {
+        if (starDatas == null) return;
         for (StarData starData : starDatas) {
             SpyglassAstronomyClient.stars.get(starData.index).name = starData.name;
         }

@@ -43,12 +43,8 @@ public class Orbit {
         return pos;
     }
 
-    public void scaleLocalPostion() {
-
-    }
-
     public void rotateLocalPosition(Vec3f vector) {
-        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(inclination));
-        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotation));
+        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(inclination));
+        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotation));
     }
 }

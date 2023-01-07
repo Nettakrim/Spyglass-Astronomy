@@ -32,9 +32,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static MinecraftClient client;
     public static ClientWorld world;
 
-    public static ArrayList<Star> stars = new ArrayList<>();
+    public static ArrayList<Star> stars;
 
-    public static ArrayList<Constellation> constellations = new ArrayList<>();
+    public static ArrayList<Constellation> constellations;
 
     public static SpaceRenderingManager spaceRenderingManager;
 
@@ -47,13 +47,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static boolean lastToggle = false;
 
-    public static Orbit earthOrbit = new Orbit(8, 0, 0, 0);
-    public static ArrayList<OrbitingBody> orbitingBodies = new ArrayList<OrbitingBody>();
+    public static Orbit earthOrbit;
+    public static ArrayList<OrbitingBody> orbitingBodies;
+
+    private static float starAngleMultiplier;
 
 	@Override
 	public void onInitializeClient() {
-        orbitingBodies.add(new OrbitingBody(16, 0, 0, 0));
-
         client = MinecraftClient.getInstance();
 
         SpyglassAstronomyCommands.initialize();
@@ -70,13 +70,26 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static void loadSpace(ClientWorld clientWorld) {
         world = clientWorld;
 
+        stars = new ArrayList<>();
+        constellations = new ArrayList<>();
+        orbitingBodies = new ArrayList<OrbitingBody>();
+
         spaceDataManager = new SpaceDataManager(clientWorld);
 
         generateSpace();
     }
 
     public static void generateSpace() {
-        Random random = Random.create(spaceDataManager.getStarSeed());
+        Random random = Random.create(0);
+        generateStars(random);
+        generatePlanets(random);
+
+        spaceRenderingManager = new SpaceRenderingManager();
+        spaceRenderingManager.updateSpace(0);
+    }
+
+    public static void generateStars(Random random) {
+        random.setSeed(spaceDataManager.getStarSeed());
 
         int currentStars = 0;
         while (currentStars < starCount) {
@@ -129,13 +142,28 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         spaceDataManager.loadStarDatas();
+    }
 
-        spaceRenderingManager = new SpaceRenderingManager();
-        spaceRenderingManager.updateSpace(0);
+    public static void generatePlanets(Random random) {
+        random.setSeed(spaceDataManager.getPlanetSeed());
+
+        //earth will often have a year of 4 lunar cycles (32 days, 10 realtime hours), but theres a chance to have some sligthly more irregular years
+        float[] yearTimesInLunarCycles = new float[] {4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,5,5,5,5,3.5f,4.5f};
+        float yearLength = yearTimesInLunarCycles[random.nextInt(yearTimesInLunarCycles.length)]*8;
+
+        //earth will have a largely circular orbit
+        float inclinationRaw = (random.nextFloat()*2-1);
+        earthOrbit = new Orbit(yearLength, random.nextFloat()/25f, random.nextFloat()*360f, (inclinationRaw*MathHelper.abs(inclinationRaw))*20f);
+    
+        starAngleMultiplier = ((yearLength + 1) / yearLength) * 360f;
     }
 
     public static float getPreciseMoonPhase() {
         return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
+    }
+
+    public static float getStarAngleMultiplier() {
+        return getPreciseDay() * starAngleMultiplier;
     }
 
     public static float getPreciseDay() {
@@ -295,7 +323,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void rotateVectorToStarRotation(Vec3f vector) {
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
-        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getPreciseMoonPhase()*-405f));
+        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(getStarAngleMultiplier()*-1));
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
     }
 
