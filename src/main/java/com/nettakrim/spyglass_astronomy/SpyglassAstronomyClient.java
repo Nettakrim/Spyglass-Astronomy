@@ -192,6 +192,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             Orbit orbit = generateRandomOrbit(random, period, Math.min(0.15f*settingsMultiplier,0.5f), Math.min(20f*settingsMultiplier,60f));
             addRandomOrbitingBody(random, orbit);
         }
+
+        spaceDataManager.loadOrbitingBodyDatas();
     }
 
     private static float scale01Between(float x, float valueAt0, float valueAt1) {
@@ -201,7 +203,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     private static void addRandomOrbitingBody(Random random, Orbit orbit) {
         float size = random.nextFloat()+1;
         float albedo = (random.nextFloat()+1)/2;
-        float rotationSpeed = random.nextFloat();
+        float rotationSpeed = (random.nextFloat()+1)/2;
         orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed));
     }
 
@@ -245,7 +247,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         if (spyglassing && editMode == 2 && client.options.attackKey.isPressed()) {
-            selectStar();
+            selectAstralObject();
         }
 
         if (spyglassing) {
@@ -256,25 +258,35 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static void updateHover() {
         if (editMode != 0) {
-            Vec3f lookVector = getLookVector();
-            rotateVectorToStarRotation(lookVector);
-            Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
-            if (star == null) return;
-
-            for (Constellation constellation : constellations) {
-                if (constellation.hasStar(star)) {
-                    if (constellation.name.equals("Unnamed")) {
-                        sayActionBar("Use /sga:name to name this Constellation!");
-                    } else if (star.name == null) {
-                        sayActionBar(constellation.name);
-                    } else {
-                        sayActionBar(constellation.name+" | "+star.name);
-                    }
-                    return;
-                }
+            AstralObject astralObject;
+            if (editMode == 2) {
+                astralObject = getNearestAstralObjectToCursor();
+            } else {
+                Vec3f lookVector = getLookVector();
+                rotateVectorToStarRotation(lookVector);
+                astralObject = new AstralObject(getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ()));
             }
+            if (AstralObject.isNull(astralObject)) return;
+            if (astralObject.isStar) {
+                Star star = astralObject.star;
+                for (Constellation constellation : constellations) {
+                    if (constellation.hasStar(star)) {
+                        if (constellation.name.equals("Unnamed")) {
+                            sayActionBar("Use /sga:name to name this Constellation!");
+                        } else if (star.name == null) {
+                            sayActionBar(constellation.name);
+                        } else {
+                            sayActionBar(constellation.name+" | "+star.name);
+                        }
+                        return;
+                    }
+                }
 
-            if (editMode == 2) sayActionBar(star.name == null ? "Use /sga:name to name this Star" : star.name);
+                if (editMode == 2) sayActionBar(star.name == null ? "Use /sga:name to name this Star" : star.name);
+            } else {
+                OrbitingBody orbitingBody = astralObject.orbitingBody;
+                sayActionBar(orbitingBody.name == null ? "Use /sga:name to name this Planet" : orbitingBody.name);
+            }
         }
     }
 
@@ -292,6 +304,14 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
         if (star == null) return;
         star.select();
+    }
+
+    public static void selectAstralObject() {
+        Vec3f lookVector = getLookVector();
+        rotateVectorToStarRotation(lookVector);
+        AstralObject astralObject = getNearestAstralObjectToCursor();
+        if (astralObject == null) return;
+        astralObject.select();        
     }
 
     public static void startDrawingConstellation() {
@@ -386,6 +406,11 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
     }
 
+    public static void rotateVectorToOrbitingBodyRotation(Vec3f vector) {
+        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()/SpyglassAstronomyClient.earthOrbit.period)*360f));
+        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(((SpyglassAstronomyClient.getPreciseDay()*360f)+180)*-1));
+    }    
+
     public static Star getNearestStar(float x, float y, float z) {
         float nearestDistance = 5; //at most the nearest star can only be 2 units away, or 4 when squared
         Star nearestStar = null;
@@ -404,6 +429,54 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
 
         return nearestStar;
+    }
+
+    public static AstralObject getNearestAstralObjectToCursor() {
+        float nearestDistance = 5; //at most the nearest star can only be 2 units away, or 4 when squared
+        Star nearestStar = null;
+        OrbitingBody nearestOrbitingBody = null;
+        boolean isStar = false;
+
+        Vec3f lookVector = getLookVector();
+        Vec3f rotatedToBody = lookVector.copy();
+        rotateVectorToOrbitingBodyRotation(rotatedToBody);
+        float x = rotatedToBody.getX();
+        float y = rotatedToBody.getY();
+        float z = rotatedToBody.getZ();
+
+        for (OrbitingBody orbitingBody : orbitingBodies) {
+            Vec3f pos = orbitingBody.getPosition();
+            float currentDistance = getSquaredDistance(x - pos.getX(), y - pos.getY(), z - pos.getZ());
+            if (currentDistance < nearestDistance) {
+                nearestDistance = currentDistance;
+                nearestOrbitingBody = orbitingBody;
+            }
+        }
+
+        rotateVectorToStarRotation(lookVector);
+        x = lookVector.getX();
+        y = lookVector.getY();
+        z = lookVector.getZ();
+
+        for (Star star : stars) {
+            float[] pos = star.getPosition();
+            float currentDistance = getSquaredDistance(x - pos[0], y - pos[1], z - pos[2]);
+            if (currentDistance < nearestDistance) {
+                nearestDistance = currentDistance;
+                nearestStar = star;
+                isStar = true;
+            }
+        }
+
+        if (nearestDistance > 0.0005f) return null;
+
+        if (isStar) {
+            if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
+            return new AstralObject(nearestStar);
+        } else {
+            if (nearestOrbitingBody.getCurrentNonTwinkledAlpha() < 0.1f) return null;
+            return new AstralObject(nearestOrbitingBody);
+        }
     }
 
     public static float getHeight() {

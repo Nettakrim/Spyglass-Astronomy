@@ -27,6 +27,7 @@ public class SpaceDataManager {
     private File data = null;
 
     public ArrayList<StarData> starDatas;
+    public ArrayList<OrbitingBodyData> orbitingBodyDatas;
 
     public SpaceDataManager(ClientWorld world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
@@ -61,6 +62,7 @@ public class SpaceDataManager {
             Decoder decoder = Base64.getDecoder();
             int starIndex = 0;
             starDatas = new ArrayList<StarData>();
+            orbitingBodyDatas = new ArrayList<OrbitingBodyData>();
             while (scanner.hasNextLine()) {
                 String s = scanner.nextLine();
                 if (s.equals("---")) {
@@ -92,10 +94,16 @@ public class SpaceDataManager {
                         SpyglassAstronomyClient.constellations.add(constellation);
                         break;
                     case 3:
-                        int split = s.indexOf(' ');
-                        starIndex += Integer.parseInt(s.substring(0, split));
-                        String name = s.substring(split+1);
-                        starDatas.add(new StarData(starIndex, name));
+                        int starSplit = s.indexOf(' ');
+                        starIndex += Integer.parseInt(s.substring(0, starSplit));
+                        String starName = s.substring(starSplit+1);
+                        starDatas.add(new StarData(starIndex, starName));
+                        break;
+                    case 4:
+                        int orbitingBodySplit = s.indexOf(' ');
+                        int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
+                        String orbitingBodyName = s.substring(orbitingBodySplit+1);
+                        orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
                         break;
                 }
             }           
@@ -135,6 +143,15 @@ public class SpaceDataManager {
                     lastIndex = star.index;
                 }
             }            
+            s.append("\n---");
+            int index = 0;
+            for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+                if (orbitingBody.name != null) {
+                    s.append('\n');
+                    s.append(Integer.toString(index)+" "+orbitingBody.name);
+                }
+                index++;
+            }   
             s.append("\n---");
 
             writer.write(s.toString());
@@ -201,6 +218,14 @@ public class SpaceDataManager {
         starDatas = null;
     }
 
+    public void loadOrbitingBodyDatas() {
+        if (orbitingBodyDatas == null) return;
+        for (OrbitingBodyData orbitingBodyData : orbitingBodyDatas) {
+            SpyglassAstronomyClient.orbitingBodies.get(orbitingBodyData.index).name = orbitingBodyData.name;
+        }
+        orbitingBodyDatas = null;        
+    }
+
     public class StarData {
         public int index;
         public String name;
@@ -210,4 +235,14 @@ public class SpaceDataManager {
             this.name = name;
         }
     }
+
+    public class OrbitingBodyData {
+        public int index;
+        public String name;
+
+        public OrbitingBodyData(int index, String name) {
+            this.index = index;
+            this.name = name;
+        }
+    }    
 }

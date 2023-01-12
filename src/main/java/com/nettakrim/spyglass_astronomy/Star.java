@@ -124,6 +124,7 @@ public class Star {
 
     public void select() {
         Constellation.deselect();
+        OrbitingBody.deselect();
         if (selected != null) selected.isSelected = false;
         isSelected = true;
         selected = this;

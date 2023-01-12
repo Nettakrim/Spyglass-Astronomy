@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import com.nettakrim.spyglass_astronomy.Constellation;
+import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
@@ -35,12 +36,19 @@ public class SpyglassAstronomyCommands {
                 return CompletableFuture.completedFuture(builder.build());
             };
 
+            SuggestionProvider<FabricClientCommandSource> orbitingBodies = (context, builder) -> {
+                for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+                    if (orbitingBody.name != null) builder.suggest(orbitingBody.name);
+                }
+                return CompletableFuture.completedFuture(builder.build());
+            };            
+
             RootCommandNode<FabricClientCommandSource> root = dispatcher.getRoot();
 
             LiteralCommandNode<FabricClientCommandSource> infoNode = ClientCommandManager
                 .literal("sga:info")
                 .executes(new InfoCommand())
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> constellationInfoNode = ClientCommandManager
                 .literal("constellation")
@@ -49,7 +57,7 @@ public class SpyglassAstronomyCommands {
                     .suggests(constellations)
                     .executes(InfoCommand::getConstellationInfo)
                 )
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> starInfoNode = ClientCommandManager
                 .literal("star")
@@ -58,16 +66,32 @@ public class SpyglassAstronomyCommands {
                     .suggests(stars)
                     .executes(InfoCommand::getStarInfo)
                 )
-                .build();
+            .build();
+
+            LiteralCommandNode<FabricClientCommandSource> orbitingBodyInfoNode = ClientCommandManager
+                .literal("planet")
+                .then(
+                    ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(orbitingBodies)
+                    .executes(InfoCommand::getOrbitingBodyInfo)
+                )
+            .build();
+
+            LiteralCommandNode<FabricClientCommandSource> earthInfoNode = ClientCommandManager
+                .literal("thisworld")
+                .executes(InfoCommand::getEarthInfo)
+            .build();            
             
             dispatcher.getRoot().addChild(infoNode);
             infoNode.addChild(constellationInfoNode);
             infoNode.addChild(starInfoNode);
+            infoNode.addChild(orbitingBodyInfoNode);
+            infoNode.addChild(earthInfoNode);
                 
             LiteralCommandNode<FabricClientCommandSource> selectNode = ClientCommandManager
                 .literal("sga:select")
                 .executes(new InfoCommand())
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> constellationSelectNode = ClientCommandManager
                 .literal("constellation")
@@ -76,7 +100,7 @@ public class SpyglassAstronomyCommands {
                     .suggests(constellations)
                     .executes(SelectCommand::selectConstellation)
                 )
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> starSelectNode = ClientCommandManager
                 .literal("star")
@@ -85,11 +109,21 @@ public class SpyglassAstronomyCommands {
                     .suggests(stars)
                     .executes(SelectCommand::selectStar)
                 )
-                .build();            
+            .build();
+
+            LiteralCommandNode<FabricClientCommandSource> orbitingBodySelectNode = ClientCommandManager
+                .literal("planet")
+                .then(
+                    ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(orbitingBodies)
+                    .executes(SelectCommand::selectOrbitingBody)
+                )
+            .build();
 
             root.addChild(selectNode);
             selectNode.addChild(constellationSelectNode);
-            selectNode.addChild(starSelectNode);      
+            selectNode.addChild(starSelectNode);
+            selectNode.addChild(orbitingBodySelectNode);
 
             LiteralCommandNode<FabricClientCommandSource> nameNode = ClientCommandManager
                 .literal("sga:name")
@@ -163,6 +197,17 @@ public class SpyglassAstronomyCommands {
         SpyglassAstronomyClient.say(String.format("No Star with name \"%s\" could be found", name));
         return null;        
     }
+
+    public static OrbitingBody getOrbitingBody(CommandContext<FabricClientCommandSource> context) {
+        String name = getMessageText(context);
+        for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+            if (orbitingBody.name != null && orbitingBody.name.equals(name)) {
+                return orbitingBody;
+            }
+        }
+        SpyglassAstronomyClient.say(String.format("No Planet with name \"%s\" could be found", name));
+        return null;        
+    }    
 
     public static String getMessageText(CommandContext<FabricClientCommandSource> context) {
         //a lot of digging through #SayCommand to make a MessageArgumentType that works clientside

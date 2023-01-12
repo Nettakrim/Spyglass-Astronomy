@@ -189,6 +189,7 @@ public class Constellation {
 
     public void select() {
         Star.deselect();
+        OrbitingBody.deselect();
         if (selected != null) selected.isSelected = false;
         isSelected = true;
         selected = this;

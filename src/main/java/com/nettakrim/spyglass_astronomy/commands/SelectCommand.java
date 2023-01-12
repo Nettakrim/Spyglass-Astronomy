@@ -2,6 +2,7 @@ package com.nettakrim.spyglass_astronomy.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.nettakrim.spyglass_astronomy.Constellation;
+import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
@@ -31,6 +32,19 @@ public class SelectCommand {
             return -1;
         }
         star.select();
+        return 1;
+    }
+
+    public static int selectOrbitingBody(CommandContext<FabricClientCommandSource> context) {
+        OrbitingBody orbitingBody = SpyglassAstronomyCommands.getOrbitingBody(context);
+        if (orbitingBody == null) {
+            return -1;
+        }
+        if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
+            SpyglassAstronomyClient.say("Spyglass must be held to be able to select Planets");
+            return -1;
+        }
+        orbitingBody.select();
         return 1;
     }
 }

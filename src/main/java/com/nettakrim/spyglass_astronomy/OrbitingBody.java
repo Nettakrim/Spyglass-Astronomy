@@ -8,7 +8,7 @@ import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3f;
 
 public class OrbitingBody {
-    private final Orbit orbit;
+    public final Orbit orbit;
     private ArrayList<OrbitingBody> moons;
 
     private Vec3f lastPosition = new Vec3f();
@@ -27,6 +27,13 @@ public class OrbitingBody {
     private Vec3f vertex3;
     private Vec3f vertex4;
 
+    private Vec3f position;
+
+    public String name;
+
+    public static OrbitingBody selected;
+    private boolean isSelected;
+
     public OrbitingBody(Orbit orbit, float size, float albedo, float rotationSpeed) {
         this.orbit = orbit;
         this.size = size;
@@ -41,7 +48,7 @@ public class OrbitingBody {
     public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, float t) {
         angle = (angle+rotationSpeed)%90;
 
-        Vec3f position = orbit.getRotatedPositionAtGlobalTime(t);
+        position = orbit.getRotatedPositionAtGlobalTime(t);
         
         Vec3f similarityVector = position.copy();
         similarityVector.normalize();
@@ -91,28 +98,54 @@ public class OrbitingBody {
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
+        int colorMult = isSelected ? 1 : 0;
+        int r = 255 >> colorMult;
+        int g = 255;
+        int b = 255 >> colorMult;
+
         bufferBuilder.vertex(
             vertex1.getX(),
             vertex1.getY(),
             vertex1.getZ()
-        ).color(255, 255, 255, currentAlpha).next();
+        ).color(r, g, b, currentAlpha).next();
 
         bufferBuilder.vertex(
             vertex2.getX(),
             vertex2.getY(),
             vertex2.getZ()
-        ).color(255, 255, 255, currentAlpha).next();
+        ).color(r, g, b, currentAlpha).next();
 
         bufferBuilder.vertex(
             vertex3.getX(),
             vertex3.getY(),
             vertex3.getZ()
-        ).color(255, 255, 255, currentAlpha).next();
+        ).color(r, g, b, currentAlpha).next();
 
         bufferBuilder.vertex(
             vertex4.getX(),
             vertex4.getY(),
             vertex4.getZ()
-        ).color(255, 255, 255, currentAlpha).next();
+        ).color(r, g, b, currentAlpha).next();
+    }
+
+    public Vec3f getPosition() {
+        return position;
+    }
+
+    public float getCurrentNonTwinkledAlpha() {
+        return ((float)currentAlpha)/255;
+    }
+
+    public void select() {
+        Constellation.deselect();
+        Star.deselect();
+        if (selected != null) selected.isSelected = false;
+        isSelected = true;
+        selected = this;
+    }
+
+    public static void deselect() {
+        if (selected != null) selected.isSelected = false;
+        selected = null;
     }
 }
