@@ -33,7 +33,6 @@ public class SpaceRenderingManager {
     private BufferBuilder planetsBufferBuilder = Tessellator.getInstance().getBuffer();
 
     private static float heightScale = 1;
-    private static float unclampedHeightScale = 1;
 
     public void updateSpace(int ticks) {
         updateHeightScale();
@@ -58,7 +57,7 @@ public class SpaceRenderingManager {
 
         updateStars(ticks);
 
-        updateOrbits();
+        updateOrbits(ticks);
     }
 
     public void scheduleConstellationsUpdate() {
@@ -88,15 +87,18 @@ public class SpaceRenderingManager {
         starsBuffer.upload(starBufferBuilder.end());
     }
 
-    private void updateOrbits() {
+    private void updateOrbits(int ticks) {
         planetsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         float t = SpyglassAstronomyClient.getPreciseDay();
 
         Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(t);
+        Vec3f normalisedReferencePosition = referencePosition.copy();
+        normalisedReferencePosition.normalize();
 
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
-            orbitingBody.setVertices(constellationsBufferBuilder, referencePosition, t);
+            orbitingBody.update(ticks, referencePosition, normalisedReferencePosition, t);
+            orbitingBody.setVertices(constellationsBufferBuilder);
         }
 
         planetsBuffer.bind();
@@ -121,7 +123,7 @@ public class SpaceRenderingManager {
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngleMultiplier()));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
-            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, Math.min(starVisibility*((unclampedHeightScale*MathHelper.abs(unclampedHeightScale)+2))/2,1));
+            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, colorScale);
             BackgroundRenderer.clearFog();
             
             starsBuffer.bind();
@@ -152,8 +154,7 @@ public class SpaceRenderingManager {
     }
 
     public static void updateHeightScale() {
-        unclampedHeightScale = (SpyglassAstronomyClient.getHeight()-32f)/256f;
-        heightScale = MathHelper.clamp(unclampedHeightScale, 0f, 1f);
+        heightScale = MathHelper.clamp((SpyglassAstronomyClient.getHeight()-32f)/256f, 0f, 1f);
     }
 
     public static float getHeightScale() {

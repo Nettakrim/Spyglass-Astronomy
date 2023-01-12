@@ -27,7 +27,7 @@ public class Star {
     private float angle;
     private float size;
 
-    private float rotationSpeed;
+    private final float rotationSpeed;
     private final float twinkleSpeed;
     private int currentAlpha;
 
@@ -65,7 +65,7 @@ public class Star {
     }
 
     public void update(int ticks) {
-        angle += rotationSpeed;
+        angle = (angle+rotationSpeed)%90;
         float twinkle = 1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0);
         currentAlpha = (int) (getCurrentNonTwinkledAlpha() * twinkle * 255);
     }

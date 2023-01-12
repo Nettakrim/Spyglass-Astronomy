@@ -11,6 +11,7 @@ public class Orbit {
     public final float rotation;
     public final float inclination;
 
+    //orbit speed scale, k = 1 means that a period of 1 lasts 1 minecraft day
     private final static double k = 1;
 
     public Orbit(double period, double eccentricity, float rotation, float inclination) {

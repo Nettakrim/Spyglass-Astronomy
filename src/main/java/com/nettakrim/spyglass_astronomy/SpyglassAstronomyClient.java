@@ -147,15 +147,74 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static void generatePlanets(Random random) {
         random.setSeed(spaceDataManager.getPlanetSeed());
 
+        //always atleast 5 planets, and always atleast 2 outer planets, inner planets not guaranteed
+        //between 0 and 3 inner planets
+        int innerPlanets = random.nextInt(4);
+        //between 5 and 8 outer planets for 0 inner, between 2 and 8 for 3 inner
+        int outerPlanets = random.nextBetween(5-innerPlanets, 8);
+
         //earth will often have a year of 4 lunar cycles (32 days, 10 realtime hours), but theres a chance to have some sligthly more irregular years
         float[] yearTimesInLunarCycles = new float[] {4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,5,5,5,5,3.5f,4.5f};
         float yearLength = yearTimesInLunarCycles[random.nextInt(yearTimesInLunarCycles.length)]*8;
 
         //earth will have a largely circular orbit
-        float inclinationRaw = (random.nextFloat()*2-1);
-        earthOrbit = new Orbit(yearLength, random.nextFloat()/25f, random.nextFloat()*360f, (inclinationRaw*MathHelper.abs(inclinationRaw))*20f);
+        earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 20f);
     
         starAngleMultiplier = ((yearLength + 1) / yearLength) * 360f;
+
+        //inner planets are spaced rougly evenly, and rounded to 8ths of an earth year
+        float innerRoundAmount = 8;
+        while (innerPlanets >= innerRoundAmount) innerRoundAmount *= 2;
+
+        float innerDistanceRange = 1f/innerPlanets;
+        float[] innerPlanetPeriods = new float[innerPlanets];
+        for (float x = 0; x < innerPlanets; x++) {
+            float minPeriod = (x/innerPlanets);
+            float maxPeriod = (x/innerPlanets)+innerDistanceRange;
+            float unRoundedPeriod = scale01Between(random.nextFloat(), minPeriod, maxPeriod);
+            float period = (MathHelper.floor(unRoundedPeriod*(innerRoundAmount-1))+1)/innerRoundAmount;
+            for (int y = 0; y < x; y++) {
+                if (innerPlanetPeriods[y] == period) {
+                    period += 1f/innerRoundAmount;
+                }
+            }
+            innerPlanetPeriods[(int)x] = period;
+            period *= yearLength;
+            Orbit orbit = generateRandomOrbit(random, period, 0.1f, 20f);
+            addRandomOrbitingBody(random, orbit);
+        }
+
+        //outer planets rougly double in period each planet, further out planets will have slightly more irregular orbits
+        float[] periodOffsets = new float[] {0.75f, 1f, 1f, 1.25f};
+        for (float x = 0; x < outerPlanets; x++) {
+            float period = (yearLength * (2 << ((int)x+1))) * periodOffsets[random.nextInt(periodOffsets.length)];
+            float settingsMultiplier = (x/8)+1;
+            Orbit orbit = generateRandomOrbit(random, period, Math.min(0.15f*settingsMultiplier,0.5f), Math.min(20f*settingsMultiplier,60f));
+            addRandomOrbitingBody(random, orbit);
+        }
+    }
+
+    private static float scale01Between(float x, float valueAt0, float valueAt1) {
+        return (1-x)*valueAt0 + x*valueAt1;
+    }
+
+    private static void addRandomOrbitingBody(Random random, Orbit orbit) {
+        float size = random.nextFloat()+1;
+        float albedo = (random.nextFloat()+1)/2;
+        float rotationSpeed = random.nextFloat();
+        orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed));
+    }
+
+    private static Orbit generateRandomOrbit(Random random, float period, float maxEccentricity, float maxInclination) {
+        float eccentricityRaw = random.nextFloat();
+        float rotationRaw = random.nextFloat();
+        float inclinationRaw = (random.nextFloat()*2)-1;
+
+        float eccentricity = eccentricityRaw * maxEccentricity;
+        float rotation = rotationRaw*360f;
+        float inclination = (inclinationRaw*Math.abs(inclinationRaw))*maxInclination;
+
+        return new Orbit(period, eccentricity, rotation, inclination);
     }
 
     public static float getPreciseMoonPhase() {

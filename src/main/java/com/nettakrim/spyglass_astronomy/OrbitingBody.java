@@ -4,52 +4,115 @@ import java.util.ArrayList;
 
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3f;
 
 public class OrbitingBody {
     private final Orbit orbit;
     private ArrayList<OrbitingBody> moons;
 
-    public OrbitingBody(double period, double eccentricity, float rotation, float inclination) {
-        this.orbit = new Orbit(period, eccentricity, rotation, inclination);
+    private Vec3f lastPosition = new Vec3f();
+
+    private final float size;
+    private final float albedo;
+    private final float rotationSpeed;
+
+    private float angle;
+    private int currentAlpha;
+
+    private Vec3f axis1;
+    private Vec3f axis2;
+    private Vec3f vertex1;
+    private Vec3f vertex2;
+    private Vec3f vertex3;
+    private Vec3f vertex4;
+
+    public OrbitingBody(Orbit orbit, float size, float albedo, float rotationSpeed) {
+        this.orbit = orbit;
+        this.size = size;
+        this.albedo = albedo;
+        this.rotationSpeed = rotationSpeed * 0.01f;
     }
 
     public void addMoon(OrbitingBody moon) {
         moons.add(moon);
     }
 
-    public void setVertices(BufferBuilder bufferBuilder, Vec3f referencePosition, float t) {
+    public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, float t) {
+        angle = (angle+rotationSpeed)%90;
+
         Vec3f position = orbit.getRotatedPositionAtGlobalTime(t);
+        
+        Vec3f similarityVector = position.copy();
+        similarityVector.normalize();
+        float similarity = similarityVector.dot(normalisedReferencePosition);
+    
         position.subtract(referencePosition);
         float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(position.getX(), position.getY(), position.getZ());
-        position.scale(MathHelper.fastInverseSqrt(sqrDistance));
+        float inverseSqrt = MathHelper.fastInverseSqrt(sqrDistance);
+        position.scale(inverseSqrt);
 
-        float angle = 0;
-        float size = 10;
-        float xCoord = position.getX();
-        float yCoord = position.getY();
-        float zCoord = position.getZ();
+        float distanceSinceLastCalculation = SpyglassAstronomyClient.getSquaredDistance(position.getX()-lastPosition.getX(), position.getY()-lastPosition.getY(), position.getZ()-lastPosition.getZ());
+        float distanceScale = MathHelper.clamp(MathHelper.sqrt(100*inverseSqrt), 0.5f, 10f);
+        if (distanceSinceLastCalculation > 0.001f) {
+            axis1 = lastPosition.copy();
+            axis1.subtract(position);
+            axis1.normalize();
+            Quaternion rotation = position.getDegreesQuaternion(90);
+            axis2 = axis1.copy();
+            axis2.rotate(rotation);
+        
+            float distanceSizeScale = size * Math.min(distanceScale,2f) * Math.min((similarity+1f),0.5f);
+            axis1.scale(distanceSizeScale);
+            axis2.scale(distanceSizeScale);
 
-        double polarAngle = Math.atan2(xCoord, zCoord);
-        float longitudeSin = (float) Math.sin(polarAngle);
-        float longitudeCos = (float) Math.cos(polarAngle);
-
-        double proj = Math.atan2(Math.sqrt(xCoord  * xCoord  + zCoord * zCoord), yCoord);
-        float latitudeSin = (float) Math.sin(proj);
-        float latitudeCos = (float) Math.cos(proj);
-
-        float angleSin = MathHelper.sin(angle);
-        float angleCos = MathHelper.cos(angle);
-        for (int corner = 0; corner < 4; ++corner) {
-            float x = ((corner & 2) - 1) * size;
-            float y = ((corner + 1 & 2) - 1) * size;
-            float rotatedA = x * angleCos - y * angleSin;
-            float rotatedB = y * angleCos + x * angleSin;
-            float rotatedALat = rotatedA * latitudeSin;
-            float rotatedBLat = -(rotatedA * latitudeCos);
-            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
-            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-            bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(255, 255, 255, 255).next();
+            lastPosition = position.copy();
         }
+
+        float heightScale = SpaceRenderingManager.getHeightScale() + 0.5f;
+        float alphaRaw = (albedo * (12*distanceScale*heightScale + 135*heightScale)) * Math.min((similarity+1),1f);
+        float distanceHeightProportion = Math.min(distanceScale-0.5f,3f)/3f;
+        alphaRaw = (1-distanceHeightProportion)*Math.max(2*alphaRaw-1,0) + distanceHeightProportion*alphaRaw;
+        currentAlpha = Math.min((int)alphaRaw,255);
+
+        Quaternion rotation = position.getDegreesQuaternion(angle);
+        Vec3f rotatedAxis1 = axis1.copy();
+        Vec3f rotatedAxis2 = axis2.copy();
+        rotatedAxis1.rotate(rotation);
+        rotatedAxis2.rotate(rotation);
+
+        float x = position.getX()*100;
+        float y = position.getY()*100;
+        float z = position.getZ()*100;
+        vertex1 = new Vec3f(x-rotatedAxis2.getX(), y-rotatedAxis2.getY(), z-rotatedAxis2.getZ());
+        vertex2 = new Vec3f(x-rotatedAxis1.getX(), y-rotatedAxis1.getY(), z-rotatedAxis1.getZ());
+        vertex3 = new Vec3f(x+rotatedAxis2.getX(), y+rotatedAxis2.getY(), z+rotatedAxis2.getZ());
+        vertex4 = new Vec3f(x+rotatedAxis1.getX(), y+rotatedAxis1.getY(), z+rotatedAxis1.getZ());
+    }
+
+    public void setVertices(BufferBuilder bufferBuilder) {
+        bufferBuilder.vertex(
+            vertex1.getX(),
+            vertex1.getY(),
+            vertex1.getZ()
+        ).color(255, 255, 255, currentAlpha).next();
+
+        bufferBuilder.vertex(
+            vertex2.getX(),
+            vertex2.getY(),
+            vertex2.getZ()
+        ).color(255, 255, 255, currentAlpha).next();
+
+        bufferBuilder.vertex(
+            vertex3.getX(),
+            vertex3.getY(),
+            vertex3.getZ()
+        ).color(255, 255, 255, currentAlpha).next();
+
+        bufferBuilder.vertex(
+            vertex4.getX(),
+            vertex4.getY(),
+            vertex4.getZ()
+        ).color(255, 255, 255, currentAlpha).next();
     }
 }

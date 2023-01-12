@@ -91,7 +91,7 @@ public class StarLine {
         direction.normalize();
         direction.scale(distance * (Math.min(MathHelper.sqrt(sqrDistance), 4f)/4));
 
-        Vec3f perpendicular = new Vec3f(direction.getX(),direction.getY(),direction.getZ());
+        Vec3f perpendicular = direction.copy();
         perpendicular.cross(starAPosition);
         perpendicular.normalize();
         perpendicular.scale(width);
