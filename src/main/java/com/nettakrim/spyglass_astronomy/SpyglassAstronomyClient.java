@@ -154,8 +154,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         int outerPlanets = random.nextBetween(5-innerPlanets, 8);
 
         //earth will often have a year of 4 lunar cycles (32 days, 10 realtime hours), but theres a chance to have some sligthly more irregular years
-        float[] yearTimesInLunarCycles = new float[] {4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,5,5,5,5,3.5f,4.5f};
-        float yearLength = yearTimesInLunarCycles[random.nextInt(yearTimesInLunarCycles.length)]*8;
+        //float[] yearTimesInLunarCycles = new float[] {4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,5,5,5,5,3.5f,4.5f};
+        //float yearLength = yearTimesInLunarCycles[random.nextInt(yearTimesInLunarCycles.length)]*8;
+        float[] yearTimes = new float[] {8,8,8,8,8,8,8,8,8,8,8,8,6,6,6,6,10,10,10,10,7,9};
+        float yearLength = yearTimes[random.nextInt(yearTimes.length)];
 
         //earth will have a largely circular orbit
         earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 20f);
