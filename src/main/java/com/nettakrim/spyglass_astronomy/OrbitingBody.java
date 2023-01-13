@@ -38,17 +38,17 @@ public class OrbitingBody {
         this.orbit = orbit;
         this.size = size;
         this.albedo = albedo;
-        this.rotationSpeed = rotationSpeed * 0.01f;
+        this.rotationSpeed = rotationSpeed * 0.1f;
     }
 
     public void addMoon(OrbitingBody moon) {
         moons.add(moon);
     }
 
-    public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, float t) {
+    public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, Long day, float dayFraction) {
         angle = (angle+rotationSpeed)%90;
 
-        position = orbit.getRotatedPositionAtGlobalTime(t);
+        position = orbit.getRotatedPositionAtGlobalTime(day, dayFraction);
         
         Vec3f similarityVector = position.copy();
         similarityVector.normalize();

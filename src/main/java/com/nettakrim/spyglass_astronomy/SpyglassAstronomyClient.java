@@ -203,7 +203,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     private static void addRandomOrbitingBody(Random random, Orbit orbit) {
         float size = random.nextFloat()+1;
         float albedo = (random.nextFloat()+1)/2;
-        float rotationSpeed = (random.nextFloat()+1)/2;
+        float rotationSpeed = random.nextFloat();
+        if (rotationSpeed < 0.5f) rotationSpeed--;
         orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed));
     }
 
@@ -224,11 +225,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static float getStarAngleMultiplier() {
-        return getPreciseDay() * starAngleMultiplier;
+        return getPositionInOrbit(starAngleMultiplier);
     }
 
-    public static float getPreciseDay() {
-        return world.getLunarTime()%24000/24000.0f + (world.getTimeOfDay()/24000);
+    public static float getPositionInOrbit(float scale) {
+        Long time = world.getTimeOfDay();
+        return ((float)((time/24000)%(long)earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
+    }
+
+    public static Long getDay() {
+        Long time = world.getTimeOfDay();
+        return time/24000;        
+    }
+
+    public static float getDayFraction() {
+        Long time = world.getTimeOfDay();
+        return ((time%24000)/24000.0f); 
     }
 
     public static void update() {
@@ -407,8 +419,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void rotateVectorToOrbitingBodyRotation(Vec3f vector) {
-        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()/SpyglassAstronomyClient.earthOrbit.period)*360f));
-        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(((SpyglassAstronomyClient.getPreciseDay()*360f)+180)*-1));
+        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
     }    
 
     public static Star getNearestStar(float x, float y, float z) {

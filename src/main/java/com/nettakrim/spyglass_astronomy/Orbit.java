@@ -38,8 +38,8 @@ public class Orbit {
         return new Vec3f(cosAngle * scale, MathHelper.sin(f) * scale, 0);
     }
 
-    public Vec3f getRotatedPositionAtGlobalTime(float t) {
-        Vec3f pos = getLocalPositionAtLocalTime(t/period);
+    public Vec3f getRotatedPositionAtGlobalTime(Long day, float dayFraction) {
+        Vec3f pos = getLocalPositionAtLocalTime(((day%period)/period)+(dayFraction/period));
         rotateLocalPosition(pos);
         return pos;
     }

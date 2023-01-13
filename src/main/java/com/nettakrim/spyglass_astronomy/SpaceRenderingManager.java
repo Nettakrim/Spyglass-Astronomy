@@ -90,14 +90,15 @@ public class SpaceRenderingManager {
     private void updateOrbits(int ticks) {
         planetsBufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
-        float t = SpyglassAstronomyClient.getPreciseDay();
+        Long day = SpyglassAstronomyClient.getDay();
+        float dayFraction = SpyglassAstronomyClient.getDayFraction();
 
-        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(t);
+        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(day, dayFraction);
         Vec3f normalisedReferencePosition = referencePosition.copy();
         normalisedReferencePosition.normalize();
 
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
-            orbitingBody.update(ticks, referencePosition, normalisedReferencePosition, t);
+            orbitingBody.update(ticks, referencePosition, normalisedReferencePosition, day, dayFraction);
             orbitingBody.setVertices(constellationsBufferBuilder);
         }
 
@@ -123,7 +124,7 @@ public class SpaceRenderingManager {
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngleMultiplier()));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
-            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, colorScale);
+            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
             BackgroundRenderer.clearFog();
             
             starsBuffer.bind();
@@ -142,8 +143,7 @@ public class SpaceRenderingManager {
 
             matrices.pop();
             matrices.push();
-            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()/SpyglassAstronomyClient.earthOrbit.period)*-360f));
-            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPreciseDay()*360f)+180));
+            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
 
             planetsBuffer.bind();
             planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
