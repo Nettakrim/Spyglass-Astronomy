@@ -58,7 +58,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         builder.append('\n');
 
         Vec3f position = constellation.getAveragePosition();
-        mostVisibleInfo(builder, position);
+        staticVisibilityInfo(builder, position);
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
@@ -70,7 +70,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         builder.append('\n');
 
         Vec3f position = star.getPositionAsVec3f();
-        mostVisibleInfo(builder, position);
+        staticVisibilityInfo(builder, position);
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
@@ -97,19 +97,28 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
-    private static void mostVisibleInfo(StringBuilder builder, Vec3f position) {
-        position.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
-        position.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(1.75f * 405f));
-        position.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
-        if (MathHelper.abs(position.getX()) < 0.9f) {
-            float angle = (float)(MathHelper.atan2(position.getY(), position.getZ())*180d/Math.PI);
+    private static void staticVisibilityInfo(StringBuilder builder, Vec3f position) {
+        SpyglassAstronomyClient.LOGGER.info(position.toString());
+        position.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
+        position.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
+        position.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
+        SpyglassAstronomyClient.LOGGER.info(position.toString());
+        if (MathHelper.abs(position.getZ()) < 0.9f) {
+            float xPos = position.getX();
+            float yPos = position.getY();
+            float inverseSqrt = MathHelper.fastInverseSqrt(xPos*xPos+yPos*yPos);
+            xPos *= inverseSqrt;
+            yPos *= inverseSqrt;
+            float angle = (float)((MathHelper.atan2(xPos, yPos))*180d/Math.PI);
+            SpyglassAstronomyClient.LOGGER.info(Float.toString(angle));
             int mostVisiblePhase = Math.round(angle/45)-1;
             if (mostVisiblePhase < 0) mostVisiblePhase += 8;
-            builder.append("Most Visible During: ");
-            builder.append(SpyglassAstronomyClient.getMoonPhaseName(mostVisiblePhase));
+            //builder.append("Most Visible During: ");
+            //builder.append(SpyglassAstronomyClient.getMoonPhaseName(mostVisiblePhase));
         } else {
-            builder.append("Always");
-        }        
+            //builder.append("Always");
+        }
+        builder.append("visibility info currently not functional");    
     }
 
     private static void orbitInfo(StringBuilder builder, Orbit orbit) {

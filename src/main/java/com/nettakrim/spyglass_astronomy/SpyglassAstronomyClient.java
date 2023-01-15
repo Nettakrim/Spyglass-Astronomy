@@ -50,7 +50,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static Orbit earthOrbit;
     public static ArrayList<OrbitingBody> orbitingBodies;
 
-    private static float starAngleMultiplier;
+    public static float starAngleMultiplier;
+
+    public static float zoom;
 
 	@Override
 	public void onInitializeClient() {
@@ -153,9 +155,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         //between 5 and 8 outer planets for 0 inner, between 2 and 8 for 3 inner
         int outerPlanets = random.nextBetween(5-innerPlanets, 8);
 
-        //earth will often have a year of 4 lunar cycles (32 days, 10 realtime hours), but theres a chance to have some sligthly more irregular years
-        //float[] yearTimesInLunarCycles = new float[] {4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,5,5,5,5,3.5f,4.5f};
-        //float yearLength = yearTimesInLunarCycles[random.nextInt(yearTimesInLunarCycles.length)]*8;
+        //earth will often have a year of 1 lunar cycle (8 days, 2.5 realtime hours), but theres a chance to have some sligthly more irregular years
         float[] yearTimes = new float[] {8,8,8,8,8,8,8,8,8,8,8,8,6,6,6,6,10,10,10,10,7,9};
         float yearLength = yearTimes[random.nextInt(yearTimes.length)];
 
@@ -226,7 +226,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
     }
 
-    public static float getStarAngleMultiplier() {
+    public static float getStarAngle() {
         return getPositionInOrbit(starAngleMultiplier);
     }
 
@@ -306,6 +306,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void startUsingSpyglass() {
         editMode = 0;
+        zoom = 0;
     }
 
     public static void toggleEditMode() {
@@ -416,7 +417,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void rotateVectorToStarRotation(Vec3f vector) {
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
-        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(getStarAngleMultiplier()*-1));
+        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(getStarAngle()*-1));
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
     }
 

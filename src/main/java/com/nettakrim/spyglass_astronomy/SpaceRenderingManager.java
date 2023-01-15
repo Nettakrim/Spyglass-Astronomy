@@ -121,7 +121,7 @@ public class SpaceRenderingManager {
             matrices.pop();
             matrices.push();
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngleMultiplier()));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);

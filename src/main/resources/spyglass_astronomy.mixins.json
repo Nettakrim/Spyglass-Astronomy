@@ -11,7 +11,8 @@
     "SpyglassItemMixin",
     "InGameHudMixin",
     "MinecraftClientMixin",
-    "BiomeAccessAccessor"
+    "BiomeAccessAccessor",
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
