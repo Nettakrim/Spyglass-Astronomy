@@ -10,14 +10,22 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class AdminCommand {
     public static int setStarCount(CommandContext<FabricClientCommandSource> context) {
-        IntegerArgumentType.getInteger(context, "amount");
+        SpyglassAstronomyClient.setStarCount(IntegerArgumentType.getInteger(context, "amount"));
+        SpyglassAstronomyClient.generateStars(null);
         return 1;
     }
 
     public static int setStarSeed(CommandContext<FabricClientCommandSource> context) {
-        LongArgumentType.getLong(context, "seed");
+        SpyglassAstronomyClient.spaceDataManager.setStarSeed(LongArgumentType.getLong(context, "seed"));
+        SpyglassAstronomyClient.generateStars(null);
         return 1;
     }
+
+    public static int setPlanetSeed(CommandContext<FabricClientCommandSource> context) {
+        SpyglassAstronomyClient.spaceDataManager.setPlanetSeed(LongArgumentType.getLong(context, "seed"));
+        SpyglassAstronomyClient.generatePlanets(null);
+        return 1;
+    }    
 
     public static int removeConstellation(CommandContext<FabricClientCommandSource> context) {
         Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
@@ -26,6 +34,12 @@ public class AdminCommand {
         }
         SpyglassAstronomyClient.constellations.remove(constellation);
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        return 1;
+    }
+
+    public static int discardUnsavedChanges(CommandContext<FabricClientCommandSource> context) {
+        SpyglassAstronomyClient.spaceDataManager.loadData();
+        SpyglassAstronomyClient.generateSpace();
         return 1;
     }
 }

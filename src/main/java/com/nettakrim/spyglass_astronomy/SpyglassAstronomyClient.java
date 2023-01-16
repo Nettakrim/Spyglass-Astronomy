@@ -27,7 +27,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static boolean ready;
 
-    private static final int starCount = 1024; //encoding will break at 4097, so stay at 4096 and below :)
+    private static int starCount = 1024; //encoding will break at 4097, so stay at 4096 and below :)
 
     public static MinecraftClient client;
     public static ClientWorld world;
@@ -70,11 +70,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void loadSpace(ClientWorld clientWorld) {
-        world = clientWorld;
+        if (spaceDataManager != null) spaceDataManager.saveData();
 
-        stars = new ArrayList<>();
-        constellations = new ArrayList<>();
-        orbitingBodies = new ArrayList<OrbitingBody>();
+        world = clientWorld;
 
         spaceDataManager = new SpaceDataManager(clientWorld);
 
@@ -91,7 +89,14 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void generateStars(Random random) {
-        random.setSeed(spaceDataManager.getStarSeed());
+        if (random == null) {
+            random = Random.create(spaceDataManager.getStarSeed());
+        } else {
+            random.setSeed(spaceDataManager.getStarSeed());
+        }
+
+        stars = new ArrayList<>();
+        constellations = new ArrayList<>();
 
         int currentStars = 0;
         while (currentStars < starCount) {
@@ -147,7 +152,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void generatePlanets(Random random) {
-        random.setSeed(spaceDataManager.getPlanetSeed());
+        if (random == null) {
+            random = Random.create(spaceDataManager.getPlanetSeed());
+        } else {
+            random.setSeed(spaceDataManager.getPlanetSeed());
+        }
+        
+        orbitingBodies = new ArrayList<OrbitingBody>();
 
         //always atleast 5 planets, and always atleast 2 outer planets, inner planets not guaranteed
         //between 0 and 3 inner planets
@@ -381,13 +392,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             Constellation potentialNew = target.addLineCanRemove(drawingLine);
             if (potentialNew != null) {
                 say(String.format("Removing Line split Constellation \"%s\" into two", target.name));
-                constellations.add(potentialNew);
             }
             if (target.getLines().size() == 0) constellations.remove(target);
         } else {
             constellations.add(drawingConstellation);
         }
         selectConstellation(star, false);
+        SpaceDataManager.makeChange();
 
         spaceRenderingManager.scheduleConstellationsUpdate();
     }
@@ -553,5 +564,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static boolean isHoldingSpyglass() {
         if (!ready) return false;
         return client.player.getMainHandStack().isOf(Items.SPYGLASS) || client.player.getOffHandStack().isOf(Items.SPYGLASS);
+    }
+
+    public static void setStarCount(int count) {
+        starCount = count;
     }
 }

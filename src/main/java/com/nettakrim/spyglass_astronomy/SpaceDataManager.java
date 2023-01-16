@@ -29,6 +29,8 @@ public class SpaceDataManager {
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
 
+    private static boolean changesMade;
+
     public SpaceDataManager(ClientWorld world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
         long seedHash = ((BiomeAccessAccessor) world.getBiomeAccess()).getSeed();
@@ -41,7 +43,7 @@ public class SpaceDataManager {
         try {
             Files.createDirectories(storagePath);
             data = new File(storagePath.toString()+"/"+seedHash + ".txt");
-            if (!data.createNewFile()) {
+            if (data.exists()) {
                 useDefault = !loadData();
             }
         } catch (IOException e) {
@@ -51,12 +53,12 @@ public class SpaceDataManager {
         if (useDefault) {
             starSeed = seedHash;
             planetSeed = seedHash;
-            saveData();
         }
     }
 
     public boolean loadData() {
         try {
+            data.createNewFile();
             Scanner scanner = new Scanner(data);
             int stage = 0;
             Decoder decoder = Base64.getDecoder();
@@ -116,6 +118,7 @@ public class SpaceDataManager {
     }
 
     public void saveData() {
+        if (!changesMade) return;
         try {
             FileWriter writer = new FileWriter(data);
             StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
@@ -156,6 +159,7 @@ public class SpaceDataManager {
 
             writer.write(s.toString());
             writer.close();
+            changesMade = false;
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to save data");
         }
@@ -188,6 +192,14 @@ public class SpaceDataManager {
 
     public long getPlanetSeed() {
         return planetSeed;
+    }
+
+    public void setStarSeed(long starSeed) {
+        this.starSeed = starSeed;
+    }
+
+    public void setPlanetSeed(long planetSeed) {
+        this.planetSeed = planetSeed;
     }
 
     private static String getCurrentWorldOrServerName() {
@@ -224,6 +236,10 @@ public class SpaceDataManager {
             SpyglassAstronomyClient.orbitingBodies.get(orbitingBodyData.index).name = orbitingBodyData.name;
         }
         orbitingBodyDatas = null;        
+    }
+
+    public static void makeChange() {
+        changesMade = true;
     }
 
     public class StarData {

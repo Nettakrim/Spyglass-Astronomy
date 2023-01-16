@@ -131,13 +131,13 @@ public class SpyglassAstronomyCommands {
                     ClientCommandManager.argument("name", MessageArgumentType.message())
                     .executes(new NameSelectedCommand())
                 )
-                .build();
+            .build();
 
             root.addChild(nameNode);
 
             LiteralCommandNode<FabricClientCommandSource> adminNode = ClientCommandManager
                 .literal("sga:admin")
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> removeNode = ClientCommandManager
                 .literal("remove")
@@ -146,11 +146,11 @@ public class SpyglassAstronomyCommands {
                     .suggests(constellations)
                     .executes(AdminCommand::removeConstellation)
                 )
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> setSeedNode = ClientCommandManager
                 .literal("setseed")
-                .build();
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> setStarSeedNode = ClientCommandManager
                 .literal("star")
@@ -158,7 +158,15 @@ public class SpyglassAstronomyCommands {
                     ClientCommandManager.argument("seed", LongArgumentType.longArg())
                     .executes(AdminCommand::setStarSeed)
                 )
-                .build();
+            .build();
+
+            LiteralCommandNode<FabricClientCommandSource> setPlanetSeedNode = ClientCommandManager
+                .literal("planet")
+                .then(
+                    ClientCommandManager.argument("seed", LongArgumentType.longArg())
+                    .executes(AdminCommand::setPlanetSeed)
+                )
+            .build();
 
             LiteralCommandNode<FabricClientCommandSource> setStarCountNode = ClientCommandManager
                 .literal("setstarcount")
@@ -166,13 +174,20 @@ public class SpyglassAstronomyCommands {
                     ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4096))
                     .executes(AdminCommand::setStarCount)
                 )
-                .build();      
+            .build();
+            
+            LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
+                .literal("discardChanges")
+                .executes(AdminCommand::discardUnsavedChanges)
+            .build();            
 
             root.addChild(adminNode);
             adminNode.addChild(removeNode);
             adminNode.addChild(setSeedNode);
             setSeedNode.addChild(setStarSeedNode);
+            setSeedNode.addChild(setPlanetSeedNode);
             adminNode.addChild(setStarCountNode);
+            adminNode.addChild(discardNode);
         });
     }
 

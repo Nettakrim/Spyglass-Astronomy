@@ -7,6 +7,7 @@ import com.nettakrim.spyglass_astronomy.Constellation;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 import com.nettakrim.spyglass_astronomy.OrbitingBody;
+import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
@@ -16,6 +17,7 @@ public class NameSelectedCommand implements Command<FabricClientCommandSource> {
         String name = SpyglassAstronomyCommands.getMessageText(context);
         name = name.replace("|", "");
         name = name.replaceAll("^ +| +$|( )+", "$1"); //remove double spaces
+        SpaceDataManager.makeChange();
 
         if (Constellation.selected != null) {
             if (Constellation.selected.name.equals("Unnamed")) {
