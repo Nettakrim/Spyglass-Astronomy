@@ -13,19 +13,19 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 public class AdminCommand {
     public static int setStarCount(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.setStarCount(IntegerArgumentType.getInteger(context, "amount"));
-        SpyglassAstronomyClient.generateStars(null);
+        SpyglassAstronomyClient.generateStars(null, true);
         return 1;
     }
 
     public static int setStarSeed(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.setStarSeed(LongArgumentType.getLong(context, "seed"));
-        SpyglassAstronomyClient.generateStars(null);
+        SpyglassAstronomyClient.generateStars(null, true);
         return 1;
     }
 
     public static int setPlanetSeed(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.setPlanetSeed(LongArgumentType.getLong(context, "seed"));
-        SpyglassAstronomyClient.generatePlanets(null);
+        SpyglassAstronomyClient.generatePlanets(null, true);
         return 1;
     }    
 
@@ -41,7 +41,7 @@ public class AdminCommand {
 
     public static int discardUnsavedChanges(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.loadData();
-        SpyglassAstronomyClient.generateSpace();
+        SpyglassAstronomyClient.generateSpace(true);
         return 1;
     }
 

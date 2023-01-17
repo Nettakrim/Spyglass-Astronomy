@@ -74,29 +74,35 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         world = clientWorld;
 
+        stars = new ArrayList<Star>();
+        constellations = new ArrayList<Constellation>();
+        orbitingBodies = new ArrayList<OrbitingBody>();
+
         spaceDataManager = new SpaceDataManager(clientWorld);
 
-        generateSpace();
+        generateSpace(false);
     }
 
-    public static void generateSpace() {
+    public static void generateSpace(boolean reset) {
         Random random = Random.create(0);
-        generateStars(random);
-        generatePlanets(random);
+        generateStars(random, reset);
+        generatePlanets(random, reset);
 
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.updateSpace(0);
     }
 
-    public static void generateStars(Random random) {
+    public static void generateStars(Random random, boolean reset) {
         if (random == null) {
             random = Random.create(spaceDataManager.getStarSeed());
         } else {
             random.setSeed(spaceDataManager.getStarSeed());
         }
 
-        stars = new ArrayList<>();
-        constellations = new ArrayList<>();
+        if (reset) {
+            stars = new ArrayList<Star>();
+            constellations = new ArrayList<Constellation>();
+        }
 
         int currentStars = 0;
         while (currentStars < starCount) {
@@ -151,14 +157,16 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager.loadStarDatas();
     }
 
-    public static void generatePlanets(Random random) {
+    public static void generatePlanets(Random random, boolean reset) {
         if (random == null) {
             random = Random.create(spaceDataManager.getPlanetSeed());
         } else {
             random.setSeed(spaceDataManager.getPlanetSeed());
         }
         
-        orbitingBodies = new ArrayList<OrbitingBody>();
+        if (reset) {
+            orbitingBodies = new ArrayList<OrbitingBody>();
+        }
 
         //always atleast 5 planets, and always atleast 2 outer planets, inner planets not guaranteed
         //between 0 and 3 inner planets
