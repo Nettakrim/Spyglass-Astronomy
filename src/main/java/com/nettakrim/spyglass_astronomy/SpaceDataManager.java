@@ -86,14 +86,8 @@ public class SpaceDataManager {
                         }
                         break;
                     case 2:
-                        Constellation constellation = new Constellation();
                         String[] parts = s.split(" \\| ");
-                        constellation.name = parts[0];
-                        String lines = parts[1];
-                        for (int x = 0; x < lines.length(); x+=5) {
-                            constellation.addLine(decodeStarLine(decoder, lines.substring(x, x+5)));
-                        }
-                        SpyglassAstronomyClient.constellations.add(constellation);
+                        SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, parts[0], parts[1]));
                         break;
                     case 3:
                         int starSplit = s.indexOf(' ');
@@ -132,10 +126,7 @@ public class SpaceDataManager {
             Encoder encoder = Base64.getEncoder();
             for (Constellation constellation : SpyglassAstronomyClient.constellations) {
                 s.append('\n');
-                s.append(constellation.name+" | ");
-                for (StarLine line : constellation.getLines()) {
-                    s.append(encodeStarLine(encoder, line.getStars()));
-                }
+                s.append(encodeConstellation(encoder, constellation));
             }
             s.append("\n---");
             int lastIndex = 0;
@@ -165,7 +156,18 @@ public class SpaceDataManager {
         }
     }
 
-    public String encodeStarLine(Encoder encoder, Star[] stars) {
+    public static String encodeConstellation(Encoder encoder, Constellation constellation) {
+        if (encoder == null) {
+            encoder = Base64.getEncoder();
+        }
+        String encodedConstellation = constellation.name+" | ";
+        for (StarLine line : constellation.getLines()) {
+            encodedConstellation += encodeStarLine(encoder, line.getStars());
+        }
+        return encodedConstellation;
+    }
+
+    private static String encodeStarLine(Encoder encoder, Star[] stars) {
         int starA = stars[0].index;
         int starB = stars[1].index;
         int combined = starA + (starB << 12);
@@ -175,7 +177,19 @@ public class SpaceDataManager {
         return encoder.encodeToString(array).substring(1,6);
     }
 
-    public StarLine decodeStarLine(Decoder decoder, String s) {
+    public static Constellation decodeConstellation(Decoder decoder, String name, String lines) {
+        if (decoder == null) {
+            decoder = Base64.getDecoder();
+        }
+        Constellation constellation = new Constellation();
+        constellation.name = name;
+        for (int x = 0; x < lines.length(); x+=5) {
+            constellation.addLine(decodeStarLine(decoder, lines.substring(x, x+5)));
+        }
+        return constellation;
+    }
+
+    private static StarLine decodeStarLine(Decoder decoder, String s) {
         byte[] array = decoder.decode("A"+s+"==");
         ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
         bb.put(array);

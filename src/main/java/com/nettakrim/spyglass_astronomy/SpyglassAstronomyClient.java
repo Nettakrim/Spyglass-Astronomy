@@ -393,7 +393,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (potentialNew != null) {
                 say(String.format("Removing Line split Constellation \"%s\" into two", target.name));
             }
-            if (target.getLines().size() == 0) constellations.remove(target);
+            if (target.getLines().size() == 0) {
+                say(String.format("Removed Constellation \"%s\"", target.name));
+                constellations.remove(target);
+            }
         } else {
             constellations.add(drawingConstellation);
         }
@@ -521,6 +524,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (!clear && Constellation.selected == null && oldSelected != null) {
             oldSelected.select();
         }
+    }
+
+    public static void say(Text text) {
+        client.player.sendMessage(text);
     }
 
     public static void say(String message) {

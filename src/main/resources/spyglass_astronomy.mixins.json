@@ -12,7 +12,8 @@
     "InGameHudMixin",
     "MinecraftClientMixin",
     "BiomeAccessAccessor",
-    "GameRendererMixin"
+    "GameRendererMixin",
+    "ChatHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
