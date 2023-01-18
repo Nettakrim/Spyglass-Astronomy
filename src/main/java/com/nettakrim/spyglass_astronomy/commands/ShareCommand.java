@@ -56,17 +56,19 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Star star) {
-        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Star \"%s\"", star.name))
+        String starName = (star.name == null ? "Unnamed" : star.name);
+        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Star \"%s\"", starName))
         .setStyle(Style.EMPTY.withClickEvent(
-            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:s_"+star.name+"|"+Integer.toString(star.index)+"|")
+            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:s_"+starName+"|"+Integer.toString(star.index)+"|")
         ));
         SpyglassAstronomyClient.say(text);
     }
 
     public static void share(OrbitingBody orbitingBody) {
-        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Planet \"%s\"", orbitingBody.name))
+        String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
+        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Planet \"%s\"", orbitingBodyName))
         .setStyle(Style.EMPTY.withClickEvent(
-            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:p_"+orbitingBody.name+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|")
+            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|")
         ));
         SpyglassAstronomyClient.say(text);
     }

@@ -53,11 +53,13 @@ public class AdminCommand {
         for (Constellation targetConstellation : SpyglassAstronomyClient.constellations) {
             for (StarLine line : constellation.getLines()) {
                 if (targetConstellation.lineIntersects(line)) {
-                    SpyglassAstronomyClient.say(String.format("Cannot add new Constellation: collision with Constellation \"%s\"", targetConstellation.name));
+                    SpyglassAstronomyClient.say(String.format("Cannot add new Constellation \"%s\": collision with \"%s\"",constellation.name, targetConstellation.name));
                     return -1;
                 }
             }
         }
+        SpyglassAstronomyClient.say(String.format("Added new Constellation \"%s\"", constellation.name));
+        constellation.select();
         SpyglassAstronomyClient.constellations.add(constellation);
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
         return 1;

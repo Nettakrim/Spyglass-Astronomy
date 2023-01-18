@@ -58,32 +58,32 @@ public class NameCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void name(Constellation constellation, String name) {
-        if (Constellation.selected.name.equals("Unnamed")) {
+        if (constellation.name.equals("Unnamed")) {
             SpyglassAstronomyClient.say(String.format("Named new Constellation \"%s\"", name));
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Constellation \"%s\" to \"%s\"", Constellation.selected.name, name));
+            SpyglassAstronomyClient.say(String.format("Renamed Constellation \"%s\" to \"%s\"", constellation.name, name));
         }
-
-        Constellation.selected.name = name;
+        constellation.name = name;
+        constellation.select();
     }
 
     public static void name(Star star, String name) {
-        if (Star.selected.name == null) {
+        if (star.name == null) {
             SpyglassAstronomyClient.say(String.format("Named Star \"%s\"", name));
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Star \"%s\" to \"%s\"", Star.selected.name, name));
+            SpyglassAstronomyClient.say(String.format("Renamed Star \"%s\" to \"%s\"", star.name, name));
         }
-
-        Star.selected.name = name;
+        star.name = name;
+        star.select();
     }
 
     public static void name(OrbitingBody orbitingBody, String name) {
-        if (OrbitingBody.selected.name == null) {
+        if (orbitingBody.name == null) {
             SpyglassAstronomyClient.say(String.format("Named Planet \"%s\"", name));
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Planet \"%s\" to \"%s\"", OrbitingBody.selected.name, name));
+            SpyglassAstronomyClient.say(String.format("Renamed Planet \"%s\" to \"%s\"", orbitingBody.name, name));
         }
-
-        OrbitingBody.selected.name = name;
+        orbitingBody.name = name;
+        orbitingBody.select();
     }
 }

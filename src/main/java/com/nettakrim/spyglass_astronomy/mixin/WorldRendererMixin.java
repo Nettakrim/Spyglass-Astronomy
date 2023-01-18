@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
+import com.nettakrim.spyglass_astronomy.SpaceRenderingManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.gl.VertexBuffer;
@@ -25,7 +26,9 @@ public class WorldRendererMixin {
         at = @At(value = "INVOKE", ordinal = 1, target="Lnet/minecraft/client/gl/VertexBuffer;draw(Lnet/minecraft/util/math/Matrix4f;Lnet/minecraft/util/math/Matrix4f;Lnet/minecraft/client/render/Shader;)V")
     )
 	private void stopStarRender(VertexBuffer buffer, Matrix4f positionMatrix, Matrix4f projectionMatrix, Shader positionShader) {
-        return;
+        if (SpaceRenderingManager.oldStarsVisible) {
+            buffer.draw(positionMatrix, projectionMatrix, positionShader);
+        }
     }
 
     @Inject(

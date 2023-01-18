@@ -55,6 +55,8 @@ public class SpyglassAstronomyCommands {
             registerShareNode(root);
 
             registerAdminNode(root);
+
+            registerHideNode(root);
         });
     }
 
@@ -151,6 +153,10 @@ public class SpyglassAstronomyCommands {
         )
         .build();
 
+        LiteralCommandNode<FabricClientCommandSource> renameNode = ClientCommandManager
+        .literal("sga:rename")
+        .build();
+
         LiteralCommandNode<FabricClientCommandSource> constellationNameNode = ClientCommandManager
         .literal("constellation")
         .then(
@@ -185,9 +191,10 @@ public class SpyglassAstronomyCommands {
         .build();
 
         root.addChild(nameNode);
-        nameNode.addChild(constellationNameNode);
-        nameNode.addChild(starNameNode);
-        nameNode.addChild(orbitingBodyNameNode);
+        root.addChild(renameNode);
+        renameNode.addChild(constellationNameNode);
+        renameNode.addChild(starNameNode);
+        renameNode.addChild(orbitingBodyNameNode);
     }
 
     public static void registerShareNode(RootCommandNode<FabricClientCommandSource> root) {
@@ -297,6 +304,40 @@ public class SpyglassAstronomyCommands {
         adminNode.addChild(discardNode);
         adminNode.addChild(addNode);
         addNode.addChild(addConstellationNode);
+    }
+
+    public static void registerHideNode(RootCommandNode<FabricClientCommandSource> root) {
+        LiteralCommandNode<FabricClientCommandSource> hideNode = ClientCommandManager
+        .literal("sga:hide")
+        .executes(new HideCommand())
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> constellationsHideNode = ClientCommandManager
+        .literal("constellations")
+        .executes(HideCommand::hideConstellations)
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> starsHideNode = ClientCommandManager
+        .literal("stars")
+        .executes(HideCommand::hideStars)
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodiesHideNode = ClientCommandManager
+        .literal("planets")
+        .executes(HideCommand::hideOrbitingBodies)
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> oldStarsHideNode = ClientCommandManager
+        .literal("vanillastars")
+        .executes(HideCommand::hideOldStars)
+        .build();
+
+
+        root.addChild(hideNode);
+        hideNode.addChild(constellationsHideNode);
+        hideNode.addChild(starsHideNode);
+        hideNode.addChild(orbitingBodiesHideNode);
+        hideNode.addChild(oldStarsHideNode);
     }
 
     public static Constellation getConstellation(CommandContext<FabricClientCommandSource> context) {

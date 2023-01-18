@@ -10,8 +10,10 @@ import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
@@ -36,10 +38,11 @@ public class ChatHudMixin {
                 String constellationName = data.substring(2, firstIndex);
                 String constellationData = data.substring(firstIndex+1, secondIndex);
 
-                Text constellationText = Text.literal(String.format("[Spyglass Astronomy] Click Here to add Constellation \"%s\"", constellationName))
-                .setStyle(Style.EMPTY.withClickEvent(
-                    new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sga:admin add constellation "+constellationData+" "+constellationName)
-                ));
+                Text constellationText = getClickHere(
+                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Constellation \"%s\"", constellationName),
+                    "/sga:admin add constellation "+constellationData+" "+constellationName
+                );
+                
                 SpyglassAstronomyClient.say(constellationText);
                 break;
             case 's':
@@ -48,10 +51,11 @@ public class ChatHudMixin {
                 String starName = data.substring(2, firstIndex);
                 int starIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
 
-                Text starText = Text.literal(String.format("[Spyglass Astronomy] Click Here to add Star \"%s\"", starName))
-                .setStyle(Style.EMPTY.withClickEvent(
-                    new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sga:name star "+Integer.toString(starIndex)+" "+starName)
-                ));
+                Text starText = getClickHere(
+                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Star \"%s\"", starName),
+                    "/sga:rename star "+Integer.toString(starIndex)+" "+starName
+                );
+                
                 SpyglassAstronomyClient.say(starText);
                 break;
             case 'p':
@@ -60,12 +64,33 @@ public class ChatHudMixin {
                 String orbitingBodyName = data.substring(2, firstIndex);
                 int orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
 
-                Text orbitingBodyText = Text.literal(String.format("[Spyglass Astronomy] Click Here to add Planet \"%s\"", orbitingBodyName))
-                .setStyle(Style.EMPTY.withClickEvent(
-                    new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sga:name planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName)
-                ));
+                Text orbitingBodyText = getClickHere(
+                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Planet \"%s\"", orbitingBodyName),
+                    "/sga:rename planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName
+                );
+
                 SpyglassAstronomyClient.say(orbitingBodyText);
                 break;           
         }
+    }
+
+    private Text getClickHere(String formatText, String command) {
+        String[] parts = formatText.split("\\|");
+
+        MutableText text = Text.literal("");
+        for (String string : parts) {
+            if (string.charAt(0) == '/') {
+                text.append(Text.literal(string.substring(1)).setStyle(Style.EMPTY
+                    .withClickEvent(
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
+                    )
+                    .withColor(Formatting.GREEN)
+                ));
+            } else {
+                text.append(Text.literal(string));
+            }
+        }
+        
+        return text;
     }
 }

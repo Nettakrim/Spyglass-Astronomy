@@ -23,7 +23,7 @@ public abstract class GameRendererMixin {
     private double getFov(double fov) {
         if (SpyglassAstronomyClient.zoom == 0) return fov;
 
-        if (!SpyglassAstronomyClient.client.player.isUsingSpyglass()) SpyglassAstronomyClient.zoom = 0;
+        if (!(SpyglassAstronomyClient.client.player.isUsingSpyglass() && SpyglassAstronomyClient.client.options.getPerspective().isFirstPerson())) SpyglassAstronomyClient.zoom = 0;
 
         float z = (float)Math.pow(1.25d, SpyglassAstronomyClient.zoom);
         return fov * z;
