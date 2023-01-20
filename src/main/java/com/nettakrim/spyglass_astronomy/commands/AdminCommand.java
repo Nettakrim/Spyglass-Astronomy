@@ -64,4 +64,10 @@ public class AdminCommand {
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
         return 1;
     }
+
+    public static int bypassKnowledge(CommandContext<FabricClientCommandSource> context) {
+        SpyglassAstronomyClient.knowledge.bypassKnowledge();
+        SpyglassAstronomyClient.say("Knowledge Checks bypassed, relog to reset");
+        return 1;
+    }
 }

@@ -254,6 +254,7 @@ public class SpaceDataManager {
 
     public static void makeChange() {
         changesMade = true;
+        SpyglassAstronomyClient.updateKnowledge();
     }
 
     public class StarData {

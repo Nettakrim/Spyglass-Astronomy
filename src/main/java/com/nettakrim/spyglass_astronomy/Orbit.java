@@ -11,6 +11,8 @@ public class Orbit {
     public final float rotation;
     public final float inclination;
 
+    public float lastLocalTime;
+
     //orbit speed scale, k = 1 means that a period of 1 lasts 1 minecraft day
     private final static double k = 1;
 
@@ -32,6 +34,7 @@ public class Orbit {
     }
 
     public Vec3f getLocalPositionAtLocalTime(float t) {
+        this.lastLocalTime = t;
         float f = getLocalAngleAtLocalTime(t);
         float cosAngle = MathHelper.cos(f);
         float scale = distance/(1+eccentricity*cosAngle);
@@ -47,5 +50,11 @@ public class Orbit {
     public void rotateLocalPosition(Vec3f vector) {
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(inclination));
         vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotation));
+    }
+
+    public Vec3f getLastRotatedPosition() {
+        Vec3f pos = getLocalPositionAtLocalTime(lastLocalTime);
+        rotateLocalPosition(pos);
+        return pos;
     }
 }

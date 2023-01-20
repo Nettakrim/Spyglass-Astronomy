@@ -34,6 +34,8 @@ public class OrbitingBody {
     public static OrbitingBody selected;
     private boolean isSelected;
 
+    public boolean isPlanet;
+
     public OrbitingBody(Orbit orbit, float size, float albedo, float rotationSpeed) {
         this.orbit = orbit;
         this.size = size;

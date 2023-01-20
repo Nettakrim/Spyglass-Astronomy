@@ -8,6 +8,7 @@ import com.nettakrim.spyglass_astronomy.Orbit;
 import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
+import com.nettakrim.spyglass_astronomy.Knowledge.Level;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.util.math.MathHelper;
@@ -52,52 +53,69 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     }
 
     private static void displayInfo(Constellation constellation) {
+        boolean[] flags = new boolean[2];
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(constellation.name);
         builder.append('\n');
 
         Vec3f position = constellation.getAveragePosition();
-        staticVisibilityInfo(builder, position);
+        staticVisibilityInfo(builder, position, flags);
+
+        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
+        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayInfo(Star star) {
+        boolean[] flags = new boolean[2];
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(star.name == null ? "Unnamed" : star.name);
         builder.append('\n');
 
         Vec3f position = star.getPositionAsVec3f();
-        staticVisibilityInfo(builder, position);
+        staticVisibilityInfo(builder, position, flags);
+
+        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
+        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayInfo(OrbitingBody orbitingBody) {
+        boolean[] flags = new boolean[2];
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
         builder.append('\n');
 
-        orbitInfo(builder, orbitingBody.orbit);
+        orbitInfo(builder, orbitingBody.orbit, flags);
+
+        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
+        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayEarthInfo() {
+        boolean[] flags = new boolean[2];
         StringBuilder builder = new StringBuilder();
         builder.append("Time: ");
         getMinecraftTime(builder);
         builder.append('\n');
 
-        orbitInfo(builder, SpyglassAstronomyClient.earthOrbit);
+        orbitInfo(builder, SpyglassAstronomyClient.earthOrbit, flags);
+
+        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
+        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
-    private static void staticVisibilityInfo(StringBuilder builder, Vec3f position) {
+    private static void staticVisibilityInfo(StringBuilder builder, Vec3f position, boolean[] flags) {
         SpyglassAstronomyClient.LOGGER.info(position.toString());
         position.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
         position.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
@@ -118,21 +136,80 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         } else {
             //builder.append("Always");
         }
-        builder.append("visibility info currently not functional");    
+        builder.append("visibility info currently not functional"); 
     }
 
-    private static void orbitInfo(StringBuilder builder, Orbit orbit) {
-        builder.append("Period: ");
-        prettyFloat(builder, orbit.period);
-        builder.append(" Days");
+    private static void orbitInfo(StringBuilder builder, Orbit orbit, boolean[] flags) {
+        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.NOVICE)) {
+            builder.append("Period: ");
+            prettyFloat(builder, orbit.period);
+            builder.append(" Days");
+        } else {
+            flags[0] = true;
+        }
 
-        builder.append('\n');
-        builder.append("Eccentricity: ");
-        prettyFloat(builder, orbit.eccentricity);
+        boolean isEarth = orbit == SpyglassAstronomyClient.earthOrbit;
 
-        builder.append('\n');
-        builder.append("Inclination: ");
-        prettyFloat(builder, orbit.inclination);
+        if (!isEarth) {
+            if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT)) {
+                float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+                float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+                // max/min is often 1 less iteration for getDenominator
+                double[] fraction = getFraction(max/min);
+
+                builder.append("\nResonance: ");
+                prettyFloat(builder, (float)(fraction[0] - fraction[1]));
+                builder.append(" Days");
+            } else {
+                flags[0] = true;
+            }
+        }
+
+        if ((isEarth && SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT)) || SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT)) {
+            builder.append("\nCurrent position in orbit: ");
+            builder.append((int)(orbit.lastLocalTime*100));
+            builder.append("%");
+        } else {
+            flags[isEarth ? 0 : 1] = true;
+        }
+
+        if (!isEarth) {
+            if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT)) {
+                builder.append("\nDistance: ");
+                Vec3f pos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
+                pos.subtract(orbit.getLastRotatedPosition());
+                float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.getX(), pos.getY(), pos.getZ());
+                prettyFloat(builder, MathHelper.sqrt(sqrDistance));
+                builder.append(" AU");
+            } else {
+                flags[1] = true;
+            }
+        }
+
+        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.MASTER)) {
+            builder.append("\nEccentricity: ");
+            prettyFloat(builder, orbit.eccentricity);
+
+            builder.append("\nInclination: ");
+            prettyFloat(builder, orbit.inclination);
+        } else {
+            flags[1] = true;
+        }
+    }
+
+    static private double[] getFraction(double x){
+        double tolerance = 1.0E-6;
+        double h1=1; double h2=0;
+        double k1=0; double k2=1;
+        double b = x;
+        do {
+            double a = Math.floor(b);
+            double aux = h1; h1 = a*h1+h2; h2 = aux;
+            aux = k1; k1 = a*k1+k2; k2 = aux;
+            b = 1/(b-a);
+        } while (Math.abs(x-h1/k1) > x*tolerance);
+
+        return new double[] {h1,k1};
     }
 
     private static void prettyFloat(StringBuilder builder, float f) {

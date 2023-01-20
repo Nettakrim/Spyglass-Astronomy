@@ -7,23 +7,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
+import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
 import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
-    @Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V")
-    public void onChat(Text message, int messageId, int timestamp, boolean refresh, CallbackInfo ci) {
-        String messageString = message.getString();
-        int sgaIndex = messageString.indexOf("sga:");
+    //@Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V")
+    //public void onChat(Text message, int messageId, int timestamp, boolean refresh, CallbackInfo ci) {
+    //mixin to addToMessageHistory instead of addMessage to avoid changes between 1.19 and 1.19.1
+    @Inject(at = @At("TAIL"), method = "addToMessageHistory(Ljava/lang/String;)V")
+    public void onChat(String message, CallbackInfo ci) {
+        int sgaIndex = message.indexOf("sga:");
         if (sgaIndex == -1) return;
         
-        String data = messageString.substring(sgaIndex+4);
+        String data = message.substring(sgaIndex+4);
         int firstIndex = data.indexOf("|");
         if (firstIndex == -1) return;
         int secondIndex = data.indexOf("|", firstIndex+1);
@@ -38,12 +37,12 @@ public class ChatHudMixin {
                 String constellationName = data.substring(2, firstIndex);
                 String constellationData = data.substring(firstIndex+1, secondIndex);
 
-                Text constellationText = getClickHere(
+                Text constellationText = SpyglassAstronomyCommands.getClickHere(
                     String.format("[Spyglass Astronomy] |/[Click Here]| to add Constellation \"%s\"", constellationName),
-                    "/sga:admin add constellation "+constellationData+" "+constellationName
+                    "/sga:admin add constellation "+constellationData+" "+constellationName,
+                    true
                 );
-                
-                SpyglassAstronomyClient.say(constellationText);
+                SpyglassAstronomyClient.say(constellationText, true);
                 break;
             case 's':
                 //star shared with sga:s_Name|index|
@@ -51,12 +50,12 @@ public class ChatHudMixin {
                 String starName = data.substring(2, firstIndex);
                 int starIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
 
-                Text starText = getClickHere(
+                Text starText = SpyglassAstronomyCommands.getClickHere(
                     String.format("[Spyglass Astronomy] |/[Click Here]| to add Star \"%s\"", starName),
-                    "/sga:rename star "+Integer.toString(starIndex)+" "+starName
+                    "/sga:admin rename star "+Integer.toString(starIndex)+" "+starName,
+                    true
                 );
-                
-                SpyglassAstronomyClient.say(starText);
+                SpyglassAstronomyClient.say(starText, true);
                 break;
             case 'p':
                 //planets shared with sga:p_Name|index|
@@ -64,33 +63,13 @@ public class ChatHudMixin {
                 String orbitingBodyName = data.substring(2, firstIndex);
                 int orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
 
-                Text orbitingBodyText = getClickHere(
+                Text orbitingBodyText = SpyglassAstronomyCommands.getClickHere(
                     String.format("[Spyglass Astronomy] |/[Click Here]| to add Planet \"%s\"", orbitingBodyName),
-                    "/sga:rename planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName
+                    "/sga:admin rename planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName,
+                    true
                 );
-
-                SpyglassAstronomyClient.say(orbitingBodyText);
+                SpyglassAstronomyClient.say(orbitingBodyText, true);
                 break;           
         }
-    }
-
-    private Text getClickHere(String formatText, String command) {
-        String[] parts = formatText.split("\\|");
-
-        MutableText text = Text.literal("");
-        for (String string : parts) {
-            if (string.charAt(0) == '/') {
-                text.append(Text.literal(string.substring(1)).setStyle(Style.EMPTY
-                    .withClickEvent(
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)
-                    )
-                    .withColor(Formatting.GREEN)
-                ));
-            } else {
-                text.append(Text.literal(string));
-            }
-        }
-        
-        return text;
     }
 }

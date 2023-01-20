@@ -10,8 +10,6 @@ import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 public class ShareCommand implements Command<FabricClientCommandSource> {
@@ -48,28 +46,31 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Constellation constellation) {
-        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Constellation \"%s\"", constellation.name))
-        .setStyle(Style.EMPTY.withClickEvent(
-            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:c_"+(SpaceDataManager.encodeConstellation(null, constellation).replace(" | ", "|"))+"|")
-        ));
-        SpyglassAstronomyClient.say(text);
+        Text text = SpyglassAstronomyCommands.getClickHere(
+            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Constellation \"%s\"", constellation.name),
+            "sga:c_"+(SpaceDataManager.encodeConstellation(null, constellation).replace(" | ", "|"))+"|",
+            false
+        );
+        SpyglassAstronomyClient.say(text, false);
     }
 
     public static void share(Star star) {
         String starName = (star.name == null ? "Unnamed" : star.name);
-        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Star \"%s\"", starName))
-        .setStyle(Style.EMPTY.withClickEvent(
-            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:s_"+starName+"|"+Integer.toString(star.index)+"|")
-        ));
-        SpyglassAstronomyClient.say(text);
+        Text text = SpyglassAstronomyCommands.getClickHere(
+            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Star \"%s\"", starName),
+            "sga:s_"+starName+"|"+Integer.toString(star.index)+"|",
+            false
+        );
+        SpyglassAstronomyClient.say(text, false);
     }
 
     public static void share(OrbitingBody orbitingBody) {
         String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
-        Text text = Text.literal(String.format("[Spyglass Astronomy] Click Here to Share Planet \"%s\"", orbitingBodyName))
-        .setStyle(Style.EMPTY.withClickEvent(
-            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|")
-        ));
-        SpyglassAstronomyClient.say(text);
+        Text text = SpyglassAstronomyCommands.getClickHere(
+            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Planet \"%s\"", orbitingBody),
+            "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|",
+            false
+        );
+        SpyglassAstronomyClient.say(text, false);
     }
 }

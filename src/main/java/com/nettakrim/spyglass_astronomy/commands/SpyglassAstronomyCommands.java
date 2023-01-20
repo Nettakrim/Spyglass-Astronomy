@@ -19,6 +19,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.command.argument.MessageArgumentType.MessageFormat;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class SpyglassAstronomyCommands {
     public static SuggestionProvider<FabricClientCommandSource> constellations = (context, builder) -> {
@@ -153,48 +158,7 @@ public class SpyglassAstronomyCommands {
         )
         .build();
 
-        LiteralCommandNode<FabricClientCommandSource> renameNode = ClientCommandManager
-        .literal("sga:rename")
-        .build();
-
-        LiteralCommandNode<FabricClientCommandSource> constellationNameNode = ClientCommandManager
-        .literal("constellation")
-        .then(
-            ClientCommandManager.argument("index", IntegerArgumentType.integer())
-            .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
-                .executes(NameCommand::nameConstellation)
-            )
-        )
-        .build();
-
-        LiteralCommandNode<FabricClientCommandSource> starNameNode = ClientCommandManager
-        .literal("star")
-        .then(
-            ClientCommandManager.argument("index", IntegerArgumentType.integer())
-            .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
-                .executes(NameCommand::nameStar)
-            )
-        )
-        .build();        
-
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodyNameNode = ClientCommandManager
-        .literal("planet")
-        .then(
-            ClientCommandManager.argument("index", IntegerArgumentType.integer())
-            .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
-                .executes(NameCommand::nameOrbitingBody)
-            )
-        )
-        .build();
-
         root.addChild(nameNode);
-        root.addChild(renameNode);
-        renameNode.addChild(constellationNameNode);
-        renameNode.addChild(starNameNode);
-        renameNode.addChild(orbitingBodyNameNode);
     }
 
     public static void registerShareNode(RootCommandNode<FabricClientCommandSource> root) {
@@ -250,6 +214,53 @@ public class SpyglassAstronomyCommands {
         )
         .build();
 
+        LiteralCommandNode<FabricClientCommandSource> setStarCountNode = ClientCommandManager
+        .literal("setstarcount")
+        .then(
+            ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4096))
+            .executes(AdminCommand::setStarCount)
+        )
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
+        .literal("discardchanges")
+        .executes(AdminCommand::discardUnsavedChanges)
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> bypassNode = ClientCommandManager
+        .literal("bypassknowledge")
+        .executes(AdminCommand::bypassKnowledge)
+        .build();        
+
+        root.addChild(adminNode);
+        adminNode.addChild(removeNode);
+        adminNode.addChild(setStarCountNode);
+        adminNode.addChild(discardNode);
+        adminNode.addChild(bypassNode);
+
+        registerAdminSetSeedNode(adminNode);
+
+        registerAdminRenameNode(adminNode);
+    }
+
+    public static void registerAdminAddNode(LiteralCommandNode<FabricClientCommandSource> node) {
+        LiteralCommandNode<FabricClientCommandSource> addNode = ClientCommandManager
+        .literal("add")
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> addConstellationNode = ClientCommandManager
+        .literal("constellation")
+        .then(
+            ClientCommandManager.argument("data", MessageArgumentType.message())
+            .executes(AdminCommand::addConstellation)
+        )
+        .build();
+
+        node.addChild(addNode);
+        addNode.addChild(addConstellationNode);
+    }
+
+    public static void registerAdminSetSeedNode(LiteralCommandNode<FabricClientCommandSource> node) {
         LiteralCommandNode<FabricClientCommandSource> setSeedNode = ClientCommandManager
         .literal("setseed")
         .build();
@@ -270,40 +281,54 @@ public class SpyglassAstronomyCommands {
         )
         .build();
 
-        LiteralCommandNode<FabricClientCommandSource> setStarCountNode = ClientCommandManager
-        .literal("setstarcount")
-        .then(
-            ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4096))
-            .executes(AdminCommand::setStarCount)
-        )
-        .build();
-    
-        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
-        .literal("discardChanges")
-        .executes(AdminCommand::discardUnsavedChanges)
-        .build();
-        
-        LiteralCommandNode<FabricClientCommandSource> addNode = ClientCommandManager
-        .literal("add")
-        .build();
-
-        LiteralCommandNode<FabricClientCommandSource> addConstellationNode = ClientCommandManager
-        .literal("constellation")
-        .then(
-            ClientCommandManager.argument("data", MessageArgumentType.message())
-            .executes(AdminCommand::addConstellation)
-        )
-        .build();
-
-        root.addChild(adminNode);
-        adminNode.addChild(removeNode);
-        adminNode.addChild(setSeedNode);
+        node.addChild(setSeedNode);
         setSeedNode.addChild(setStarSeedNode);
         setSeedNode.addChild(setPlanetSeedNode);
-        adminNode.addChild(setStarCountNode);
-        adminNode.addChild(discardNode);
-        adminNode.addChild(addNode);
-        addNode.addChild(addConstellationNode);
+    }
+
+
+    public static void registerAdminRenameNode(LiteralCommandNode<FabricClientCommandSource> node) {
+        LiteralCommandNode<FabricClientCommandSource> renameNode = ClientCommandManager
+        .literal("rename")
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> constellationNameNode = ClientCommandManager
+        .literal("constellation")
+        .then(
+            ClientCommandManager.argument("index", IntegerArgumentType.integer())
+            .then(
+                ClientCommandManager.argument("name", StringArgumentType.string())
+                .executes(NameCommand::nameConstellation)
+            )
+        )
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> starNameNode = ClientCommandManager
+        .literal("star")
+        .then(
+            ClientCommandManager.argument("index", IntegerArgumentType.integer())
+            .then(
+                ClientCommandManager.argument("name", StringArgumentType.string())
+                .executes(NameCommand::nameStar)
+            )
+        )
+        .build();        
+
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodyNameNode = ClientCommandManager
+        .literal("planet")
+        .then(
+            ClientCommandManager.argument("index", IntegerArgumentType.integer())
+            .then(
+                ClientCommandManager.argument("name", StringArgumentType.string())
+                .executes(NameCommand::nameOrbitingBody)
+            )
+        )
+        .build();
+
+        node.addChild(renameNode);
+        renameNode.addChild(constellationNameNode);
+        renameNode.addChild(starNameNode);
+        renameNode.addChild(orbitingBodyNameNode);
     }
 
     public static void registerHideNode(RootCommandNode<FabricClientCommandSource> root) {
@@ -381,5 +406,25 @@ public class SpyglassAstronomyCommands {
         //a lot of digging through #SayCommand to make a MessageArgumentType that works clientside
         MessageFormat messageFormat = (MessageFormat)context.getArgument(name, MessageFormat.class);
         return messageFormat.getContents();
+    }
+
+    public static Text getClickHere(String formatText, String command, boolean run) {
+        String[] parts = formatText.split("\\|");
+
+        MutableText text = Text.literal("");
+        for (String string : parts) {
+            if (string.charAt(0) == '/') {
+                text.append(Text.literal(string.substring(1)).setStyle(Style.EMPTY
+                    .withClickEvent(
+                        new ClickEvent(run ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command)
+                    )
+                    .withColor(Formatting.GREEN)
+                ));
+            } else {
+                text.append(Text.literal(string));
+            }
+        }
+        
+        return text;
     }
 }

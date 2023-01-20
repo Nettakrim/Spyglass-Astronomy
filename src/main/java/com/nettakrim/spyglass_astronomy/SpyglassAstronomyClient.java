@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
@@ -54,6 +55,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static float zoom;
 
+    private static Stack<Text> sayBuffer = new Stack<Text>();
+
+    public static Knowledge knowledge;
+
 	@Override
 	public void onInitializeClient() {
         client = MinecraftClient.getInstance();
@@ -81,6 +86,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager = new SpaceDataManager(clientWorld);
 
         generateSpace(false);
+
+        knowledge = new Knowledge();
+        updateKnowledge();
     }
 
     public static void generateSpace(boolean reset) {
@@ -287,6 +295,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             updateHover();
         }
         lastToggle = toggle;
+
+        while (!sayBuffer.empty()) {
+            say(sayBuffer.pop(), false);
+        }
     }
 
     private static void updateHover() {
@@ -534,8 +546,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    public static void say(Text text) {
-        client.player.sendMessage(text);
+    public static void say(Text text, boolean buffer) {
+        if (buffer) {
+            sayBuffer.add(text);
+        } else {
+            client.player.sendMessage(text);
+        }
     }
 
     public static void say(String message) {
@@ -551,6 +567,11 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static void sayActionBar(String message) {
         Text text = Text.of(message);
         client.player.sendMessage(text, true);        
+    }
+
+    public static void updateKnowledge() {
+        knowledge.updateStarKnowledge(constellations, stars);
+        knowledge.updateOrbitKnowledge(orbitingBodies, orbitingBodies.size(), 0);
     }
 
     public static String getMoonPhaseName(int phase) {

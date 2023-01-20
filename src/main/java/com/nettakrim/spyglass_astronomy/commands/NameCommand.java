@@ -63,6 +63,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Constellation \"%s\" to \"%s\"", constellation.name, name));
         }
+        SpaceDataManager.makeChange();
         constellation.name = name;
         constellation.select();
     }
@@ -73,6 +74,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Star \"%s\" to \"%s\"", star.name, name));
         }
+        SpaceDataManager.makeChange();
         star.name = name;
         star.select();
     }
@@ -83,6 +85,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Planet \"%s\" to \"%s\"", orbitingBody.name, name));
         }
+        SpaceDataManager.makeChange();
         orbitingBody.name = name;
         orbitingBody.select();
     }
