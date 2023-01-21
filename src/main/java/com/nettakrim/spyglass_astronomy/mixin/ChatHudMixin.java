@@ -48,7 +48,12 @@ public class ChatHudMixin {
                 //star shared with sga:s_Name|index|
                 if (secondIndex == -1) return;
                 String starName = data.substring(2, firstIndex);
-                int starIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                int starIndex = -1;
+                try {
+                    starIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                } catch (Exception e) {
+                    break;
+                }
 
                 Text starText = SpyglassAstronomyCommands.getClickHere(
                     String.format("[Spyglass Astronomy] |/[Click Here]| to add Star \"%s\"", starName),
@@ -61,7 +66,12 @@ public class ChatHudMixin {
                 //planets shared with sga:p_Name|index|
                 if (secondIndex == -1) return;
                 String orbitingBodyName = data.substring(2, firstIndex);
-                int orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                int orbitingBodyIndex = -1;
+                try {
+                    orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                } catch (Exception e) {
+                    break;
+                }
 
                 Text orbitingBodyText = SpyglassAstronomyCommands.getClickHere(
                     String.format("[Spyglass Astronomy] |/[Click Here]| to add Planet \"%s\"", orbitingBodyName),

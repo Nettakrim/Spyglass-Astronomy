@@ -28,7 +28,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static boolean ready;
 
-    private static int starCount = 1024; //encoding will break at 4097, so stay at 4096 and below :)
+    private static int starCount = 1024; //encoding will break at 4096, so stay at 4095 and below :)
 
     public static MinecraftClient client;
     public static ClientWorld world;

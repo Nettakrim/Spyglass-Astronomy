@@ -113,7 +113,6 @@ public class SpyglassAstronomyCommands {
     public static void registerSelectNode(RootCommandNode<FabricClientCommandSource> root) {
         LiteralCommandNode<FabricClientCommandSource> selectNode = ClientCommandManager
         .literal("sga:select")
-        .executes(new InfoCommand())
         .build();
 
         LiteralCommandNode<FabricClientCommandSource> constellationSelectNode = ClientCommandManager
@@ -217,7 +216,7 @@ public class SpyglassAstronomyCommands {
         LiteralCommandNode<FabricClientCommandSource> setStarCountNode = ClientCommandManager
         .literal("setstarcount")
         .then(
-            ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4096))
+            ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4095))
             .executes(AdminCommand::setStarCount)
         )
         .build();
@@ -238,8 +237,8 @@ public class SpyglassAstronomyCommands {
         adminNode.addChild(discardNode);
         adminNode.addChild(bypassNode);
 
+        registerAdminAddNode(adminNode);
         registerAdminSetSeedNode(adminNode);
-
         registerAdminRenameNode(adminNode);
     }
 
