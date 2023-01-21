@@ -183,7 +183,8 @@ public class SpaceDataManager {
         }
         Constellation constellation = new Constellation();
         constellation.name = name;
-        for (int x = 0; x <= lines.length()-5; x+=5) {
+        int continueIf = lines.length()-5;
+        for (int x = 0; x <= continueIf; x+=5) {
             constellation.addLine(decodeStarLine(decoder, lines.substring(x, x+5)));
         }
         return constellation;

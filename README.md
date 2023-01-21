@@ -3,8 +3,9 @@ Explore a procedurally generated solar system through the lens of a spyglass!
 
 The mod is entirely client-side and designed for helping with worldbuilding and immersion, it is encouraged you think of lore about all the constellations you draw and planets you name!
 
-Planets and stars will be the same for all players on a particular world, and are generated randomly (and largely scientifically accurately) per world, and you can easily share constellations using client side-commands
+Planets and stars will be the same for all players on a particular world, and are generated randomly (and largely scientifically accurately) per world, and you can easily share constellations between players using a client-side command
 
+![Screenshot of some planets and constellations from atop a mountain](https://cdn-raw.modrinth.com/data/EdBSdqge/images/0162f7ffd5d6296f59d5ab30f3bc2cb80fe66dbd.png)
 # How to use
 
 To interact with the stars there are three spyglass modes: vanilla, constellation (amethyst), and star (emerald), these are cycled with the pick block button (middle click) while zoomed in.
