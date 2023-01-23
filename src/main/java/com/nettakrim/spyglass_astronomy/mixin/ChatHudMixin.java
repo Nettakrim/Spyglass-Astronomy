@@ -14,11 +14,9 @@ import net.minecraft.text.Text;
 
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
-    //@Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V")
-    //public void onChat(Text message, int messageId, int timestamp, boolean refresh, CallbackInfo ci) {
-    //mixin to addToMessageHistory instead of addMessage to avoid changes between 1.19 and 1.19.1
-    @Inject(at = @At("TAIL"), method = "addToMessageHistory(Ljava/lang/String;)V")
-    public void onChat(String message, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V")
+    public void onChat(Text messageText, int messageId, int timestamp, boolean refresh, CallbackInfo ci) {
+        String message = messageText.getString();
         int sgaIndex = message.indexOf("sga:");
         if (sgaIndex == -1) return;
         

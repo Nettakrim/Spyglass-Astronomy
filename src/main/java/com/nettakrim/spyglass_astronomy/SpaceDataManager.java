@@ -101,8 +101,10 @@ public class SpaceDataManager {
                         String orbitingBodyName = s.substring(orbitingBodySplit+1);
                         orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
                         break;
+                    case 5:
+                        SpyglassAstronomyClient.setStarCount(Integer.parseInt(s));
                 }
-            }           
+            }
             scanner.close();
             return true;
         } catch (IOException e) {
@@ -146,6 +148,8 @@ public class SpaceDataManager {
                 }
                 index++;
             }   
+            s.append("\n---\n");
+            s.append(SpyglassAstronomyClient.getStarCount());
             s.append("\n---");
 
             writer.write(s.toString());

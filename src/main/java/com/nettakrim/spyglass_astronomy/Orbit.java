@@ -10,13 +10,14 @@ public class Orbit {
     public final float distance;
     public final float rotation;
     public final float inclination;
+    public final float timeOffset;
 
     public float lastLocalTime;
 
     //orbit speed scale, k = 1 means that a period of 1 lasts 1 minecraft day
     private final static double k = 1;
 
-    public Orbit(double period, double eccentricity, float rotation, float inclination) {
+    public Orbit(double period, double eccentricity, float rotation, float inclination, float timeOffset) {
         double semiMajorAxis = Math.cbrt((period*period)/k);
         double distance = semiMajorAxis*(1-eccentricity*eccentricity);
         
@@ -27,6 +28,7 @@ public class Orbit {
 
         this.rotation = rotation;
         this.inclination = inclination;
+        this.timeOffset = timeOffset;
     }
 
     public float getLocalAngleAtLocalTime(float t) {
@@ -42,12 +44,13 @@ public class Orbit {
     }
 
     public Vec3f getRotatedPositionAtGlobalTime(Long day, float dayFraction) {
-        Vec3f pos = getLocalPositionAtLocalTime(((day%period)/period)+(dayFraction/period));
+        Vec3f pos = getLocalPositionAtLocalTime((((day%period)/period)+(dayFraction/period)+timeOffset)%1);
         rotateLocalPosition(pos);
         return pos;
     }
 
     public void rotateLocalPosition(Vec3f vector) {
+        //ascending node is always such that the highest and lowest points relative to the reference plane are the apoapsis and periapsis
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(inclination));
         vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotation));
     }

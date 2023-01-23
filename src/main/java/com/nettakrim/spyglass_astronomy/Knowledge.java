@@ -107,7 +107,8 @@ public class Knowledge {
         return a == Level.EXPERT && b == Level.ADEPT;
     }
 
-    public void bypassKnowledge() {
-        bypass = true;
+    public boolean bypassKnowledge() {
+        bypass = !bypass;
+        return bypass;
     }
 }

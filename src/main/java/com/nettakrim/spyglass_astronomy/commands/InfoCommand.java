@@ -79,10 +79,13 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         staticVisibilityInfo(builder, position, flags);
 
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.MASTER)) {
-            //most visible stars are within 1000 light years
+            //most visible stars are within 1000 light years, the stars index is used to add a bit of randomness to the distance
             float alpha = star.getAlpha();
+            int distance = (int)((1-alpha)*1000);
+            distance += star.index%100;
+            if (distance < 1) distance = 1;
             builder.append("\nDistance: ");
-            builder.append((int)((1-alpha)*999)+1);
+            builder.append(distance);
             builder.append(" LY");
         } else {
             flags[0] = true;

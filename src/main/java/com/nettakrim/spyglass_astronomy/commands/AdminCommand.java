@@ -14,18 +14,21 @@ public class AdminCommand {
     public static int setStarCount(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.setStarCount(IntegerArgumentType.getInteger(context, "amount"));
         SpyglassAstronomyClient.generateStars(null, true);
+        SpaceDataManager.makeChange();
         return 1;
     }
 
     public static int setStarSeed(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.setStarSeed(LongArgumentType.getLong(context, "seed"));
         SpyglassAstronomyClient.generateStars(null, true);
+        SpaceDataManager.makeChange();
         return 1;
     }
 
     public static int setPlanetSeed(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.setPlanetSeed(LongArgumentType.getLong(context, "seed"));
         SpyglassAstronomyClient.generatePlanets(null, true);
+        SpaceDataManager.makeChange();
         return 1;
     }    
 
@@ -36,12 +39,14 @@ public class AdminCommand {
         }
         SpyglassAstronomyClient.constellations.remove(constellation);
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        SpaceDataManager.makeChange();
         return 1;
     }
 
     public static int discardUnsavedChanges(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.spaceDataManager.loadData();
         SpyglassAstronomyClient.generateSpace(true);
+        SpaceDataManager.makeChange();
         return 1;
     }
 
@@ -62,12 +67,16 @@ public class AdminCommand {
         constellation.select();
         SpyglassAstronomyClient.constellations.add(constellation);
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        SpaceDataManager.makeChange();
         return 1;
     }
 
     public static int bypassKnowledge(CommandContext<FabricClientCommandSource> context) {
-        SpyglassAstronomyClient.knowledge.bypassKnowledge();
-        SpyglassAstronomyClient.say("Knowledge Checks bypassed, relog to reset");
+        if (SpyglassAstronomyClient.knowledge.bypassKnowledge()) {
+            SpyglassAstronomyClient.say("Knowledge Checks bypassed, run again to reset");    
+        } else {
+            SpyglassAstronomyClient.say("Knowledge Checks reenabled");
+        }
         return 1;
     }
 }
