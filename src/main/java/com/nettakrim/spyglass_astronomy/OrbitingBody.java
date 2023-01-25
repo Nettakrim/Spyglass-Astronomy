@@ -11,13 +11,14 @@ public class OrbitingBody {
     public final Orbit orbit;
     private ArrayList<OrbitingBody> moons;
 
-    private Vec3f lastPosition = new Vec3f();
-
     private final float size;
     private final float albedo;
     private final float rotationSpeed;
     public final boolean isPlanet;
     private final int decoration;
+    private final int[] mainColor;
+    private final int[] secondaryColor;
+    public final OrbitingBodyType type;
 
     private float angle;
     private int currentAlpha;
@@ -40,13 +41,16 @@ public class OrbitingBody {
     public static OrbitingBody selected;
     private boolean isSelected;
 
-    public OrbitingBody(Orbit orbit, float size, float albedo, float rotationSpeed, boolean isPlanet, int decoration) {
+    public OrbitingBody(Orbit orbit, float size, float albedo, float rotationSpeed, boolean isPlanet, int decoration, int[] mainColor, int[] secondaryColor, OrbitingBodyType type) {
         this.orbit = orbit;
         this.size = size;
         this.albedo = albedo;
         this.rotationSpeed = rotationSpeed * 0.1f;
         this.isPlanet = isPlanet;
         this.decoration = decoration;
+        this.mainColor = mainColor;
+        this.secondaryColor = secondaryColor;
+        this.type = type;
     }
 
     public void addMoon(OrbitingBody moon) {
@@ -67,38 +71,51 @@ public class OrbitingBody {
         float inverseSqrt = MathHelper.fastInverseSqrt(sqrDistance);
         position.scale(inverseSqrt);
 
-        float distanceSinceLastCalculation = SpyglassAstronomyClient.getSquaredDistance(position.getX()-lastPosition.getX(), position.getY()-lastPosition.getY(), position.getZ()-lastPosition.getZ());
-        float distanceScale = MathHelper.clamp(MathHelper.sqrt(100*inverseSqrt), 0.5f, 10f);
-        if (distanceSinceLastCalculation > 0.001f) {
-            axis1 = lastPosition.copy();
+        float distance = (1/inverseSqrt)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis;
+
+        float visibilityScale = Math.min(MathHelper.sqrt(distance),8);
+
+        { //this isnt needed to run every frame
+            axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/100));
+            axis1.subtract(referencePosition);
+            axis1.normalize();
             axis1.subtract(position);
             axis1.normalize();
-            Quaternion rotation = position.getDegreesQuaternion(90);
+
             axis2 = axis1.copy();
-            axis2.rotate(rotation);
+            axis2.rotate(position.getDegreesQuaternion(90));
         
-            float distanceSizeScale = size * Math.min(distanceScale,2f) * Math.min((similarity+1f),0.5f);
-            axis1.scale(distanceSizeScale);
-            axis2.scale(distanceSizeScale);
+            float sizeScale = MathHelper.clamp(
+                (size/visibilityScale)*3,
+            0.25f,1.5f);
 
-            lastPosition = position.copy();
+            axis1.scale(sizeScale);
+            axis2.scale(sizeScale);
         }
+        
+        float heightScale = SpaceRenderingManager.getHeightScale();
+        float heightFactor = 1;
 
-        float heightScale = SpaceRenderingManager.getHeightScale() + 0.5f;
-        float alphaRaw = (albedo * (12*distanceScale*heightScale + 135*heightScale)) * Math.min((similarity+1),1f);
-        float distanceHeightProportion = Math.min(distanceScale-0.5f,3f)/3f;
-        alphaRaw = (1-distanceHeightProportion)*Math.max(2*alphaRaw-1,0) + distanceHeightProportion*alphaRaw;
-        currentAlpha = Math.min((int)alphaRaw,255);
+        float alphaRaw = Math.max(((
+                    Math.min(
+                        albedo*10*heightScale-visibilityScale+heightFactor,
+                        1
+                    )+heightScale
+                )/2
+            ),
+            0
+        );
+        if (similarity < -0.5) {
+            float offsetSimilarity = 2*(similarity+0.5f);
+            alphaRaw *= 1-offsetSimilarity*offsetSimilarity;
+        }
+        currentAlpha = (int)(alphaRaw*255);
 
         Quaternion rotation = position.getDegreesQuaternion(angle);
         Vec3f rotatedAxis1 = axis1.copy();
         Vec3f rotatedAxis2 = axis2.copy();
         rotatedAxis1.rotate(rotation);
         rotatedAxis2.rotate(rotation);
-        if (!isPlanet) {
-            rotatedAxis1.scale(0.5f);
-            rotatedAxis2.scale(0.5f);
-        }
 
         float x = position.getX()*100;
         float y = position.getY()*100;
@@ -179,7 +196,7 @@ public class OrbitingBody {
             quad2vertex4.add(axis1);
 
             Vec3f trailWidth = axis2.copy();
-            trailWidth.scale(0.5f);
+            trailWidth.scale(0.75f);
 
             if (decoration != 0) {
                 quad2vertex1.add(trailWidth);
@@ -194,58 +211,61 @@ public class OrbitingBody {
 
     public void setVertices(BufferBuilder bufferBuilder) {
         int colorMult = isSelected ? 1 : 0;
-        int r = 255 >> colorMult;
-        int g = 255;
-        int b = 255 >> colorMult;
+        int r1 = mainColor[0] >> colorMult;
+        int g1 = mainColor[1];
+        int b1 = mainColor[2] >> colorMult;
+        int r2 = secondaryColor[0] >> colorMult;
+        int g2 = secondaryColor[1];
+        int b2 = secondaryColor[2] >> colorMult;        
         int decorationAlpha = currentAlpha/3;
 
         bufferBuilder.vertex(
             quad1vertex1.getX(),
             quad1vertex1.getY(),
             quad1vertex1.getZ()
-        ).color(r, g, b, currentAlpha).next();
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex2.getX(),
             quad1vertex2.getY(),
             quad1vertex2.getZ()
-        ).color(r, g, b, currentAlpha).next();
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex3.getX(),
             quad1vertex3.getY(),
             quad1vertex3.getZ()
-        ).color(r, g, b, currentAlpha).next();
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex4.getX(),
             quad1vertex4.getY(),
             quad1vertex4.getZ()
-        ).color(r, g, b, currentAlpha).next();
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad2vertex1.getX(),
             quad2vertex1.getY(),
             quad2vertex1.getZ()
-        ).color(r, g, b, isPlanet ? decorationAlpha : 0).next();
+        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
             quad2vertex2.getX(),
             quad2vertex2.getY(),
             quad2vertex2.getZ()
-        ).color(r, g, b, isPlanet ? decorationAlpha : 0).next();
+        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
             quad2vertex3.getX(),
             quad2vertex3.getY(),
             quad2vertex3.getZ()
-        ).color(r, g, b, decorationAlpha).next();
+        ).color(r2, g2, b2, decorationAlpha).next();
 
         bufferBuilder.vertex(
             quad2vertex4.getX(),
             quad2vertex4.getY(),
             quad2vertex4.getZ()
-        ).color(r, g, b, decorationAlpha).next();        
+        ).color(r2, g2, b2, decorationAlpha).next();        
     }
 
     public Vec3f getPosition() {
@@ -267,5 +287,37 @@ public class OrbitingBody {
     public static void deselect() {
         if (selected != null) selected.isSelected = false;
         selected = null;
+    }
+
+    public enum OrbitingBodyType {
+        //ordered roughly by rquired closeness to sun
+        TERRESTIAL,
+        HABITABLE,
+        OCEANPLANET,
+        ICEPLANET,
+        GASGIANT,
+        ICEGIANT,
+        COMET
+    }
+
+    public String getOrbitingBodyTypeName() {
+        switch (type) {
+            case TERRESTIAL:
+                return "Terrestial";
+            case HABITABLE:
+                return "Habitable";
+            case OCEANPLANET:
+                return "Ocean Planet";
+            case ICEPLANET:
+                return "Ice Planet";
+            case GASGIANT:
+                return "Gas Giant";
+            case ICEGIANT:
+                return "Ice Giant";
+            case COMET:
+                return "Comet";
+            default:
+                return "Unknown";
+        }
     }
 }

@@ -66,6 +66,13 @@ public class SpaceRenderingManager {
             }            
         }
 
+        if (OrbitingBody.selected != null) {
+            ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
+            if (player == null || !SpyglassAstronomyClient.isHoldingSpyglass()) {
+                OrbitingBody.deselect();
+            }               
+        }
+
         updateStars(ticks);
 
         updateOrbits(ticks);

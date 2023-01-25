@@ -52,6 +52,11 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return 1;
     }
 
+    public static int getSolarSystemInfo(CommandContext<FabricClientCommandSource> context) {
+        displaySolarSystemInfo();
+        return 1;
+    }    
+
     private static void displayInfo(Constellation constellation) {
         boolean[] flags = new boolean[2];
         StringBuilder builder = new StringBuilder();
@@ -106,6 +111,9 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         orbitInfo(builder, orbitingBody.orbit, flags);
 
+        builder.append("\nType: ");
+        builder.append(orbitingBody.getOrbitingBodyTypeName());
+
         if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
         if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
@@ -124,6 +132,40 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
         if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
+        SpyglassAstronomyClient.longSay(builder.toString());
+    }
+
+    private static void displaySolarSystemInfo() {
+        boolean[] flags = new boolean[2];
+        StringBuilder builder = new StringBuilder();
+        builder.append("Planets: ");
+        int stage = 0;
+        for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+            if (stage == 0 && orbitingBody.orbit.period > SpyglassAstronomyClient.earthOrbit.period) {
+                builder.append("\nThis World");
+                stage = 1;
+            }
+            if (stage == 1 && !orbitingBody.isPlanet) {
+                builder.append("\nComets:");
+                stage = 2;
+            }
+            if (orbitingBody.name == null) {
+                builder.append("\n???");
+            } else {
+                builder.append("\n"+orbitingBody.name);
+            }
+        }
+
+        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT)) {
+            builder.append("\nCurrent Time:\n");
+            builder.append(Long.toString(SpyglassAstronomyClient.getDay())+"."+(Float.toString(Math.round(SpyglassAstronomyClient.getDayFraction()*100)/100).replace("0.","")));
+            builder.append(" Days");
+        } else {
+            flags[1] = true;
+        }
+
+        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
+        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
@@ -133,7 +175,6 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
         pos.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
         pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-        SpyglassAstronomyClient.LOGGER.info(pos.toString());
 
         float yaw = (float)(Math.atan2(pos.getX(), pos.getZ())*-180d/Math.PI);
         float angle = (float)(Math.atan2(Math.sqrt(pos.getX() * pos.getX() + pos.getZ() * pos.getZ()), pos.getY())*180d/Math.PI)-90;
@@ -209,12 +250,24 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT)) {
+                Vec3f pos = orbit.getLastRotatedPosition();
+
                 builder.append("\nDistance: ");
-                Vec3f pos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
-                pos.subtract(orbit.getLastRotatedPosition());
+                Vec3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
+                pos.subtract(earthPos);
                 float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.getX(), pos.getY(), pos.getZ());
-                prettyFloat(builder, MathHelper.sqrt(sqrDistance));
-                builder.append(" AU");
+                prettyFloat(builder, MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis);
+                builder.append(" AU\n");
+
+                pos.normalize();
+                pos.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+
+                float yaw = (float)(Math.atan2(pos.getX(), pos.getZ())*-180d/Math.PI);
+                float angle = (float)(Math.atan2(Math.sqrt(pos.getX() * pos.getX() + pos.getZ() * pos.getZ()), pos.getY())*180d/Math.PI)-90;
+                builder.append("Current Angle: ");
+                prettyFloat(builder, yaw);
+                builder.append(" ");
+                prettyFloat(builder, angle);
             } else {
                 flags[1] = true;
             }

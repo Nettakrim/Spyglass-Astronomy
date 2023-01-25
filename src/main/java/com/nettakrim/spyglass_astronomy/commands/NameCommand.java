@@ -19,8 +19,6 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         String name = SpyglassAstronomyCommands.getMessageText(context);
         name = name.replace("|", "");
         name = name.replaceAll("^ +| +$|( )+", "$1"); //remove double spaces
-        SpaceDataManager.makeChange();
-
         if (Constellation.selected != null) {
             name(Constellation.selected, name);
             return 1;
@@ -63,9 +61,9 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Constellation \"%s\" to \"%s\"", constellation.name, name));
         }
-        SpaceDataManager.makeChange();
         constellation.name = name;
         constellation.select();
+        SpaceDataManager.makeChange();
     }
 
     public static void name(Star star, String name) {
@@ -74,9 +72,9 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Star \"%s\" to \"%s\"", star.name, name));
         }
-        SpaceDataManager.makeChange();
         star.name = name;
         star.select();
+        SpaceDataManager.makeChange();
     }
 
     public static void name(OrbitingBody orbitingBody, String name) {
@@ -85,8 +83,8 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         } else {
             SpyglassAstronomyClient.say(String.format("Renamed Planet \"%s\" to \"%s\"", orbitingBody.name, name));
         }
-        SpaceDataManager.makeChange();
         orbitingBody.name = name;
         orbitingBody.select();
+        SpaceDataManager.makeChange();
     }
 }

@@ -66,7 +66,7 @@ public class Knowledge {
             orbitKnowledge = Level.MASTER;
             return;
         }
-        if (namedPlanets >= planets-1 && namedComets >= 2) {
+        if (namedPlanets >= planets-2 && namedComets >= 2) {
             orbitKnowledge = Level.EXPERT;
             return;
         }
@@ -83,7 +83,7 @@ public class Knowledge {
             case NOVICE:
                 return String.format("\nName %d Planets or 1 Comet to learn more",planets/2);
             case ADEPT:
-                return String.format("\nName %d Planets and 2 Comets to learn more",planets-1);
+                return String.format("\nName %d Planets and 2 Comets to learn more",planets-2);
             case EXPERT:
                 return String.format("\nName %d Planets and %d Comets to learn more",planets, comets-1);
             default:

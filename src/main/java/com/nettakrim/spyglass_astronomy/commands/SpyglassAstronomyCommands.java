@@ -101,13 +101,19 @@ public class SpyglassAstronomyCommands {
         LiteralCommandNode<FabricClientCommandSource> earthInfoNode = ClientCommandManager
         .literal("thisworld")
         .executes(InfoCommand::getEarthInfo)
-        .build();            
+        .build();
+        
+        LiteralCommandNode<FabricClientCommandSource> solarSystemInfoNode = ClientCommandManager
+        .literal("solarsystem")
+        .executes(InfoCommand::getSolarSystemInfo)
+        .build();        
     
         root.addChild(infoNode);
         infoNode.addChild(constellationInfoNode);
         infoNode.addChild(starInfoNode);
         infoNode.addChild(orbitingBodyInfoNode);
         infoNode.addChild(earthInfoNode);
+        infoNode.addChild(solarSystemInfoNode);
     }
 
     public static void registerSelectNode(RootCommandNode<FabricClientCommandSource> root) {

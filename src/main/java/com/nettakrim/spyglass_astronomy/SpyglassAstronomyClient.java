@@ -11,6 +11,7 @@ import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nettakrim.spyglass_astronomy.OrbitingBody.OrbitingBodyType;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
 import java.util.ArrayList;
@@ -134,21 +135,14 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 if (galaxyCloseness > 0) sizeRaw = (1-galaxyCloseness)*sizeRaw + galaxyCloseness*((sizeRaw*sizeRaw)/2);
             }
             float size = 0.15f + sizeRaw * 0.2f;
-            float rotationSpeed = (random.nextFloat() * 2f)-1;
 
-            float range = 0.8f;
-            float offsetRange = 2*range-2;
-            float gradientPos = random.nextFloat();
             float alphaRaw = random.nextFloat();
             float alpha = Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
             alpha = (alpha + (alpha*alpha))/2;
 
-            int[] color = new int[]{
-                (int)(Math.min(offsetRange * gradientPos - range + 2f, 1f)*255),
-                (int)(255 - random.nextFloat() * 20),
-                (int)(Math.min(range - offsetRange * gradientPos, 1f)*255)
-            };
+            int [] color = generateRandomColor(random, 0.8f, 20, 0);
 
+            float rotationSpeed = (random.nextFloat() * 2f)-1;
             float twinkleSpeed = random.nextFloat()*0.025f+0.035f;
 
             stars.add(new Star(currentStars, posX, posY, posZ, size, rotationSpeed, color, alpha, twinkleSpeed));
@@ -171,15 +165,20 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         } else {
             random.setSeed(spaceDataManager.getPlanetSeed());
         }
+        //things with less importance and *could* change in the future and not be too bad like exact color that use their own random
+        Random lowPriorityRandom = Random.create(spaceDataManager.getPlanetSeed());
         
         if (reset) {
             orbitingBodies = new ArrayList<OrbitingBody>();
         }
 
-        //always atleast 5 planets, and always atleast 2 outer planets, inner planets not guaranteed
-        //between 0 and 3 inner planets
-        int innerPlanets = random.nextInt(4);
-        //between 5 and 8 outer planets for 0 inner, between 2 and 8 for 3 inner
+        IntTetrisBagRandom planetDesignRandom = new IntTetrisBagRandom(random, 3);
+        IntTetrisBagRandom cometDesignRandom = new IntTetrisBagRandom(random, 2);
+
+        //always atleast 5 planets, and always atleast 2 outer planets
+        //between 1 and 3 inner planets
+        int innerPlanets = random.nextInt(3)+1;
+        //between 4 and 8 outer planets for 1 inner, between 2 and 8 for 3 inner
         int outerPlanets = random.nextBetween(5-innerPlanets, 8);
 
         //earth will often have a year of 1 lunar cycle (8 days, 2.5 realtime hours), but theres a chance to have some sligthly more irregular years
@@ -197,12 +196,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float innerRoundAmount = 8;
         while (innerPlanets >= innerRoundAmount) innerRoundAmount *= 2;
 
+        int otherHabitable = random.nextBetween(0, 8); //0 means first inner planet habitable, 1 means first outer, all else mean none
+
         float innerDistanceRange = 1f/innerPlanets;
         float[] innerPlanetPeriods = new float[innerPlanets];
         for (float x = 0; x < innerPlanets; x++) {
             float minPeriod = (x/innerPlanets);
             float maxPeriod = (x/innerPlanets)+innerDistanceRange;
-            float unRoundedPeriod = scale01Between(random.nextFloat(), minPeriod, maxPeriod);
+            float rawUnRoundedPeriod = random.nextFloat();
+            float unRoundedPeriod = (1-rawUnRoundedPeriod)*minPeriod + x*maxPeriod;
             float period = (MathHelper.floor(unRoundedPeriod*(innerRoundAmount-1))+1)/innerRoundAmount;
             for (int y = 0; y < x; y++) {
                 if (innerPlanetPeriods[y] == period) {
@@ -211,8 +213,21 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             }
             innerPlanetPeriods[(int)x] = period;
             period *= yearLength;
+            
+            OrbitingBodyType type;
+            if (otherHabitable == 0 && x == innerPlanets) {
+                type = OrbitingBodyType.HABITABLE;
+            } else {
+                int randomInnerType = lowPriorityRandom.nextBetween(0, 3);
+                if (randomInnerType == 0 && x > innerPlanets/2) {
+                    type = OrbitingBodyType.OCEANPLANET;
+                } else {
+                    type = OrbitingBodyType.TERRESTIAL;
+                }
+            }
+            
             Orbit orbit = generateRandomOrbit(random, period, 0.1f, 20f, false);
-            addRandomOrbitingBody(random, orbit, true);
+            addRandomOrbitingBody(random, lowPriorityRandom, orbit, true, planetDesignRandom, type);
         }
 
         //outer planets rougly double in period each planet, further out planets will have slightly more irregular orbits
@@ -221,45 +236,94 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float period = (yearLength * (2 << ((int)x+1))) * periodOffsets[random.nextInt(periodOffsets.length)];
             float settingsMultiplier = (x/8)+1;
             Orbit orbit = generateRandomOrbit(random, period, Math.min(0.15f*settingsMultiplier,0.5f), Math.min(20f*settingsMultiplier,60f), false);
-            addRandomOrbitingBody(random, orbit, true);
+            
+            OrbitingBodyType type;
+            if (otherHabitable == 1 && x == innerPlanets) {
+                type = OrbitingBodyType.HABITABLE;
+            } else {
+                int canBeTerrestial = lowPriorityRandom.nextBetween(0, 1);
+                if (x <= 4 && canBeTerrestial == 0) {
+                    int isIcy = x == 0 ? 1 : lowPriorityRandom.nextBetween(0, 1);
+                    if (isIcy == 1) {
+                        type = OrbitingBodyType.ICEPLANET;
+                    } else {
+                        type = OrbitingBodyType.TERRESTIAL;
+                    }
+                } else {
+                    int isTerrestial = lowPriorityRandom.nextBetween(0, 3);
+                    if (isTerrestial == 0) {
+                        type = OrbitingBodyType.ICEPLANET;
+                    } else if (x > outerPlanets/2) {
+                        type = OrbitingBodyType.ICEGIANT;
+                    } else {
+                        type = OrbitingBodyType.GASGIANT;
+                    }
+                }
+            }
+            addRandomOrbitingBody(random, lowPriorityRandom, orbit, true, planetDesignRandom, type);
         }
 
         //comets have a very high eccentrity, halley's for instance, has an eccentricity of 0.97
         //halleys comet also has a period of 76 years though, so the eccentricity and period of our comets is a bit lower on average
         for (int x = 0; x < comets; x++) {
             float periodRaw = random.nextFloat();
-            float eccentricity = (random.nextFloat()*0.25f)+0.7f;
+            float eccentricity = (random.nextFloat()*0.2f)+0.75f;
 
-            float period = Math.max(Math.round(32 * (((eccentricity-0.25f)) + (2*periodRaw-0.5))), 2);
+            float period = Math.max(Math.round(32 * (((eccentricity-0.25f)) + (8*periodRaw-4))), 2);
             period *= yearLength;
 
             float rotation = random.nextFloat() * 360;
             float inclination = (random.nextFloat() * 180) - 90;
             float timeOffset = random.nextFloat();
             Orbit orbit = new Orbit(period, eccentricity, rotation, inclination, timeOffset);
-            addRandomOrbitingBody(random, orbit, false);
+            addRandomOrbitingBody(random, lowPriorityRandom, orbit, false, cometDesignRandom, OrbitingBodyType.COMET);
         }
 
         spaceDataManager.loadOrbitingBodyDatas();
     }
 
-    private static float scale01Between(float x, float valueAt0, float valueAt1) {
-        return (1-x)*valueAt0 + x*valueAt1;
+    private static int[] generateRandomColor(Random random, float hueRange, float lightnessRange, int forceHue) {
+        float offsetRange = 2*hueRange-2;
+        float gradientPos = random.nextFloat();
+        if (forceHue == -1) {
+            gradientPos /= 2f;
+        } else if (forceHue == 1) {
+            gradientPos = 1 - gradientPos/2f;
+        }
+
+        return new int[]{
+            (int)(Math.min(offsetRange * gradientPos - hueRange + 2f, 1f)*255),
+            (int)(255 - (random.nextFloat() * lightnessRange)),
+            (int)(Math.min(hueRange - offsetRange * gradientPos, 1f)*255)
+        };
     }
 
-    private static void addRandomOrbitingBody(Random random, Orbit orbit, boolean isPlanet) {
+    private static void addRandomOrbitingBody(Random random, Random lowPriorityRandom, Orbit orbit, boolean isPlanet, IntTetrisBagRandom decorationRandom, OrbitingBodyType type) {
         float size = random.nextFloat()+1;
         float albedo = (random.nextFloat()+1)/2;
         float rotationSpeed = random.nextFloat();
         if (rotationSpeed < 0.5f) rotationSpeed--;
-        float color = random.nextFloat();
-        int decoration;
-        if (isPlanet) {
-            decoration = random.nextBetween(0,3);
+        int decoration = decorationRandom.get();
+        int forceMainHue = 0;
+        if (type == OrbitingBodyType.ICEGIANT || type == OrbitingBodyType.ICEPLANET || type == OrbitingBodyType.OCEANPLANET) {
+            forceMainHue = 1;
+            albedo = (albedo+1)/2;
         } else {
-            decoration = random.nextBetween(0,2);
+            int forceNonIcyColor = lowPriorityRandom.nextBetween(0, 2);
+            if ((forceNonIcyColor != 0 && type == OrbitingBodyType.TERRESTIAL || type == OrbitingBodyType.HABITABLE) || type == OrbitingBodyType.GASGIANT) {
+                forceMainHue = -1;
+            }
         }
-        orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed, isPlanet, decoration));
+        if (!isPlanet) {
+            albedo /= 4;
+            size = (size + 2)/12;
+        }
+        if (type == OrbitingBodyType.GASGIANT || type == OrbitingBodyType.ICEGIANT) {
+            size *= 2;
+        }
+        int[] mainColor = generateRandomColor(random, 0.1f, 196, forceMainHue);
+        int[] secondaryColor = generateRandomColor(lowPriorityRandom, 0.1f, 196, 0);
+        orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed, isPlanet, decoration, mainColor, secondaryColor, type));
     }
 
     private static Orbit generateRandomOrbit(Random random, float period, float maxEccentricity, float maxInclination, boolean isEarth) {
