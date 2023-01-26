@@ -78,7 +78,7 @@ public class OrbitingBody {
         //this isnt needed to run every frame
         {
             //it may seem a bit weird allowing dayFraction to be outside of 0-1, but it doesnt matter
-            axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/100), false);
+            axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/64), false);
             axis1.subtract(referencePosition);
             axis1.normalize();
             axis1.subtract(position);

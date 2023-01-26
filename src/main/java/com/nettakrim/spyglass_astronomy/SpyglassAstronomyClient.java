@@ -181,16 +181,18 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         //between 4 and 8 outer planets for 1 inner, between 2 and 8 for 3 inner
         int outerPlanets = random.nextBetween(5-innerPlanets, 8);
 
-        //earth will often have a year of 1 lunar cycle (8 days, 2.5 realtime hours), but theres a chance to have some sligthly more irregular years
-        float[] yearTimes = new float[] {8,8,8,8,8,8,8,8,8,8,8,8,6,6,6,6,10,10,10,10,7,9};
-        float yearLength = yearTimes[random.nextInt(yearTimes.length)];
+        int comets = random.nextBetween(4, 6);
+
+        float yearLength = spaceDataManager.getYearLength();
+
+        innerPlanets = 10;
+        outerPlanets = 0;
+        comets = 0;
 
         //earth will have a largely circular orbit
-        earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 20f, true);
+        earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 10f, true);
     
         starAngleMultiplier = ((yearLength + 1) / yearLength) * 360f;
-
-        int comets = random.nextBetween(4, 6);
 
         //inner planets are spaced rougly evenly, and rounded to 8ths of an earth year
         float innerRoundAmount = 8;
@@ -204,13 +206,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float minPeriod = (x/innerPlanets);
             float maxPeriod = (x/innerPlanets)+innerDistanceRange;
             float rawUnRoundedPeriod = random.nextFloat();
-            float unRoundedPeriod = (1-rawUnRoundedPeriod)*minPeriod + x*maxPeriod;
+            float unRoundedPeriod = (1-rawUnRoundedPeriod)*minPeriod + rawUnRoundedPeriod*maxPeriod;
             float period = (MathHelper.floor(unRoundedPeriod*(innerRoundAmount-1))+1)/innerRoundAmount;
             for (int y = 0; y < x; y++) {
                 if (innerPlanetPeriods[y] == period) {
                     period += 1f/innerRoundAmount;
                 }
             }
+            if (period == 1) period -= 0.5f/innerRoundAmount;
+
             innerPlanetPeriods[(int)x] = period;
             period *= yearLength;
             
@@ -350,7 +354,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static float getPositionInOrbit(float scale) {
         Long time = world.getTimeOfDay();
-        return ((float)((time/24000)%(long)earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
+        return ((float)((time/24000)%earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
     }
 
     public static Long getDay() {
@@ -676,7 +680,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             case 2:
                 return "▐ Last Quarter";
             case 3:
-                return "] Waning Cresent";
+                return " ] Waning Cresent";
             case 4:
                 return "[] New Moon";
             case 5:

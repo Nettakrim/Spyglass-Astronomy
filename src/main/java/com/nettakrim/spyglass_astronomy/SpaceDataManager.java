@@ -23,6 +23,7 @@ public class SpaceDataManager {
 
     private long starSeed;
     private long planetSeed;
+    private float yearLength;
 
     private File data = null;
 
@@ -53,6 +54,7 @@ public class SpaceDataManager {
         if (useDefault) {
             starSeed = seedHash;
             planetSeed = seedHash;
+            yearLength = 8;
         }
     }
 
@@ -86,8 +88,8 @@ public class SpaceDataManager {
                         }
                         break;
                     case 2:
-                        String[] parts = s.split(" \\| ");
-                        SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, parts[0], parts[1]));
+                        String[] constellationParts = s.split(" \\| ");
+                        SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
                         break;
                     case 3:
                         int starSplit = s.indexOf(' ');
@@ -102,7 +104,10 @@ public class SpaceDataManager {
                         orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
                         break;
                     case 5:
-                        SpyglassAstronomyClient.setStarCount(Integer.parseInt(s));
+                        String[] parts = s.split(" ");
+                        SpyglassAstronomyClient.setStarCount(Integer.parseInt(parts[0]));
+                        if (parts.length > 1) setYearLength(Float.parseFloat(parts[1]));
+                        else yearLength = 8;
                 }
             }
             scanner.close();
@@ -150,6 +155,8 @@ public class SpaceDataManager {
             }   
             s.append("\n---\n");
             s.append(SpyglassAstronomyClient.getStarCount());
+            s.append(" ");
+            s.append(yearLength);
             s.append("\n---");
 
             writer.write(s.toString());
@@ -219,6 +226,14 @@ public class SpaceDataManager {
 
     public void setPlanetSeed(long planetSeed) {
         this.planetSeed = planetSeed;
+    }
+
+    public float getYearLength() {
+        return yearLength;
+    }
+
+    public void setYearLength(float yearLength) {
+        this.yearLength = yearLength;
     }
 
     private static String getCurrentWorldOrServerName() {

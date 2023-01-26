@@ -2,6 +2,7 @@ package com.nettakrim.spyglass_astronomy.commands;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -235,13 +236,22 @@ public class SpyglassAstronomyCommands {
         LiteralCommandNode<FabricClientCommandSource> bypassNode = ClientCommandManager
         .literal("bypassknowledge")
         .executes(AdminCommand::bypassKnowledge)
-        .build();        
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> yearLengthNode = ClientCommandManager
+        .literal("setyearlength")
+        .then(
+            ClientCommandManager.argument("days", FloatArgumentType.floatArg(1f/8f))
+            .executes(AdminCommand::setYearLength)
+        )
+        .build();
 
         root.addChild(adminNode);
         adminNode.addChild(removeNode);
         adminNode.addChild(setStarCountNode);
         adminNode.addChild(discardNode);
         adminNode.addChild(bypassNode);
+        adminNode.addChild(yearLengthNode);
 
         registerAdminAddNode(adminNode);
         registerAdminSetSeedNode(adminNode);

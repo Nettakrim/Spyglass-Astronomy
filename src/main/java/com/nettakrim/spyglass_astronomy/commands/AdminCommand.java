@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy.commands;
 
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -30,7 +31,7 @@ public class AdminCommand {
         SpyglassAstronomyClient.generatePlanets(null, true);
         SpaceDataManager.makeChange();
         return 1;
-    }    
+    }
 
     public static int removeConstellation(CommandContext<FabricClientCommandSource> context) {
         Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
@@ -77,6 +78,13 @@ public class AdminCommand {
         } else {
             SpyglassAstronomyClient.say("Knowledge Checks reenabled");
         }
+        return 1;
+    }
+
+    public static int setYearLength(CommandContext<FabricClientCommandSource> context) {
+        SpyglassAstronomyClient.spaceDataManager.setYearLength(FloatArgumentType.getFloat(context, "days"));
+        SpyglassAstronomyClient.generatePlanets(null, true);
+        SpaceDataManager.makeChange();
         return 1;
     }
 }

@@ -51,6 +51,7 @@ public class Orbit {
 
     public void rotateLocalPosition(Vec3f vector) {
         //ascending node is always such that the highest and lowest points relative to the reference plane are the apoapsis and periapsis
+        //in other words, i think inclination is actually incorrect? idk
         vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(inclination));
         vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotation));
     }
