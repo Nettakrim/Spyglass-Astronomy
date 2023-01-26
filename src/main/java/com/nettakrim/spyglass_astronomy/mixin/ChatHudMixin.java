@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
@@ -34,9 +35,10 @@ public class ChatHudMixin {
                 if (secondIndex == -1) return;
                 String constellationName = data.substring(2, firstIndex);
                 String constellationData = data.substring(firstIndex+1, secondIndex);
-
+                
+                String translate1 = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.receive.constellation").toString();
                 Text constellationText = SpyglassAstronomyCommands.getClickHere(
-                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Constellation \"%s\"", constellationName),
+                    String.format(translate1, constellationName),
                     "/sga:admin add constellation "+constellationData+" "+constellationName,
                     true
                 );
@@ -53,8 +55,9 @@ public class ChatHudMixin {
                     break;
                 }
 
+                String translate2 = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.receive.star").toString();
                 Text starText = SpyglassAstronomyCommands.getClickHere(
-                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Star \"%s\"", starName),
+                    String.format(translate2, starName),
                     "/sga:admin rename star "+Integer.toString(starIndex)+" "+starName,
                     true
                 );
@@ -71,8 +74,13 @@ public class ChatHudMixin {
                     break;
                 }
 
+                if (orbitingBodyIndex >= SpyglassAstronomyClient.orbitingBodies.size()) break;
+
+                OrbitingBody orbitingBody = SpyglassAstronomyClient.orbitingBodies.get(orbitingBodyIndex);
+
+                String translate3 = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.receive."+(orbitingBody.isPlanet ? "planet" : "comet")).toString();
                 Text orbitingBodyText = SpyglassAstronomyCommands.getClickHere(
-                    String.format("[Spyglass Astronomy] |/[Click Here]| to add Planet \"%s\"", orbitingBodyName),
+                    String.format(translate3, orbitingBodyName),
                     "/sga:admin rename planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName,
                     true
                 );

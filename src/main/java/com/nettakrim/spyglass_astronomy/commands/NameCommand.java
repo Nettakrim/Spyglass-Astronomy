@@ -57,9 +57,9 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static void name(Constellation constellation, String name) {
         if (constellation.name.equals("Unnamed")) {
-            SpyglassAstronomyClient.say(String.format("Named new Constellation \"%s\"", name));
+            SpyglassAstronomyClient.say("commands.name.constellation", name);
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Constellation \"%s\" to \"%s\"", constellation.name, name));
+            SpyglassAstronomyClient.say("commands.name.constellation.rename", constellation.name, name);
         }
         constellation.name = name;
         constellation.select();
@@ -68,9 +68,9 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static void name(Star star, String name) {
         if (star.name == null) {
-            SpyglassAstronomyClient.say(String.format("Named Star \"%s\"", name));
+            SpyglassAstronomyClient.say("commands.name.star", name);
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Star \"%s\" to \"%s\"", star.name, name));
+            SpyglassAstronomyClient.say("commands.name.star.rename", star.name, name);
         }
         star.name = name;
         star.select();
@@ -79,9 +79,9 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static void name(OrbitingBody orbitingBody, String name) {
         if (orbitingBody.name == null) {
-            SpyglassAstronomyClient.say(String.format("Named Planet \"%s\"", name));
+            SpyglassAstronomyClient.say("commands.name."+(orbitingBody.isPlanet ? "planet" : "comet"), name);
         } else {
-            SpyglassAstronomyClient.say(String.format("Renamed Planet \"%s\" to \"%s\"", orbitingBody.name, name));
+            SpyglassAstronomyClient.say("commands.name."+(orbitingBody.isPlanet ? "planet" : "comet")+".rename", orbitingBody.name, name);
         }
         orbitingBody.name = name;
         orbitingBody.select();

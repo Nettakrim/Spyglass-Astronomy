@@ -408,22 +408,24 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 for (Constellation constellation : constellations) {
                     if (constellation.hasStar(star)) {
                         if (constellation.name.equals("Unnamed")) {
-                            sayActionBar("Use /sga:name to name this Constellation!");
+                            sayActionBar("prompt.name.constellation");
                         } else if (star.name == null) {
-                            sayActionBar(constellation.name);
+                            sayActionBar("prompt.constellation", constellation.name);
                         } else {
-                            sayActionBar(constellation.name+" | "+star.name);
+                            sayActionBar("prompt.constellationandstar", constellation.name, star.name);
                         }
                         return;
                     }
                 }
 
-                if (editMode == 2) sayActionBar(star.name == null ? "Use /sga:name to name this Star" : star.name);
+                if (editMode == 2) {
+                    if (star.name == null) sayActionBar("prompt.name.star");
+                    else sayActionBar("prompt.star", star.name);
+                }
             } else {
                 OrbitingBody orbitingBody = astralObject.orbitingBody;
-                if (orbitingBody.isPlanet) {
-                    sayActionBar(orbitingBody.name == null ? "Use /sga:name to name this Planet" : orbitingBody.name);
-                }
+                if (orbitingBody.name == null) sayActionBar("prompt.name."+(orbitingBody.isPlanet ? "planet" : "comet"));
+                else sayActionBar("prompt.planet", orbitingBody.name);
             }
         }
     }
@@ -494,7 +496,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                     for (StarLine line : constellation.getLines()) {
                         target.addLine(line);
                     }
-                    say(String.format("New line merged two Constellations \"%s\" and \"%s\"", Constellation.selected.name, target.name));
+                    say("constellation.merge", Constellation.selected.name, target.name);
                     constellations.remove(i);
                     break;
                 }
@@ -504,10 +506,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (target != null) {
             Constellation potentialNew = target.addLineCanRemove(drawingLine);
             if (potentialNew != null) {
-                say(String.format("Removing Line split Constellation \"%s\" into two", target.name));
+                say("constellation.split", target.name);
             }
             if (target.getLines().size() == 0) {
-                say(String.format("Removed Constellation \"%s\"", target.name));
+                say("constellation.remove", target.name);
                 constellations.remove(target);
             }
         } else {
@@ -647,9 +649,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    public static void say(String message) {
-        Text text = Text.of("[Spyglass Astronomy] "+message);
-        client.player.sendMessage(text);
+    public static void say(String key, Object... args) {
+        say(Text.literal("[Spyglass Astronomy] ").append(Text.translatable(MODID+"."+key, args)), false);
     }
 
     public static void longSay(String message) {
@@ -657,9 +658,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         client.player.sendMessage(text);
     }
 
-    public static void sayActionBar(String message) {
-        Text text = Text.of(message);
-        client.player.sendMessage(text, true);        
+    public static void sayActionBar(String key, Object... args) {
+        client.player.sendMessage(Text.translatable(MODID+"."+key, args), true); 
     }
 
     public static void updateKnowledge() {

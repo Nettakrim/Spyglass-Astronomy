@@ -8,11 +8,11 @@ Planets and stars will be the same for all players on a particular world, and ar
 ![Screenshot of some planets and constellations from atop a mountain](https://cdn-raw.modrinth.com/data/EdBSdqge/images/0162f7ffd5d6296f59d5ab30f3bc2cb80fe66dbd.png)
 # How to use
 
-To interact with the stars there are three spyglass modes: vanilla, constellation (amethyst), and star (emerald), these are cycled with the pick block button (middle click) while zoomed in.
+To interact with the cosmos there are three spyglass modes: vanilla, constellation (amethyst), and star (emerald), these are cycled with the pick block button (middle click) while zoomed in.
 
 Constellation mode allows you to draw constellations by holding the attack button (left click) and drawing between stars, as well as being able to select constellations
 
-Star mode allows you to select stars and planets
+Star mode allows you to select stars and planets, note that comets are referred to as *planets* when using commands
 
 Once an object is selected you can name it with `/sga:name <name>`, or get useful information with `/sga:info`, you can also get the information of a specific object by following the suggestions after typing `/sga:info <x>`
 

@@ -15,7 +15,7 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("Spyglass must be held to be able to select Constellations");
+            SpyglassAstronomyClient.say("commands.select.constellation");
             return -1;
         }
         constellation.select();
@@ -28,7 +28,7 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("Spyglass must be held to be able to select Stars");
+            SpyglassAstronomyClient.say("commands.select.star");
             return -1;
         }
         star.select();
@@ -41,7 +41,7 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("Spyglass must be held to be able to select Planets");
+            SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet"));
             return -1;
         }
         orbitingBody.select();

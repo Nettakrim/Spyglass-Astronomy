@@ -46,8 +46,9 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Constellation constellation) {
+        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.constellation").toString();
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Constellation \"%s\"", constellation.name),
+            String.format(translate, constellation.name),
             "sga:c_"+(SpaceDataManager.encodeConstellation(null, constellation).replace(" | ", "|"))+"|",
             false
         );
@@ -55,9 +56,10 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Star star) {
+        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.star").toString();
         String starName = (star.name == null ? "Unnamed" : star.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Star \"%s\"", starName),
+            String.format(translate, starName),
             "sga:s_"+starName+"|"+Integer.toString(star.index)+"|",
             false
         );
@@ -65,9 +67,10 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(OrbitingBody orbitingBody) {
+        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share."+(orbitingBody.isPlanet ?"planet" : "comet")).toString();
         String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format("[Spyglass Astronomy] |/[Click Here]| to Share Planet \"%s\"", orbitingBody),
+            String.format(translate, orbitingBody),
             "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|",
             false
         );

@@ -59,12 +59,12 @@ public class AdminCommand {
         for (Constellation targetConstellation : SpyglassAstronomyClient.constellations) {
             for (StarLine line : constellation.getLines()) {
                 if (targetConstellation.lineIntersects(line)) {
-                    SpyglassAstronomyClient.say(String.format("Cannot add new Constellation \"%s\": collision with \"%s\"",constellation.name, targetConstellation.name));
+                    SpyglassAstronomyClient.say("commands.admin.addconstellation.fail", constellation.name, targetConstellation.name);
                     return -1;
                 }
             }
         }
-        SpyglassAstronomyClient.say(String.format("Added new Constellation \"%s\"", constellation.name));
+        SpyglassAstronomyClient.say("commands.admin.addconstellation", constellation.name);
         constellation.select();
         SpyglassAstronomyClient.constellations.add(constellation);
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
@@ -74,9 +74,9 @@ public class AdminCommand {
 
     public static int bypassKnowledge(CommandContext<FabricClientCommandSource> context) {
         if (SpyglassAstronomyClient.knowledge.bypassKnowledge()) {
-            SpyglassAstronomyClient.say("Knowledge Checks bypassed, run again to reset");    
+            SpyglassAstronomyClient.say("commands.admin.bypass.on");    
         } else {
-            SpyglassAstronomyClient.say("Knowledge Checks reenabled");
+            SpyglassAstronomyClient.say("commands.admin.bypass.off");
         }
         return 1;
     }

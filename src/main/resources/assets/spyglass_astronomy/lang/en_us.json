@@ -1,3 +1,52 @@
 {
+    "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
+    "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
+    "spyglass_astronomy.commands.admin.bypass.on" : "Knowledge Checks bypassed, run again to reset",
+    "spyglass_astronomy.commands.admin.bypass.off" : "Knowledge Checks reenabled",
     
+    "spyglass_astronomy.commands.hide.all" : "All hidden, run /sga:hide again to unhide",
+    "spyglass_astronomy.commands.hide.constellations" : "Constellations hidden, run /sga:hide constellations again to unhide",
+    "spyglass_astronomy.commands.hide.stars" : "Stars hidden, run /sga:hide stars again to unhide",
+    "spyglass_astronomy.commands.hide.planets" : "Planets and Comets hidden, run /sga:hide planets again to unhide",
+    "spyglass_astronomy.commands.hide.vanillastars" : "Vanilla Stars unhidden, run /sga:hide vanillastars again to hide",
+
+    "spyglass_astronomy.commands.name.constellation" : "Named new Constellation \"%s\"",
+    "spyglass_astronomy.commands.name.constellation.rename" : "Renamed Constellation \"%s\" to \"%s\"",
+    "spyglass_astronomy.commands.name.star" : "Named Star \"%s\"",
+    "spyglass_astronomy.commands.name.star.rename" : "Renamed Star \"%s\" to \"%s\"",
+    "spyglass_astronomy.commands.name.planet" : "Named Planet \"%s\"",
+    "spyglass_astronomy.commands.name.planet.rename" : "Renamed Planet \"%s\" to \"%s\"",
+    "spyglass_astronomy.commands.name.comet" : "Named Comet \"%s\"",
+    "spyglass_astronomy.commands.name.comet.rename" : "Renamed Comet \"%s\" to \"%s\"",
+
+    "spyglass_astronomy.commands.select.constellation.fail" : "Spyglass must be held to be able to select Constellations",
+    "spyglass_astronomy.commands.select.star.fail" : "Spyglass must be held to be able to select Stars",
+    "spyglass_astronomy.commands.select.planet.fail" : "Spyglass must be held to be able to select Planets",
+    "spyglass_astronomy.commands.select.comet.fail" : "Spyglass must be held to be able to select Comets",
+
+    "spyglass_astronomy.commands.share.constellation" : "|/[Click Here]| to Share Constellation \"%s\"",
+    "spyglass_astronomy.commands.share.star" : "|/[Click Here]| to Share Star \"%s\"",
+    "spyglass_astronomy.commands.share.planet" : "|/[Click Here]| to Share Planet \"%s\"",
+    "spyglass_astronomy.commands.share.comet" : "|/[Click Here]| to Share Comet \"%s\"",
+    "spyglass_astronomy.commands.share.receive.constellation" : "|/[Click Here]| to add Constellation \"%s\"",
+    "spyglass_astronomy.commands.share.receive.star" : "|/[Click Here]| to add Star \"%s\"",
+    "spyglass_astronomy.commands.share.receive.planet" : "|/[Click Here]| to add Planet \"%s\"",
+    "spyglass_astronomy.commands.share.receive.comet" : "|/[Click Here]| to add Comet \"%s\"",
+
+    "spyglass_astronomy.commands.find.constellation.fail" : "No Constellation with name \"%s\" could be found",
+    "spyglass_astronomy.commands.find.star.fail" : "No Star with name \"%s\" could be found",
+    "spyglass_astronomy.commands.find.planet.fail" : "No Planet or Comet with name \"%s\" could be found",
+
+    "spyglass_astronomy.constellation.merge" : "New line merged two Constellations \"%s\" and \"%s\"",
+    "spyglass_astronomy.constellation.split" : "Removing Line split Constellation \"%s\" into two",
+    "spyglass_astronomy.constellation.remove" : "Removed Constellation \"%s\"",
+
+    "spyglass_astronomy.prompt.name.constellation" : "Use /sga:name to name this Constellation!",
+    "spyglass_astronomy.prompt.name.star" : "Use /sga:name to name this Star!",
+    "spyglass_astronomy.prompt.name.planet" : "Use /sga:name to name this Planet!",
+    "spyglass_astronomy.prompt.name.comet" : "Use /sga:name to name this Comet!",
+    "spyglass_astronomy.prompt.constellation" : "%s",
+    "spyglass_astronomy.prompt.constellationandstar" : "%s | %s",
+    "spyglass_astronomy.prompt.star" : "%s",
+    "spyglass_astronomy.prompt.planet" : "%s"
 }

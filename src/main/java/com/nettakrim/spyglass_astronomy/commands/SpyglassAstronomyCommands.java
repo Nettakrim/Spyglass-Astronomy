@@ -387,7 +387,7 @@ public class SpyglassAstronomyCommands {
                 return constellation;
             }
         }
-        SpyglassAstronomyClient.say(String.format("No Constellation with name \"%s\" could be found", name));
+        SpyglassAstronomyClient.say("commands.find.constellation.fail", name);
         return null;        
     }
 
@@ -398,7 +398,7 @@ public class SpyglassAstronomyCommands {
                 return star;
             }
         }
-        SpyglassAstronomyClient.say(String.format("No Star with name \"%s\" could be found", name));
+        SpyglassAstronomyClient.say("commands.find.star.fail", name);
         return null;        
     }
 
@@ -409,7 +409,7 @@ public class SpyglassAstronomyCommands {
                 return orbitingBody;
             }
         }
-        SpyglassAstronomyClient.say(String.format("No Planet with name \"%s\" could be found", name));
+        SpyglassAstronomyClient.say("commands.find.planet.fail", name);
         return null;        
     }    
 

@@ -17,31 +17,31 @@ public class HideCommand implements Command<FabricClientCommandSource> {
         SpaceRenderingManager.starsVisible = !active;
         SpaceRenderingManager.orbitingBodiesVisible = !active;
         SpaceRenderingManager.oldStarsVisible = false;
-        if (active) SpyglassAstronomyClient.say("All hidden, run /sga:hide again to unhide");
+        if (active) SpyglassAstronomyClient.say("commands.hide.all");
         return 1;
 	}
 
     public static int hideConstellations(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.constellationsVisible = !SpaceRenderingManager.constellationsVisible;
-        if (!SpaceRenderingManager.constellationsVisible) SpyglassAstronomyClient.say("Constellations hidden, run /sga:hide constellations again to unhide");
+        if (!SpaceRenderingManager.constellationsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.constellations");
         return 1;
     }
 
     public static int hideStars(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.starsVisible = !SpaceRenderingManager.starsVisible;
-        if (!SpaceRenderingManager.starsVisible) SpyglassAstronomyClient.say("Stars hidden, run /sga:hide stars again to unhide");
+        if (!SpaceRenderingManager.starsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.stars");
         return 1;
     }
 
     public static int hideOrbitingBodies(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.orbitingBodiesVisible = !SpaceRenderingManager.orbitingBodiesVisible;
-        if (!SpaceRenderingManager.orbitingBodiesVisible) SpyglassAstronomyClient.say("Planets hidden, run /sga:hide planets again to unhide");
+        if (!SpaceRenderingManager.orbitingBodiesVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.planets");
         return 1;
     }
 
     public static int hideOldStars(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.oldStarsVisible = !SpaceRenderingManager.oldStarsVisible;
-        if (SpaceRenderingManager.oldStarsVisible) SpyglassAstronomyClient.say("Vanilla Stars unhidden, run /sga:hide vanillastars again to hide");
+        if (SpaceRenderingManager.oldStarsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.vanillastars");
         return 1;
     }
 
