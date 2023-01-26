@@ -35,16 +35,16 @@ public class Orbit {
         return KeplerLookup.getAt(eccentricity, (t%1)*2);
     }
 
-    public Vec3f getLocalPositionAtLocalTime(float t) {
-        this.lastLocalTime = t;
+    public Vec3f getLocalPositionAtLocalTime(float t, boolean updateLastPos) {
+        if (updateLastPos) this.lastLocalTime = t;
         float f = getLocalAngleAtLocalTime(t);
         float cosAngle = MathHelper.cos(f);
         float scale = distance/(1+eccentricity*cosAngle);
         return new Vec3f(cosAngle * scale, MathHelper.sin(f) * scale, 0);
     }
 
-    public Vec3f getRotatedPositionAtGlobalTime(Long day, float dayFraction) {
-        Vec3f pos = getLocalPositionAtLocalTime((((day%period)/period)+(dayFraction/period)+timeOffset)%1);
+    public Vec3f getRotatedPositionAtGlobalTime(Long day, float dayFraction, boolean updateLastPos) {
+        Vec3f pos = getLocalPositionAtLocalTime((((day%period)/period)+(dayFraction/period)+timeOffset)%1, updateLastPos);
         rotateLocalPosition(pos);
         return pos;
     }
@@ -56,7 +56,7 @@ public class Orbit {
     }
 
     public Vec3f getLastRotatedPosition() {
-        Vec3f pos = getLocalPositionAtLocalTime(lastLocalTime);
+        Vec3f pos = getLocalPositionAtLocalTime(lastLocalTime, false);
         rotateLocalPosition(pos);
         return pos;
     }

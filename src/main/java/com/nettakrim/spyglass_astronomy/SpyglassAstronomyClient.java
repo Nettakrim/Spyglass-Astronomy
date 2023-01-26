@@ -670,23 +670,23 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static String getMoonPhaseName(int phase) {
         switch (phase) {
             case 0:
-                return "Full Moon";
+                return "▉ Full Moon";
             case 1:
-                return "Waning Gibbous";
+                return "▜ Waning Gibbous";
             case 2:
-                return "Last Quarter";
+                return "▐ Last Quarter";
             case 3:
-                return "Waning Cresent";
+                return "] Waning Cresent";
             case 4:
-                return "New Moon";
+                return "[] New Moon";
             case 5:
-                return "Waxing Crescent";
+                return "[ Waxing Crescent";
             case 6:
-                return "First Quarter";
+                return "▌ First Quarter";
             case 7:
-                return "Waxing Gibbous";
+                return "▛ Waxing Gibbous";
             default:
-                return "Unkown";
+                return "? Unkown";
         }
     }
 

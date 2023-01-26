@@ -60,7 +60,7 @@ public class OrbitingBody {
     public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, Long day, float dayFraction) {
         angle = (angle+rotationSpeed)%360;
 
-        position = orbit.getRotatedPositionAtGlobalTime(day, dayFraction);
+        position = orbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
         
         Vec3f similarityVector = position.copy();
         similarityVector.normalize();
@@ -75,8 +75,10 @@ public class OrbitingBody {
 
         float visibilityScale = Math.min(MathHelper.sqrt(distance),8);
 
-        { //this isnt needed to run every frame
-            axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/100));
+        //this isnt needed to run every frame
+        {
+            //it may seem a bit weird allowing dayFraction to be outside of 0-1, but it doesnt matter
+            axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/100), false);
             axis1.subtract(referencePosition);
             axis1.normalize();
             axis1.subtract(position);

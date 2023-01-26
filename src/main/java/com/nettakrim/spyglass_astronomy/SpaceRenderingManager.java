@@ -111,7 +111,7 @@ public class SpaceRenderingManager {
         Long day = SpyglassAstronomyClient.getDay();
         float dayFraction = SpyglassAstronomyClient.getDayFraction();
 
-        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(day, dayFraction);
+        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
         Vec3f normalisedReferencePosition = referencePosition.copy();
         normalisedReferencePosition.normalize();
 

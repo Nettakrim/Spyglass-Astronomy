@@ -58,7 +58,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     }    
 
     private static void displayInfo(Constellation constellation) {
-        boolean[] flags = new boolean[2];
+        int[] flags = new int[] {-1, -1};
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(constellation.name);
@@ -67,14 +67,13 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         Vec3f position = constellation.getAveragePosition();
         staticVisibilityInfo(builder, position, flags);
 
-        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
-        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+        builder.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayInfo(Star star) {
-        boolean[] flags = new boolean[2];
+        int[] flags = new int[] {-1, -1};
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(star.name == null ? "Unnamed" : star.name);
@@ -83,7 +82,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         Vec3f position = star.getPositionAsVec3f();
         staticVisibilityInfo(builder, position, flags);
 
-        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.MASTER)) {
+        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.MASTER, flags)) {
             //most visible stars are within 1000 light years, the stars index is used to add a bit of randomness to the distance
             float alpha = star.getAlpha();
             int distance = (int)((1-alpha)*1000);
@@ -92,18 +91,15 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             builder.append("\nDistance: ");
             builder.append(distance);
             builder.append(" LY");
-        } else {
-            flags[0] = true;
         }
 
-        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
-        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+        builder.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayInfo(OrbitingBody orbitingBody) {
-        boolean[] flags = new boolean[2];
+        int[] flags = new int[] {-1, -1};
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
@@ -114,29 +110,30 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         builder.append("\nType: ");
         builder.append(orbitingBody.getOrbitingBodyTypeName());
 
-        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
-        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+        builder.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displayEarthInfo() {
-        boolean[] flags = new boolean[2];
+        int[] flags = new int[] {-1, -1};
         StringBuilder builder = new StringBuilder();
         builder.append("Time: ");
         getMinecraftTime(builder);
+        builder.append("\nMoon Phase:");
+        builder.append(SpyglassAstronomyClient.getMoonPhaseName(SpyglassAstronomyClient.world.getMoonPhase()));
         builder.append('\n');
+
 
         orbitInfo(builder, SpyglassAstronomyClient.earthOrbit, flags);
 
-        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
-        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+        builder.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
     private static void displaySolarSystemInfo() {
-        boolean[] flags = new boolean[2];
+        int[] flags = new int[] {-1, -1};
         StringBuilder builder = new StringBuilder();
         builder.append("Planets: ");
         int stage = 0;
@@ -156,21 +153,18 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             }
         }
 
-        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT)) {
+        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT, flags)) {
             builder.append("\nCurrent Time:\n");
             builder.append(Long.toString(SpyglassAstronomyClient.getDay())+"."+(Float.toString(Math.round(SpyglassAstronomyClient.getDayFraction()*100)/100).replace("0.","")));
             builder.append(" Days");
-        } else {
-            flags[1] = true;
         }
 
-        if (flags[0]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextStarKnowledgeStage());
-        if (flags[1]) builder.append(SpyglassAstronomyClient.knowledge.getInstructionsToNextOrbitKnowledgeStage());
+        builder.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
 
         SpyglassAstronomyClient.longSay(builder.toString());
     }
 
-    private static void staticVisibilityInfo(StringBuilder builder, Vec3f position, boolean[] flags) {
+    private static void staticVisibilityInfo(StringBuilder builder, Vec3f position, int[] flags) {
         Vec3f pos = position.copy();
         pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
         pos.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
@@ -183,7 +177,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         builder.append(" ");
         prettyFloat(builder, angle);
 
-        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT)) {
+        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
             pos = position.copy();
             pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
             pos.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
@@ -209,24 +203,20 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             } else {
                 builder.append("Always");
             }
-        } else {
-            flags[0] = true;
         }
     }
 
-    private static void orbitInfo(StringBuilder builder, Orbit orbit, boolean[] flags) {
-        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.NOVICE)) {
+    private static void orbitInfo(StringBuilder builder, Orbit orbit, int[] flags) {
+        if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.NOVICE, flags)) {
             builder.append("Period: ");
             prettyFloat(builder, orbit.period);
             builder.append(" Days");
-        } else {
-            flags[0] = true;
         }
 
         boolean isEarth = orbit == SpyglassAstronomyClient.earthOrbit;
 
         if (!isEarth) {
-            if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT)) {
+            if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
                 float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
                 float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
                 // max/min is often 1 less iteration for getDenominator
@@ -235,21 +225,17 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 builder.append("\nResonance: ");
                 prettyFloat(builder, ((float)fraction[1]*max)/(float)(fraction[0] - fraction[1]));
                 builder.append(" Days");
-            } else {
-                flags[0] = true;
             }
         }
 
-        if ((isEarth && SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT)) || SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT)) {
+        if ((isEarth && SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) || SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
             builder.append("\nCurrent position in orbit: ");
             builder.append((int)(orbit.lastLocalTime*100));
             builder.append("%");
-        } else {
-            flags[isEarth ? 0 : 1] = true;
         }
 
         if (!isEarth) {
-            if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT)) {
+            if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
                 Vec3f pos = orbit.getLastRotatedPosition();
 
                 builder.append("\nDistance: ");
@@ -268,19 +254,15 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 prettyFloat(builder, yaw);
                 builder.append(" ");
                 prettyFloat(builder, angle);
-            } else {
-                flags[1] = true;
             }
         }
 
-        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.MASTER)) {
+        if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.MASTER, flags)) {
             builder.append("\nEccentricity: ");
             prettyFloat(builder, orbit.eccentricity);
 
             builder.append("\nInclination: ");
             prettyFloat(builder, orbit.inclination);
-        } else {
-            flags[1] = true;
         }
     }
 
