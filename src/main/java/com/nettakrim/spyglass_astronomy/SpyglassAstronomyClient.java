@@ -184,11 +184,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         int comets = random.nextBetween(4, 6);
 
         float yearLength = spaceDataManager.getYearLength();
-
-        innerPlanets = 10;
-        outerPlanets = 0;
-        comets = 0;
-
+        
         //earth will have a largely circular orbit
         earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 10f, true);
     
