@@ -2,7 +2,6 @@ package com.nettakrim.spyglass_astronomy.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.nettakrim.spyglass_astronomy.Constellation;
@@ -36,21 +35,21 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static int nameConstellation(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        String name = StringArgumentType.getString(context, "name");
+        String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.constellations.get(index), name);
         return 1;
     }
 
     public static int nameStar(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        String name = StringArgumentType.getString(context, "name");
+        String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.stars.get(index), name);
         return 1;
     }
 
     public static int nameOrbitingBody(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        String name = StringArgumentType.getString(context, "name");
+        String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.orbitingBodies.get(index), name);
         return 1;
     }

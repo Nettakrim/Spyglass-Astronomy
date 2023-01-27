@@ -668,7 +668,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void updateKnowledge() {
         knowledge.updateStarKnowledge(constellations, stars);
-        knowledge.updateOrbitKnowledge(orbitingBodies, orbitingBodies.size(), 0);
+        int planets = 0;
+        int comets = 0;
+        for (OrbitingBody orbitingBody : orbitingBodies) {
+            if (orbitingBody.isPlanet) planets++;
+            else comets++;
+        }
+        knowledge.updateOrbitKnowledge(orbitingBodies, planets, comets);
     }
 
     public static boolean isHoldingSpyglass() {

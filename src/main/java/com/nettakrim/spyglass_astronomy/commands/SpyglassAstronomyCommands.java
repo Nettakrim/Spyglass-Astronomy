@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -311,7 +310,7 @@ public class SpyglassAstronomyCommands {
         .then(
             ClientCommandManager.argument("index", IntegerArgumentType.integer())
             .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
+                ClientCommandManager.argument("name", MessageArgumentType.message())
                 .executes(NameCommand::nameConstellation)
             )
         )
@@ -322,7 +321,7 @@ public class SpyglassAstronomyCommands {
         .then(
             ClientCommandManager.argument("index", IntegerArgumentType.integer())
             .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
+                ClientCommandManager.argument("name", MessageArgumentType.message())
                 .executes(NameCommand::nameStar)
             )
         )
@@ -333,7 +332,7 @@ public class SpyglassAstronomyCommands {
         .then(
             ClientCommandManager.argument("index", IntegerArgumentType.integer())
             .then(
-                ClientCommandManager.argument("name", StringArgumentType.string())
+                ClientCommandManager.argument("name", MessageArgumentType.message())
                 .executes(NameCommand::nameOrbitingBody)
             )
         )
