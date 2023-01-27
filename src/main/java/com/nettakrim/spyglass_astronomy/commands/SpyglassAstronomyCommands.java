@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.command.argument.MessageArgumentType.MessageFormat;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -423,23 +422,12 @@ public class SpyglassAstronomyCommands {
         return messageFormat.getContents();
     }
 
-    public static Text getClickHere(String formatText, String command, boolean run) {
-        String[] parts = formatText.split("\\|");
-
-        MutableText text = Text.literal("");
-        for (String string : parts) {
-            if (string.charAt(0) == '/') {
-                text.append(Text.literal(string.substring(1)).setStyle(Style.EMPTY
-                    .withClickEvent(
-                        new ClickEvent(run ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command)
-                    )
-                    .withColor(Formatting.GREEN)
-                ));
-            } else {
-                text.append(Text.literal(string));
-            }
-        }
-        
-        return text;
+    public static Text getClickHere(String actionKey, String command, boolean run, Object... formatting) {
+        return Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.click").setStyle(Style.EMPTY
+        .withClickEvent(
+            new ClickEvent(run ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command)
+        )
+        .withColor(Formatting.GREEN))
+        .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 }

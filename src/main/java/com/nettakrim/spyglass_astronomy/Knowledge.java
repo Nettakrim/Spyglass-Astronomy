@@ -2,6 +2,9 @@ package com.nettakrim.spyglass_astronomy;
 
 import java.util.ArrayList;
 
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+
 public class Knowledge {
     public enum Level {
         NOVICE,
@@ -38,16 +41,16 @@ public class Knowledge {
         starKnowledge = Level.NOVICE;
     }
 
-    public String getInstructionsToStarKnowledgeStage(int stage) {
+    public MutableText getInstructionsToStarKnowledgeStage(int stage) {
         switch (stage) {
             case 1:
-                return "\nDraw 5 Constellations to learn more";
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toadept", 5);
             case 2:
-                return "\nDraw 10 Constellations and Name 3 Stars to learn more";
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toexpert", 10, 3);
             case 3:
-                return "\nDraw 20 Constellations and Name 8 Stars to learn more";
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.tomaster", 20, 8);
             default:
-                return "";
+                return Text.empty();
         }
     }
 
@@ -78,16 +81,16 @@ public class Knowledge {
         return;
     }
 
-    public String getInstructionsToOrbitKnowledgeStage(int stage) {
+    public MutableText getInstructionsToOrbitKnowledgeStage(int stage) {
         switch (stage) {
             case 1:
-                return String.format("\nName %d Planets or 1 Comet to learn more",planets/3);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toadept", planets/3, 1);
             case 2:
-                return String.format("\nName %d Planets and 2 Comets to learn more",planets/3*2);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toexpert", planets/3*2, 2);
             case 3:
-                return String.format("\nName %d Planets and %d Comets to learn more",planets-1, comets-1);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.tomaster", planets-1, comets-1);
             default:
-                return "";
+                return Text.empty();
         }
     }
 
@@ -111,8 +114,8 @@ public class Knowledge {
         else flags[index] = Math.min(flags[index], current);
     }
 
-    public String getKnowledgeInstructions(int[] flags) {
-        return getInstructionsToStarKnowledgeStage(flags[0])+getInstructionsToOrbitKnowledgeStage(flags[1]);
+    public Text getKnowledgeInstructions(int[] flags) {
+        return getInstructionsToStarKnowledgeStage(flags[0]).append(getInstructionsToOrbitKnowledgeStage(flags[1]));
     }
 
     public boolean starKnowledgeAtleast(Level level, int[] flags) {

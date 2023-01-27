@@ -301,25 +301,4 @@ public class OrbitingBody {
         ICEGIANT,
         COMET
     }
-
-    public String getOrbitingBodyTypeName() {
-        switch (type) {
-            case TERRESTIAL:
-                return "Terrestial";
-            case HABITABLE:
-                return "Habitable";
-            case OCEANPLANET:
-                return "Ocean Planet";
-            case ICEPLANET:
-                return "Ice Planet";
-            case GASGIANT:
-                return "Gas Giant";
-            case ICEGIANT:
-                return "Ice Giant";
-            case COMET:
-                return "Comet";
-            default:
-                return "Unknown";
-        }
-    }
 }

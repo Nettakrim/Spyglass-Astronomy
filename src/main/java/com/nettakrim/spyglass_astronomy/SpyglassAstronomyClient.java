@@ -330,6 +330,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float eccentricityRaw = random.nextFloat();
         float rotationRaw = random.nextFloat();
         float inclinationRaw = (random.nextFloat()*2)-1;
+        random.nextFloat(); //unused ascencion random
 
         float eccentricity = eccentricityRaw * maxEccentricity;
         float rotation = rotationRaw*360f;
@@ -641,7 +642,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    public static void say(Text text, boolean buffer) {
+    private static void say(Text text, boolean buffer) {
         if (buffer) {
             sayBuffer.add(text);
         } else {
@@ -650,12 +651,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void say(String key, Object... args) {
-        say(Text.literal("[Spyglass Astronomy] ").append(Text.translatable(MODID+"."+key, args)), false);
+        say(Text.translatable(MODID+".say").append(Text.translatable(MODID+"."+key, args)), false);
     }
 
-    public static void longSay(String message) {
-        Text text = Text.of("- [Spyglass Astronomy] -\n"+message);
-        client.player.sendMessage(text);
+    public static void sayText(Text text, boolean buffer) {
+        say(Text.translatable(MODID+".say").append(text), buffer);
+    }
+
+    public static void longSay(Text text) {
+        client.player.sendMessage(Text.translatable(MODID+".longsay").append(text));
     }
 
     public static void sayActionBar(String key, Object... args) {
@@ -665,29 +669,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static void updateKnowledge() {
         knowledge.updateStarKnowledge(constellations, stars);
         knowledge.updateOrbitKnowledge(orbitingBodies, orbitingBodies.size(), 0);
-    }
-
-    public static String getMoonPhaseName(int phase) {
-        switch (phase) {
-            case 0:
-                return "▉ Full Moon";
-            case 1:
-                return "▜ Waning Gibbous";
-            case 2:
-                return "▐ Last Quarter";
-            case 3:
-                return " ] Waning Cresent";
-            case 4:
-                return "[] New Moon";
-            case 5:
-                return "[ Waxing Crescent";
-            case 6:
-                return "▌ First Quarter";
-            case 7:
-                return "▛ Waxing Gibbous";
-            default:
-                return "? Unkown";
-        }
     }
 
     public static boolean isHoldingSpyglass() {

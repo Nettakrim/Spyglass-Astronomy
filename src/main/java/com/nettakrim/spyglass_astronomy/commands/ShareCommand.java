@@ -46,34 +46,34 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Constellation constellation) {
-        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.constellation").toString();
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format(translate, constellation.name),
+            "commands.share.constellation",
             "sga:c_"+(SpaceDataManager.encodeConstellation(null, constellation).replace(" | ", "|"))+"|",
-            false
+            false,
+            constellation.name
         );
-        SpyglassAstronomyClient.say(text, false);
+        SpyglassAstronomyClient.sayText(text, false);
     }
 
     public static void share(Star star) {
-        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.star").toString();
         String starName = (star.name == null ? "Unnamed" : star.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format(translate, starName),
+            "commands.share.star",
             "sga:s_"+starName+"|"+Integer.toString(star.index)+"|",
-            false
+            false,
+            starName
         );
-        SpyglassAstronomyClient.say(text, false);
+        SpyglassAstronomyClient.sayText(text, false);
     }
 
     public static void share(OrbitingBody orbitingBody) {
-        String translate = "[Spyglass Astronomy] "+Text.translatable(SpyglassAstronomyClient.MODID+".commands.share."+(orbitingBody.isPlanet ?"planet" : "comet")).toString();
         String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
-            String.format(translate, orbitingBody),
+            "commands.share."+(orbitingBody.isPlanet ?"planet" : "comet"),
             "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|",
-            false
+            false,
+            orbitingBodyName
         );
-        SpyglassAstronomyClient.say(text, false);
+        SpyglassAstronomyClient.sayText(text, false);
     }
 }

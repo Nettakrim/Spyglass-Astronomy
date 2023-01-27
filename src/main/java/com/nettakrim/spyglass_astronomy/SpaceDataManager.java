@@ -19,7 +19,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.integrated.IntegratedServer;
 
 public class SpaceDataManager {
-    public static final int SAVE_FORMAT = 0;
+    public static final int SAVE_FORMAT = 1;
 
     private long starSeed;
     private long planetSeed;
@@ -67,6 +67,7 @@ public class SpaceDataManager {
             int starIndex = 0;
             starDatas = new ArrayList<StarData>();
             orbitingBodyDatas = new ArrayList<OrbitingBodyData>();
+            boolean useDefault = false;
             while (scanner.hasNextLine()) {
                 String s = scanner.nextLine();
                 if (s.equals("---")) {
@@ -75,7 +76,8 @@ public class SpaceDataManager {
                 }
                 switch (stage) {
                     case 0:
-                        //format
+                        int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
+                        if (format == 0) useDefault = true;
                         break;
                     case 1:
                         String[] seeds =  s.split(" ");
@@ -111,7 +113,7 @@ public class SpaceDataManager {
                 }
             }
             scanner.close();
-            return true;
+            return !useDefault;
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to load data");
         }
