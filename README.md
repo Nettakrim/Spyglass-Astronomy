@@ -5,7 +5,7 @@ The mod is entirely client-side and designed for helping with worldbuilding and 
 
 Planets and stars will be the same for all players on a particular world, and are generated randomly (and largely scientifically accurately) per world, and you can easily share constellations between players using a client-side command
 
-![Planet overlooking a far away mountain](https://cdn.modrinth.com/data/EdBSdqge/images/2dc9459aa0b000240c470d16b1f08e4d194ed0a5.png)
+![Planet overlooking a far away mountain](https://cdn.modrinth.com/data/EdBSdqge/images/3dc17c154655fdc2dc7fc3989a38e16e9052d269.png)
 # How to use
 
 To interact with the cosmos there are three spyglass modes: vanilla, constellation (amethyst), and star (emerald), these are cycled with the pick block button (middle click) while zoomed in.
