@@ -14,9 +14,9 @@ Constellation mode allows you to draw constellations by holding the attack butto
 
 Star mode allows you to select stars and planets, note that comets are referred to as *planets* when using commands
 
-Once an object is selected you can name it with `/sga:name <name>`, or get useful information with `/sga:info`, you can also get the information of a specific object by following the suggestions after typing `/sga:info <x>`
+Once an object is selected you can name it with `/sga:name <name>`, or get useful information with `/sga:info`, you can also get the information of a specific object without selecting it by following the suggestions after typing `/sga:info <x>`
 
-If youre playing on a multiplayer server, you can use `/sga:share` or `/sga:share <x>` to share the currently selected or specified object respectively, this gives you a code you can send in chat or /message to someone directly, which allows them to easily add a constellation or name of a planet or star on their side, without the need for a server side mod.
+If youre playing on a multiplayer server, you can use `/sga:share` or `/sga:share <x>` to share the currently selected or specified object respectively, this gives you a code you can send in chat or /message to someone directly, which allows them to easily add a constellation or name of a planet or star on their side, provided they have the mod too, of course.
 
 All the client side commands can be seen by looking at the suggestions after typing `/sga:`, or by refering to the list below
 
