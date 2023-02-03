@@ -53,7 +53,7 @@ public class MouseMixin {
     )
     private double changeXSensitivity(double d) {
         ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-        if (player != null && player.isUsingSpyglass()) {
+        if (player != null && player.isUsingSpyglass() && SpyglassAstronomyClient.client.options.getPerspective().isFirstPerson()) {
             sensitivityScale = (float)Math.pow(1.25d, SpyglassAstronomyClient.zoom);
             float cosAngle = (MathHelper.cos(player.getPitch()/180*MathHelper.PI));
             if (cosAngle < 0) cosAngle *= -1;
