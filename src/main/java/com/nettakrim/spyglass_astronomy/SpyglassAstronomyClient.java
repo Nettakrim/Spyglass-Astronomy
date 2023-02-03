@@ -508,6 +508,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             Constellation potentialNew = target.addLineCanRemove(drawingLine);
             if (potentialNew != null) {
                 say("constellation.split", target.name);
+                constellations.add(potentialNew);
             }
             if (target.getLines().size() == 0) {
                 say("constellation.remove", target.name);
