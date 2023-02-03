@@ -36,6 +36,7 @@ public class Orbit {
     }
 
     public Vec3f getLocalPositionAtLocalTime(float t, boolean updateLastPos) {
+        if (t < 0) t++;
         if (updateLastPos) this.lastLocalTime = t;
         float f = getLocalAngleAtLocalTime(t);
         float cosAngle = MathHelper.cos(f);
