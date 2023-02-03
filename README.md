@@ -106,6 +106,10 @@ reverts to the last saved data, data is saved whenever you leave the world or ch
 
 bypass knowledge checks for `/sga:info` until a relog
 
+`/sga:admin setyearlength <days>`
+
+sets the length of the year in days, decimals are allowed but it has to be 0.125 or more, by default it is 8
+
 `/sga:admin setseed star <seed>`
 
 sets the seed that stars use to generate, by default this is the biome seed of the world

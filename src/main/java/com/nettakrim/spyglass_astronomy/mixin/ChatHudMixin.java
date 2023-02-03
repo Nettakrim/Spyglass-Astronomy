@@ -10,13 +10,15 @@ import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
+import net.minecraft.network.message.MessageSignatureData;
+import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.text.Text;
 
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
-    @Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V")
-    public void onChat(Text messageText, int messageId, int timestamp, boolean refresh, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "Lnet/minecraft/client/gui/hud/ChatHud;addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V")
+    public void onChat(Text messageText, MessageSignatureData messageSignatureData, MessageIndicator messageIndicator, CallbackInfo ci) {
         String message = messageText.getString();
         int sgaIndex = message.indexOf("sga:");
         if (sgaIndex == -1) return;
