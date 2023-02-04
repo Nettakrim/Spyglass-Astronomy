@@ -44,11 +44,11 @@ public class Knowledge {
     public MutableText getInstructionsToStarKnowledgeStage(int stage) {
         switch (stage) {
             case 1:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toadept", 5);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toadept", "5");
             case 2:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toexpert", 10, 3);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toexpert", "10", "3");
             case 3:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.tomaster", 20, 8);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.tomaster", "20", "8");
             default:
                 return Text.empty();
         }
@@ -84,11 +84,11 @@ public class Knowledge {
     public MutableText getInstructionsToOrbitKnowledgeStage(int stage) {
         switch (stage) {
             case 1:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toadept", planets/3, 1);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toadept", Integer.toString(planets/3), "1");
             case 2:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toexpert", planets/3*2, 2);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toexpert", Integer.toString(planets/3*2), "2");
             case 3:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.tomaster", planets-1, comets-1);
+                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.tomaster", Integer.toString(planets-1), Integer.toString(comets-1));
             default:
                 return Text.empty();
         }

@@ -177,7 +177,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                     text.append(translate("visibility.time.date", nearestDay, inDays));
                 }
             } else {
-                text.append(translate("visbility.time.always"));
+                text.append(translate("visibility.time.always"));
             }
         }
     }
