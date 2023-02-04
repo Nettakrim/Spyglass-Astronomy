@@ -210,7 +210,7 @@ public class SpyglassAstronomyCommands {
         .build();
 
         LiteralCommandNode<FabricClientCommandSource> removeNode = ClientCommandManager
-        .literal("remove")
+        .literal("removeconstellation")
         .then(
             ClientCommandManager.argument("name", MessageArgumentType.message())
             .suggests(constellations)
@@ -224,11 +224,6 @@ public class SpyglassAstronomyCommands {
             ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4095))
             .executes(AdminCommand::setStarCount)
         )
-        .build();
-
-        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
-        .literal("discardchanges")
-        .executes(AdminCommand::discardUnsavedChanges)
         .build();
 
         LiteralCommandNode<FabricClientCommandSource> bypassNode = ClientCommandManager
@@ -247,13 +242,13 @@ public class SpyglassAstronomyCommands {
         root.addChild(adminNode);
         adminNode.addChild(removeNode);
         adminNode.addChild(setStarCountNode);
-        adminNode.addChild(discardNode);
         adminNode.addChild(bypassNode);
         adminNode.addChild(yearLengthNode);
 
         registerAdminAddNode(adminNode);
         registerAdminSetSeedNode(adminNode);
         registerAdminRenameNode(adminNode);
+        registerAdminChangesNode(adminNode);
     }
 
     public static void registerAdminAddNode(LiteralCommandNode<FabricClientCommandSource> node) {
@@ -342,6 +337,32 @@ public class SpyglassAstronomyCommands {
         renameNode.addChild(constellationNameNode);
         renameNode.addChild(starNameNode);
         renameNode.addChild(orbitingBodyNameNode);
+    }
+
+    public static void registerAdminChangesNode(LiteralCommandNode<FabricClientCommandSource> node) {
+        LiteralCommandNode<FabricClientCommandSource> changesNode = ClientCommandManager
+        .literal("changes")
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
+        .literal("discard")
+        .executes(AdminCommand::discardUnsavedChanges)
+        .build();
+
+        LiteralCommandNode<FabricClientCommandSource> saveNode = ClientCommandManager
+        .literal("save")
+        .executes(AdminCommand::saveChanges)
+        .build();
+        
+        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
+        .literal("query")
+        .executes(AdminCommand::queryChanges)
+        .build();
+
+        node.addChild(changesNode);
+        changesNode.addChild(discardNode);
+        changesNode.addChild(saveNode);
+        changesNode.addChild(queryNode);
     }
 
     public static void registerHideNode(RootCommandNode<FabricClientCommandSource> root) {

@@ -85,7 +85,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             int distance = (int)((1-alpha)*1000);
             distance += star.index%100;
             if (distance < 1) distance = 1;
-            text.append(translate("star.distance", distance));
+            text.append(translate("star.distance", Integer.toString(distance)));
         }
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));

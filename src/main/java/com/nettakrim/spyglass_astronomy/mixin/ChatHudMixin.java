@@ -44,7 +44,7 @@ public class ChatHudMixin {
                     true,
                     constellationName
                 );
-                SpyglassAstronomyClient.sayText(constellationText, true);
+                SpyglassAstronomyClient.sayText(constellationText);
                 break;
             case 's':
                 //star shared with sga:s_Name|index|
@@ -63,7 +63,7 @@ public class ChatHudMixin {
                     true,
                     starName
                 );
-                SpyglassAstronomyClient.sayText(starText, true);
+                SpyglassAstronomyClient.sayText(starText);
                 break;
             case 'p':
                 //planets shared with sga:p_Name|index|
@@ -86,7 +86,7 @@ public class ChatHudMixin {
                     true,
                     orbitingBodyName
                 );
-                SpyglassAstronomyClient.sayText(orbitingBodyText, true);
+                SpyglassAstronomyClient.sayText(orbitingBodyText);
                 break;           
         }
     }

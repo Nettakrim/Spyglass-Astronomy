@@ -30,7 +30,7 @@ public class SpaceDataManager {
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
 
-    private static boolean changesMade;
+    private static int changesMade;
 
     public SpaceDataManager(ClientWorld world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
@@ -67,6 +67,7 @@ public class SpaceDataManager {
             int starIndex = 0;
             starDatas = new ArrayList<StarData>();
             orbitingBodyDatas = new ArrayList<OrbitingBodyData>();
+            changesMade = 0;
             boolean useDefault = false;
             while (scanner.hasNextLine()) {
                 String s = scanner.nextLine();
@@ -121,7 +122,7 @@ public class SpaceDataManager {
     }
 
     public void saveData() {
-        if (!changesMade) return;
+        if (changesMade == 0) return;
         try {
             FileWriter writer = new FileWriter(data);
             StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
@@ -163,7 +164,7 @@ public class SpaceDataManager {
 
             writer.write(s.toString());
             writer.close();
-            changesMade = false;
+            changesMade = 0;
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to save data");
         }
@@ -275,8 +276,12 @@ public class SpaceDataManager {
     }
 
     public static void makeChange() {
-        changesMade = true;
+        changesMade++;
         SpyglassAstronomyClient.updateKnowledge();
+    }
+
+    public static int getChanges() {
+        return changesMade;
     }
 
     public class StarData {

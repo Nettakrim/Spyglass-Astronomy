@@ -15,7 +15,6 @@ import com.nettakrim.spyglass_astronomy.OrbitingBody.OrbitingBodyType;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
@@ -56,8 +55,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static float zoom;
 
-    private static Stack<Text> sayBuffer = new Stack<Text>();
-
     public static Knowledge knowledge;
 
 	@Override
@@ -75,8 +72,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    public static void loadSpace(ClientWorld clientWorld) {
-        if (spaceDataManager != null) spaceDataManager.saveData();
+    public static void discardUnsavedChanges() {
+        loadSpace(world, false);
+    }
+
+    public static void loadSpace(ClientWorld clientWorld, boolean allowSave) {
+        if (spaceDataManager != null && allowSave) spaceDataManager.saveData();
 
         world = clientWorld;
 
@@ -387,10 +388,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             updateHover();
         }
         lastToggle = toggle;
-
-        while (!sayBuffer.empty()) {
-            say(sayBuffer.pop(), false);
-        }
     }
 
     private static void updateHover() {
@@ -497,7 +494,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                     for (StarLine line : constellation.getLines()) {
                         target.addLine(line);
                     }
-                    say("constellation.merge", Constellation.selected.name, target.name);
+                    say("constellation.merge", target.name, constellation.name);
+                    if (target.name.equals("Unnamed")) target.name = constellation.name;
                     constellations.remove(i);
                     break;
                 }
@@ -643,20 +641,16 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    private static void say(Text text, boolean buffer) {
-        if (buffer) {
-            sayBuffer.add(text);
-        } else {
-            client.player.sendMessage(text);
-        }
+    private static void say(Text text) {
+        client.player.sendMessage(text);
     }
 
     public static void say(String key, Object... args) {
-        say(Text.translatable(MODID+".say").append(Text.translatable(MODID+"."+key, args)), false);
+        say(Text.translatable(MODID+".say").append(Text.translatable(MODID+"."+key, args)));
     }
 
-    public static void sayText(Text text, boolean buffer) {
-        say(Text.translatable(MODID+".say").append(text), buffer);
+    public static void sayText(Text text) {
+        say(Text.translatable(MODID+".say").append(text));
     }
 
     public static void longSay(Text text) {

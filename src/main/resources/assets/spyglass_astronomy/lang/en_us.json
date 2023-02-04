@@ -1,9 +1,17 @@
 {
-    "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
-    "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
+    "spyglass_astronomy.commands.admin.removeconstellation" : "Removed Constellation \"%s\"",
+    "spyglass_astronomy.commands.admin.setstarcount" : "Set Star Count to %s (was %s)",
+    "spyglass_astronomy.commands.admin.setstarseed" : "Set Star Seed to %s (was %s)",
+    "spyglass_astronomy.commands.admin.setplanetseed" : "Set Planet Seed to %s (was %s)",
     "spyglass_astronomy.commands.admin.bypass.on" : "Knowledge Checks bypassed, run again to reset",
     "spyglass_astronomy.commands.admin.bypass.off" : "Knowledge Checks reenabled",
-    
+    "spyglass_astronomy.commands.admin.setyearlength" : "Set Star Seed to %s (was %s)",
+    "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
+    "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
+    "spyglass_astronomy.commands.admin.changes.discard" : "Discarded %s unsaved Changes",
+    "spyglass_astronomy.commands.admin.changes.save" : "Saved %s unsaved Changes",
+    "spyglass_astronomy.commands.admin.changes.query" : "There have been %s Changes since last save",
+
     "spyglass_astronomy.commands.hide.all" : "All hidden, run /sga:hide again to unhide",
     "spyglass_astronomy.commands.hide.constellations" : "Constellations hidden, run /sga:hide constellations again to unhide",
     "spyglass_astronomy.commands.hide.stars" : "Stars hidden, run /sga:hide stars again to unhide",
@@ -43,7 +51,7 @@
     "spyglass_astronomy.commands.info.constellation.name" : "\nName: %s",
 
     "spyglass_astronomy.commands.info.star.name" : "\nName: %s",
-    "spyglass_astronomy.commands.info.star.distance" : "\nDistance: %d LY",
+    "spyglass_astronomy.commands.info.star.distance" : "\nDistance: %s LY",
 
     "spyglass_astronomy.commands.info.planet.name" : "\nName: %s",
     "spyglass_astronomy.commands.info.planet.type.terrestial" : "\nType: Terrestial",

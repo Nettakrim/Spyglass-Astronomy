@@ -52,7 +52,7 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
             false,
             constellation.name
         );
-        SpyglassAstronomyClient.sayText(text, false);
+        SpyglassAstronomyClient.sayText(text);
     }
 
     public static void share(Star star) {
@@ -63,7 +63,7 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
             false,
             starName
         );
-        SpyglassAstronomyClient.sayText(text, false);
+        SpyglassAstronomyClient.sayText(text);
     }
 
     public static void share(OrbitingBody orbitingBody) {
@@ -74,6 +74,6 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
             false,
             orbitingBodyName
         );
-        SpyglassAstronomyClient.sayText(text, false);
+        SpyglassAstronomyClient.sayText(text);
     }
 }

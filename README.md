@@ -90,7 +90,7 @@ displays a [Click Here] button, clicking the button will open chat with some sug
 
 there is generally little reason to use `sga:admin` commands, but some may still be useful for messing around
 
-`/sga:admin remove <name>`
+`/sga:admin removeconstellation <name>`
 
 removes the constellation with name `<name>`
 
@@ -98,9 +98,11 @@ removes the constellation with name `<name>`
 
 changes the amount of stars in the sky to `<amount>`, default 1024, max 4095
 
-`/sga:admin discardchanges`
+`/sga:admin changes discard|save|query`
 
-reverts to the last saved data, data is saved whenever you leave the world or change dimension
+discard reverts to the last saved data
+save saves data is saved whenever you leave the world or change dimension
+qeury says how many changes since last save/discard, what counts as a change can be quite sensitive, so it may be higher than you expect
 
 `/sga:admin bypassknowledge`
 
