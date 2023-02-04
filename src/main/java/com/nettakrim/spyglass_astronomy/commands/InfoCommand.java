@@ -1,5 +1,7 @@
 package com.nettakrim.spyglass_astronomy.commands;
 
+import org.joml.Vector3f;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,7 +16,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class InfoCommand implements Command<FabricClientCommandSource> {
 	@Override
@@ -64,7 +66,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         MutableText text = Text.empty();
         text.append(translate("constellation.name", constellation.name));
 
-        Vec3f position = constellation.getAveragePosition();
+        Vector3f position = constellation.getAveragePosition();
         staticVisibilityInfo(text, position, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
@@ -76,7 +78,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         MutableText text = Text.empty();
         text.append(translate("star.name", star.name == null ? "Unnamed" : star.name));
 
-        Vec3f position = star.getPositionAsVec3f();
+        Vector3f position = star.getPositionAsVector3f();
         staticVisibilityInfo(text, position, flags);
 
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.MASTER, flags)) {
@@ -145,25 +147,25 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         SpyglassAstronomyClient.longSay(text);
     }
 
-    private static void staticVisibilityInfo(MutableText text, Vec3f position, int[] flags) {
-        Vec3f pos = position.copy();
-        pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
-        pos.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
-        pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
+    private static void staticVisibilityInfo(MutableText text, Vector3f position, int[] flags) {
+        Vector3f pos = new Vector3f(position);
+        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
+        pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
+        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
 
-        float yaw = (float)(Math.atan2(pos.getX(), pos.getZ())*-180d/Math.PI);
-        float angle = (float)(Math.atan2(Math.sqrt(pos.getX() * pos.getX() + pos.getZ() * pos.getZ()), pos.getY())*180d/Math.PI)-90;
+        float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+        float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
         
         text.append(translate("visibility.angle", prettyFloat(yaw), prettyFloat(angle)));
 
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
-            pos = position.copy();
-            pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
-            pos.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
-            pos.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            if (MathHelper.abs(pos.getZ()) < 0.9f) {
-                float referenceYaw = (float)(Math.atan2(pos.getX(), pos.getZ())*-180d/Math.PI);
-                angle = (float)(Math.atan2(Math.sqrt(pos.getX() * pos.getX() + pos.getZ() * pos.getZ()), pos.getY())*180d/Math.PI)-90;
+            pos = new Vector3f(position);
+            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
+            pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
+            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+            if (MathHelper.abs(pos.z) < 0.9f) {
+                float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+                angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
                 if (referenceYaw < 0) angle = 180 - angle;
                 if (angle < 0) angle += 360;
                 float period = SpyglassAstronomyClient.earthOrbit.period;
@@ -206,19 +208,19 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
-                Vec3f pos = orbit.getLastRotatedPosition();
+                Vector3f pos = orbit.getLastRotatedPosition();
 
-                Vec3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
-                pos.subtract(earthPos);
-                float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.getX(), pos.getY(), pos.getZ());
+                Vector3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
+                pos.sub(earthPos);
+                float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
 
                 text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
 
                 pos.normalize();
-                pos.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+                pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
-                float yaw = (float)(Math.atan2(pos.getX(), pos.getZ())*-180d/Math.PI);
-                float angle = (float)(Math.atan2(Math.sqrt(pos.getX() * pos.getX() + pos.getZ() * pos.getZ()), pos.getY())*180d/Math.PI)-90;
+                float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+                float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
                 
                 text.append(translate("orbit.angle", prettyFloat(yaw), prettyFloat(angle)));
             }

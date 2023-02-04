@@ -1,8 +1,9 @@
 package com.nettakrim.spyglass_astronomy;
 
+import org.joml.Vector3f;
+
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
 
 //https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java
 
@@ -98,8 +99,8 @@ public class Star {
         }
     }
 
-    public Vec3f getRenderedPosition() {
-        return new Vec3f(xCoord*100, yCoord*100, zCoord*100);
+    public Vector3f getRenderedPosition() {
+        return new Vector3f(xCoord*100, yCoord*100, zCoord*100);
     }
 
     public int[] getColor() {
@@ -110,8 +111,8 @@ public class Star {
         return new float[]{xCoord, yCoord, zCoord};
     }
 
-    public Vec3f getPositionAsVec3f() {
-        return new Vec3f(xCoord, yCoord, zCoord);
+    public Vector3f getPositionAsVector3f() {
+        return new Vector3f(xCoord, yCoord, zCoord);
     }
 
     public void connect() {

@@ -2,16 +2,17 @@ package com.nettakrim.spyglass_astronomy;
 
 import java.util.ArrayList;
 
+import org.joml.Vector3f;
+
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
 
 public class Constellation {
     private ArrayList<StarLine> lines = new ArrayList<>();
 
     public String name = "Unnamed";
 
-    private Vec3f averagePositionBuffer;
+    private Vector3f averagePositionBuffer;
     private boolean averagePositionValid;
 
     public static Constellation selected;
@@ -164,10 +165,10 @@ public class Constellation {
         }
     }
 
-    public Vec3f getAveragePosition() {
+    public Vector3f getAveragePosition() {
         if (averagePositionValid) return averagePositionBuffer;
 
-        averagePositionBuffer = new Vec3f();
+        averagePositionBuffer = new Vector3f();
         ArrayList<Star> stars = new ArrayList<Star>();
         for (StarLine line : lines) {
             Star[] lineStars = line.getStars();
@@ -175,16 +176,16 @@ public class Constellation {
             if (!stars.contains(lineStars[1])) stars.add(lineStars[1]);
         }
         for (Star star : stars) {
-            averagePositionBuffer.add(star.getPositionAsVec3f());
+            averagePositionBuffer.add(star.getPositionAsVector3f());
         }
-        float x = averagePositionBuffer.getX();
-        float y = averagePositionBuffer.getY();
-        float z = averagePositionBuffer.getZ();
+        float x = averagePositionBuffer.x;
+        float y = averagePositionBuffer.y;
+        float z = averagePositionBuffer.z;
         float isqrt = MathHelper.fastInverseSqrt(x * x + y * y + z * z);
-        averagePositionBuffer.scale(isqrt);
+        averagePositionBuffer.mul(isqrt);
         averagePositionValid = true;
 
-        return averagePositionBuffer.copy();
+        return new Vector3f(averagePositionBuffer);
     }
 
     public void select() {

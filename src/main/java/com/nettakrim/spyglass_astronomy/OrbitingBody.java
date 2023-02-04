@@ -2,10 +2,12 @@ package com.nettakrim.spyglass_astronomy;
 
 import java.util.ArrayList;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class OrbitingBody {
     public final Orbit orbit;
@@ -23,18 +25,18 @@ public class OrbitingBody {
     private float angle;
     private int currentAlpha;
 
-    private Vec3f axis1;
-    private Vec3f axis2;
-    private Vec3f quad1vertex1;
-    private Vec3f quad1vertex2;
-    private Vec3f quad1vertex3;
-    private Vec3f quad1vertex4;
-    private Vec3f quad2vertex1;
-    private Vec3f quad2vertex2;
-    private Vec3f quad2vertex3;
-    private Vec3f quad2vertex4;    
+    private Vector3f axis1;
+    private Vector3f axis2;
+    private Vector3f quad1vertex1;
+    private Vector3f quad1vertex2;
+    private Vector3f quad1vertex3;
+    private Vector3f quad1vertex4;
+    private Vector3f quad2vertex1;
+    private Vector3f quad2vertex2;
+    private Vector3f quad2vertex3;
+    private Vector3f quad2vertex4;    
 
-    private Vec3f position;
+    private Vector3f position;
 
     public String name;
 
@@ -57,19 +59,19 @@ public class OrbitingBody {
         moons.add(moon);
     }
 
-    public void update(int ticks, Vec3f referencePosition, Vec3f normalisedReferencePosition, Long day, float dayFraction) {
+    public void update(int ticks, Vector3f referencePosition, Vector3f normalisedReferencePosition, Long day, float dayFraction) {
         angle = (angle+rotationSpeed)%360;
 
         position = orbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
         
-        Vec3f similarityVector = position.copy();
+        Vector3f similarityVector = new Vector3f(position);
         similarityVector.normalize();
         float similarity = similarityVector.dot(normalisedReferencePosition);
     
-        position.subtract(referencePosition);
-        float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(position.getX(), position.getY(), position.getZ());
+        position.sub(referencePosition);
+        float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(position.x, position.y, position.z);
         float inverseSqrt = MathHelper.fastInverseSqrt(sqrDistance);
-        position.scale(inverseSqrt);
+        position.mul(inverseSqrt);
 
         float distance = (1/inverseSqrt)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis;
 
@@ -79,20 +81,20 @@ public class OrbitingBody {
         {
             //it may seem a bit weird allowing dayFraction to be outside of 0-1, but it doesnt matter
             axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/32), false);
-            axis1.subtract(referencePosition);
+            axis1.sub(referencePosition);
             axis1.normalize();
-            axis1.subtract(position);
+            axis1.sub(position);
             axis1.normalize();
 
-            axis2 = axis1.copy();
-            axis2.rotate(position.getDegreesQuaternion(90));
+            axis2 = new Vector3f(axis1);
+            axis2.rotate(RotationAxis.of(position).rotationDegrees(90));
         
             float sizeScale = MathHelper.clamp(
                 (size/visibilityScale)*3,
             0.25f,1.5f);
 
-            axis1.scale(sizeScale);
-            axis2.scale(sizeScale);
+            axis1.mul(sizeScale);
+            axis2.mul(sizeScale);
         }
         
         float heightScale = SpaceRenderingManager.getHeightScale();
@@ -113,21 +115,21 @@ public class OrbitingBody {
         }
         currentAlpha = (int)(alphaRaw*255);
 
-        Quaternion rotation = position.getDegreesQuaternion(angle);
-        Vec3f rotatedAxis1 = axis1.copy();
-        Vec3f rotatedAxis2 = axis2.copy();
+        Quaternionf rotation = RotationAxis.of(position).rotationDegrees(angle);
+        Vector3f rotatedAxis1 = new Vector3f(axis1);
+        Vector3f rotatedAxis2 = new Vector3f(axis2);
         rotatedAxis1.rotate(rotation);
         rotatedAxis2.rotate(rotation);
 
-        float x = position.getX()*100;
-        float y = position.getY()*100;
-        float z = position.getZ()*100;
-        quad1vertex1 = new Vec3f(x, y, z);
-        quad1vertex2 = new Vec3f(x, y, z);
-        quad1vertex3 = new Vec3f(x, y, z);
-        quad1vertex4 = new Vec3f(x, y, z);
-        quad1vertex1.subtract(rotatedAxis2);
-        quad1vertex2.subtract(rotatedAxis1);
+        float x = position.x*100;
+        float y = position.y*100;
+        float z = position.z*100;
+        quad1vertex1 = new Vector3f(x, y, z);
+        quad1vertex2 = new Vector3f(x, y, z);
+        quad1vertex3 = new Vector3f(x, y, z);
+        quad1vertex4 = new Vector3f(x, y, z);
+        quad1vertex1.sub(rotatedAxis2);
+        quad1vertex2.sub(rotatedAxis1);
         quad1vertex3.add(rotatedAxis2);
         quad1vertex4.add(rotatedAxis1);        
 
@@ -135,34 +137,34 @@ public class OrbitingBody {
             switch (decoration) {
                 case 0:
                     //triangle half
-                    quad2vertex1 = new Vec3f(x, y, z);
-                    quad2vertex2 = quad1vertex2.copy();
-                    quad2vertex3 = quad1vertex3.copy();
-                    quad2vertex4 = quad1vertex4.copy();
+                    quad2vertex1 = new Vector3f(x, y, z);
+                    quad2vertex2 = new Vector3f(quad1vertex2);
+                    quad2vertex3 = new Vector3f(quad1vertex3);
+                    quad2vertex4 = new Vector3f(quad1vertex4);
                     break;
                 case 1:
                     //ring
                     float ringOut = 1.3f;
                     float ringIn = 0.9f;
-                    Quaternion slowOppositeRotation = position.getDegreesQuaternion(-angle/2);
-                    Vec3f in1 = axis1.copy();
+                    Quaternionf slowOppositeRotation = RotationAxis.of(position).rotationDegrees(-angle/2);
+                    Vector3f in1 = new Vector3f(axis1);
                     in1.rotate(slowOppositeRotation);
-                    Vec3f out1 = in1.copy();
-                    Vec3f in2 = axis2.copy();
+                    Vector3f out1 = new Vector3f(in1);
+                    Vector3f in2 = new Vector3f(axis2);
                     in2.rotate(slowOppositeRotation);
-                    Vec3f out2 = in2.copy();
-                    in1.scale(ringIn);
-                    out1.scale(ringOut);
-                    in2.scale(ringIn);
-                    out2.scale(ringOut);
-                    quad2vertex1 = new Vec3f(x, y, z);
-                    quad2vertex2 = new Vec3f(x, y, z);
-                    quad2vertex3 = new Vec3f(x, y, z);
-                    quad2vertex4 = new Vec3f(x, y, z);
-                    quad2vertex1.subtract(out2);
-                    quad2vertex1.subtract(in1);
-                    quad2vertex2.subtract(out1);
-                    quad2vertex2.subtract(in2);  
+                    Vector3f out2 = new Vector3f(in2);
+                    in1.mul(ringIn);
+                    out1.mul(ringOut);
+                    in2.mul(ringIn);
+                    out2.mul(ringOut);
+                    quad2vertex1 = new Vector3f(x, y, z);
+                    quad2vertex2 = new Vector3f(x, y, z);
+                    quad2vertex3 = new Vector3f(x, y, z);
+                    quad2vertex4 = new Vector3f(x, y, z);
+                    quad2vertex1.sub(out2);
+                    quad2vertex1.sub(in1);
+                    quad2vertex2.sub(out1);
+                    quad2vertex2.sub(in2);  
                     quad2vertex3.add(out2);
                     quad2vertex3.add(in1);
                     quad2vertex4.add(out1);
@@ -170,42 +172,42 @@ public class OrbitingBody {
                     break;
                 case 2,3:
                     //quater, quater with point
-                    if (decoration == 2) quad2vertex1 = new Vec3f(x, y, z);
-                    else quad2vertex1 = quad1vertex1.copy();
-                    quad2vertex2 = new Vec3f(x, y, z);
-                    quad2vertex3 = quad1vertex3.copy();
-                    quad2vertex4 = new Vec3f(x, y, z);
-                    Vec3f offset1 = rotatedAxis2.copy();
-                    Vec3f offset2 = rotatedAxis2.copy();
+                    if (decoration == 2) quad2vertex1 = new Vector3f(x, y, z);
+                    else quad2vertex1 = new Vector3f(quad1vertex1);
+                    quad2vertex2 = new Vector3f(x, y, z);
+                    quad2vertex3 = new Vector3f(quad1vertex3);
+                    quad2vertex4 = new Vector3f(x, y, z);
+                    Vector3f offset1 = new Vector3f(rotatedAxis2);
+                    Vector3f offset2 = new Vector3f(rotatedAxis2);
                     offset1.add(rotatedAxis1);
-                    offset2.subtract(rotatedAxis1);
-                    offset1.scale(0.5f);
-                    offset2.scale(0.5f);
+                    offset2.sub(rotatedAxis1);
+                    offset1.mul(0.5f);
+                    offset2.mul(0.5f);
                     quad2vertex2.add(offset2);
                     quad2vertex4.add(offset1);
                     break;
             }
         } else {
-            quad2vertex1 = new Vec3f(x, y, z);
-            quad2vertex2 = new Vec3f(x, y, z);
-            quad2vertex3 = new Vec3f(x, y, z);
-            quad2vertex4 = new Vec3f(x, y, z);
-            Vec3f trailEnd = axis1.copy();
-            trailEnd.scale(6);
+            quad2vertex1 = new Vector3f(x, y, z);
+            quad2vertex2 = new Vector3f(x, y, z);
+            quad2vertex3 = new Vector3f(x, y, z);
+            quad2vertex4 = new Vector3f(x, y, z);
+            Vector3f trailEnd = new Vector3f(axis1);
+            trailEnd.mul(6);
             quad2vertex1.add(trailEnd);
             quad2vertex2.add(trailEnd);
             quad2vertex3.add(axis1);
             quad2vertex4.add(axis1);
 
-            Vec3f trailWidth = axis2.copy();
-            trailWidth.scale(0.75f);
+            Vector3f trailWidth = new Vector3f(axis2);
+            trailWidth.mul(0.75f);
 
             if (decoration != 0) {
                 quad2vertex1.add(trailWidth);
-                quad2vertex2.subtract(trailWidth);                
+                quad2vertex2.sub(trailWidth);                
             }
             if (decoration != 2) {
-                quad2vertex3.subtract(trailWidth);
+                quad2vertex3.sub(trailWidth);
                 quad2vertex4.add(trailWidth);
             }
         }
@@ -222,55 +224,55 @@ public class OrbitingBody {
         int decorationAlpha = currentAlpha/3;
 
         bufferBuilder.vertex(
-            quad1vertex1.getX(),
-            quad1vertex1.getY(),
-            quad1vertex1.getZ()
+            quad1vertex1.x,
+            quad1vertex1.y,
+            quad1vertex1.z
         ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
-            quad1vertex2.getX(),
-            quad1vertex2.getY(),
-            quad1vertex2.getZ()
+            quad1vertex2.x,
+            quad1vertex2.y,
+            quad1vertex2.z
         ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
-            quad1vertex3.getX(),
-            quad1vertex3.getY(),
-            quad1vertex3.getZ()
+            quad1vertex3.x,
+            quad1vertex3.y,
+            quad1vertex3.z
         ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
-            quad1vertex4.getX(),
-            quad1vertex4.getY(),
-            quad1vertex4.getZ()
+            quad1vertex4.x,
+            quad1vertex4.y,
+            quad1vertex4.z
         ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
-            quad2vertex1.getX(),
-            quad2vertex1.getY(),
-            quad2vertex1.getZ()
+            quad2vertex1.x,
+            quad2vertex1.y,
+            quad2vertex1.z
         ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
-            quad2vertex2.getX(),
-            quad2vertex2.getY(),
-            quad2vertex2.getZ()
+            quad2vertex2.x,
+            quad2vertex2.y,
+            quad2vertex2.z
         ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
-            quad2vertex3.getX(),
-            quad2vertex3.getY(),
-            quad2vertex3.getZ()
+            quad2vertex3.x,
+            quad2vertex3.y,
+            quad2vertex3.z
         ).color(r2, g2, b2, decorationAlpha).next();
 
         bufferBuilder.vertex(
-            quad2vertex4.getX(),
-            quad2vertex4.getY(),
-            quad2vertex4.getZ()
+            quad2vertex4.x,
+            quad2vertex4.y,
+            quad2vertex4.z
         ).color(r2, g2, b2, decorationAlpha).next();        
     }
 
-    public Vec3f getPosition() {
+    public Vector3f getPosition() {
         return position;
     }
 

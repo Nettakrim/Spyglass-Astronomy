@@ -1,7 +1,8 @@
 package com.nettakrim.spyglass_astronomy;
 
+import org.joml.Vector3f;
+
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.MathHelper;
 
 public class StarLine {
@@ -12,16 +13,16 @@ public class StarLine {
     private int starAIndex;
     private int starBIndex;
 
-    private Vec3f starAPosition;
-    private Vec3f starBPosition;
+    private Vector3f starAPosition;
+    private Vector3f starBPosition;
 
     private int[] starAColor;
     private int[] starBColor;
 
-    private Vec3f vertexA1;
-    private Vec3f vertexA2;
-    private Vec3f vertexB1;
-    private Vec3f vertexB2;
+    private Vector3f vertexA1;
+    private Vector3f vertexA2;
+    private Vector3f vertexB1;
+    private Vector3f vertexB2;
 
     public StarLine(int startIndex, int endIndex, boolean starsReady) {
         this.starAIndex = startIndex;
@@ -57,7 +58,7 @@ public class StarLine {
         this.starBColor = new int[]{255,255,255,255};
     }
 
-    public void updateDrawing(Vec3f position) {
+    public void updateDrawing(Vector3f position) {
         this.starBPosition = position;
         calculateVertices();
     }
@@ -76,44 +77,44 @@ public class StarLine {
     }
 
     public float getSquaredLength() {
-        Vec3f length = new Vec3f(starAPosition.getX(), starAPosition.getY(), starAPosition.getZ());
-        length.subtract(starBPosition);
-        return SpyglassAstronomyClient.getSquaredDistance(length.getX(), length.getY(), length.getZ());
+        Vector3f length = new Vector3f(starAPosition.x, starAPosition.y, starAPosition.z);
+        length.sub(starBPosition);
+        return SpyglassAstronomyClient.getSquaredDistance(length.x, length.y, length.z);
     }
 
     public void calculateVertices() {
-        Vec3f direction = new Vec3f(starBPosition.getX(),starBPosition.getY(),starBPosition.getZ());
-        direction.subtract(starAPosition);
-        float dirX = direction.getX();
-        float dirY = direction.getY();
-        float dirZ = direction.getZ();
+        Vector3f direction = new Vector3f(starBPosition.x,starBPosition.y,starBPosition.z);
+        direction.sub(starAPosition);
+        float dirX = direction.x;
+        float dirY = direction.y;
+        float dirZ = direction.z;
         float sqrDistance = dirX * dirX + dirY * dirY + dirZ * dirZ;
         direction.normalize();
-        direction.scale(distance * (Math.min(MathHelper.sqrt(sqrDistance), 4f)/4));
+        direction.mul(distance * (Math.min(MathHelper.sqrt(sqrDistance), 4f)/4));
 
-        Vec3f perpendicular = direction.copy();
+        Vector3f perpendicular = new Vector3f(direction);
         perpendicular.cross(starAPosition);
         perpendicular.normalize();
-        perpendicular.scale(width);
+        perpendicular.mul(width);
 
-        float posAX = starAPosition.getX() + direction.getX();
-        float posAY = starAPosition.getY() + direction.getY();
-        float posAZ = starAPosition.getZ() + direction.getZ();
+        float posAX = starAPosition.x + direction.x;
+        float posAY = starAPosition.y + direction.y;
+        float posAZ = starAPosition.z + direction.z;
 
-        vertexA1 = new Vec3f(posAX + perpendicular.getX(), posAY + perpendicular.getY(), posAZ + perpendicular.getZ());
-        vertexA2 = new Vec3f(posAX - perpendicular.getX(), posAY - perpendicular.getY(), posAZ - perpendicular.getZ());
+        vertexA1 = new Vector3f(posAX + perpendicular.x, posAY + perpendicular.y, posAZ + perpendicular.z);
+        vertexA2 = new Vector3f(posAX - perpendicular.x, posAY - perpendicular.y, posAZ - perpendicular.z);
 
-        perpendicular = new Vec3f(-direction.getX(),-direction.getY(),-direction.getZ());
+        perpendicular = new Vector3f(-direction.x,-direction.y,-direction.z);
         perpendicular.cross(starAPosition);
         perpendicular.normalize();
-        perpendicular.scale(width);
+        perpendicular.mul(width);
 
-        float posBX = starBPosition.getX() - direction.getX();
-        float posBY = starBPosition.getY() - direction.getY();
-        float posBZ = starBPosition.getZ() - direction.getZ();
+        float posBX = starBPosition.x - direction.x;
+        float posBY = starBPosition.y - direction.y;
+        float posBZ = starBPosition.z - direction.z;
 
-        vertexB1 = new Vec3f(posBX + perpendicular.getX(), posBY + perpendicular.getY(), posBZ + perpendicular.getZ());
-        vertexB2 = new Vec3f(posBX - perpendicular.getX(), posBY - perpendicular.getY(), posBZ - perpendicular.getZ());
+        vertexB1 = new Vector3f(posBX + perpendicular.x, posBY + perpendicular.y, posBZ + perpendicular.z);
+        vertexB2 = new Vector3f(posBX - perpendicular.x, posBY - perpendicular.y, posBZ - perpendicular.z);
     }
 
     public void setVertices(BufferBuilder bufferBuilder, boolean isSelected) {
@@ -148,27 +149,27 @@ public class StarLine {
         }
 
         bufferBuilder.vertex(
-            vertexA1.getX(),
-            vertexA1.getY(),
-            vertexA1.getZ())
+            vertexA1.x,
+            vertexA1.y,
+            vertexA1.z)
         .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
-            vertexA2.getX(),
-            vertexA2.getY(),
-            vertexA2.getZ())
+            vertexA2.x,
+            vertexA2.y,
+            vertexA2.z)
         .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
-            vertexB1.getX(),
-            vertexB1.getY(),
-            vertexB1.getZ())
+            vertexB1.x,
+            vertexB1.y,
+            vertexB1.z)
         .color(br, bg, bb, ba).next();
 
         bufferBuilder.vertex(
-            vertexB2.getX(),
-            vertexB2.getY(),
-            vertexB2.getZ())
+            vertexB2.x,
+            vertexB2.y,
+            vertexB2.z)
         .color(br, bg, bb, ba).next();
     }
 

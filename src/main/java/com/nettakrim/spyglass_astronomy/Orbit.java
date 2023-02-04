@@ -1,7 +1,9 @@
 package com.nettakrim.spyglass_astronomy;
 
+import org.joml.Vector3f;
+
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class Orbit {
     public final float period;
@@ -35,30 +37,30 @@ public class Orbit {
         return KeplerLookup.getAt(eccentricity, (t%1)*2);
     }
 
-    public Vec3f getLocalPositionAtLocalTime(float t, boolean updateLastPos) {
+    public Vector3f getLocalPositionAtLocalTime(float t, boolean updateLastPos) {
         if (t < 0) t++;
         if (updateLastPos) this.lastLocalTime = t;
         float f = getLocalAngleAtLocalTime(t);
         float cosAngle = MathHelper.cos(f);
         float scale = distance/(1+eccentricity*cosAngle);
-        return new Vec3f(cosAngle * scale, MathHelper.sin(f) * scale, 0);
+        return new Vector3f(cosAngle * scale, MathHelper.sin(f) * scale, 0);
     }
 
-    public Vec3f getRotatedPositionAtGlobalTime(Long day, float dayFraction, boolean updateLastPos) {
-        Vec3f pos = getLocalPositionAtLocalTime((((day%period)/period)+(dayFraction/period)+timeOffset)%1, updateLastPos);
+    public Vector3f getRotatedPositionAtGlobalTime(Long day, float dayFraction, boolean updateLastPos) {
+        Vector3f pos = getLocalPositionAtLocalTime((((day%period)/period)+(dayFraction/period)+timeOffset)%1, updateLastPos);
         rotateLocalPosition(pos);
         return pos;
     }
 
-    public void rotateLocalPosition(Vec3f vector) {
+    public void rotateLocalPosition(Vector3f vector) {
         //ascending node is always such that the highest and lowest points relative to the reference plane are the apoapsis and periapsis
         //in other words, i think inclination is actually incorrect? idk
-        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(inclination));
-        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotation));
+        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(inclination));
+        vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
     }
 
-    public Vec3f getLastRotatedPosition() {
-        Vec3f pos = getLocalPositionAtLocalTime(lastLocalTime, false);
+    public Vector3f getLastRotatedPosition() {
+        Vector3f pos = getLocalPositionAtLocalTime(lastLocalTime, false);
         rotateLocalPosition(pos);
         return pos;
     }

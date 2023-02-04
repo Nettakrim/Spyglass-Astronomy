@@ -8,6 +8,7 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 import java.util.ArrayList;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class SpyglassAstronomyClient implements ClientModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -396,9 +397,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (editMode == 2) {
                 astralObject = getNearestAstralObjectToCursor();
             } else {
-                Vec3f lookVector = getLookVector();
+                Vector3f lookVector = getLookVector();
                 rotateVectorToStarRotation(lookVector);
-                astralObject = new AstralObject(getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ()));
+                astralObject = new AstralObject(getNearestStar(lookVector.x, lookVector.y, lookVector.z));
             }
             if (AstralObject.isNull(astralObject)) return;
             if (astralObject.isStar) {
@@ -438,15 +439,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void selectStar() {
-        Vec3f lookVector = getLookVector();
+        Vector3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
-        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+        Star star = getNearestStar(lookVector.x, lookVector.y, lookVector.z);
         if (star == null) return;
         star.select();
     }
 
     public static void selectAstralObject() {
-        Vec3f lookVector = getLookVector();
+        Vector3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
         AstralObject astralObject = getNearestAstralObjectToCursor();
         if (astralObject == null) return;
@@ -454,9 +455,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void startDrawingConstellation() {
-        Vec3f lookVector = getLookVector();
+        Vector3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
-        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+        Star star = getNearestStar(lookVector.x, lookVector.y, lookVector.z);
         if (star == null) return;
 
         selectConstellation(star, true);
@@ -477,9 +478,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (!isDrawingConstellation) return;
         isDrawingConstellation = false;
 
-        Vec3f lookVector = getLookVector();
+        Vector3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
-        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+        Star star = getNearestStar(lookVector.x, lookVector.y, lookVector.z);
 
         if(star == null || !drawingLine.finishDrawing(star)) {
             return;
@@ -522,17 +523,17 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void updateDrawingConstellation() {
-        Vec3f lookVector = getLookVector();
+        Vector3f lookVector = getLookVector();
         rotateVectorToStarRotation(lookVector);
-        Star star = getNearestStar(lookVector.getX(), lookVector.getY(), lookVector.getZ());
+        Star star = getNearestStar(lookVector.x, lookVector.y, lookVector.z);
         if (star == null || drawingLine.hasStar(star.index)) {
-            drawingLine.updateDrawing(new Vec3f(lookVector.getX() * 100, lookVector.getY() * 100, lookVector.getZ() * 100));
+            drawingLine.updateDrawing(new Vector3f(lookVector.x * 100, lookVector.y * 100, lookVector.z * 100));
         } else {
             drawingLine.updateDrawing(star.getRenderedPosition());
         }
     }
 
-    public static Vec3f getLookVector() {
+    public static Vector3f getLookVector() {
         float pitch = client.player.getPitch() / 180 * MathHelper.PI;
         float yaw = client.player.getYaw() / 180 * MathHelper.PI;
         float x = -MathHelper.sin(yaw);
@@ -541,17 +542,17 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float scale = MathHelper.cos(pitch);
         x *= scale;
         z *= scale;
-        return new Vec3f(x, y, z);        
+        return new Vector3f(x, y, z);        
     }
 
-    public static void rotateVectorToStarRotation(Vec3f vector) {
-        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0f));
-        vector.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(getStarAngle()*-1));
-        vector.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-45f));
+    public static void rotateVectorToStarRotation(Vector3f vector) {
+        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(90.0f));
+        vector.rotate(RotationAxis.POSITIVE_X.rotationDegrees(getStarAngle()*-1));
+        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45f));
     }
 
-    public static void rotateVectorToOrbitingBodyRotation(Vec3f vector) {
-        vector.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+    public static void rotateVectorToOrbitingBodyRotation(Vector3f vector) {
+        vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
     }    
 
     public static Star getNearestStar(float x, float y, float z) {
@@ -580,16 +581,16 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         OrbitingBody nearestOrbitingBody = null;
         boolean isStar = false;
 
-        Vec3f lookVector = getLookVector();
-        Vec3f rotatedToBody = lookVector.copy();
+        Vector3f lookVector = getLookVector();
+        Vector3f rotatedToBody = new Vector3f(lookVector);
         rotateVectorToOrbitingBodyRotation(rotatedToBody);
-        float x = rotatedToBody.getX();
-        float y = rotatedToBody.getY();
-        float z = rotatedToBody.getZ();
+        float x = rotatedToBody.x;
+        float y = rotatedToBody.y;
+        float z = rotatedToBody.z;
 
         for (OrbitingBody orbitingBody : orbitingBodies) {
-            Vec3f pos = orbitingBody.getPosition();
-            float currentDistance = getSquaredDistance(x - pos.getX(), y - pos.getY(), z - pos.getZ());
+            Vector3f pos = orbitingBody.getPosition();
+            float currentDistance = getSquaredDistance(x - pos.x, y - pos.y, z - pos.z);
             if (currentDistance < nearestDistance) {
                 nearestDistance = currentDistance;
                 nearestOrbitingBody = orbitingBody;
@@ -597,9 +598,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         rotateVectorToStarRotation(lookVector);
-        x = lookVector.getX();
-        y = lookVector.getY();
-        z = lookVector.getZ();
+        x = lookVector.x;
+        y = lookVector.y;
+        z = lookVector.z;
 
         for (Star star : stars) {
             float[] pos = star.getPosition();

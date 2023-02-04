@@ -12,8 +12,10 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -111,8 +113,8 @@ public class SpaceRenderingManager {
         Long day = SpyglassAstronomyClient.getDay();
         float dayFraction = SpyglassAstronomyClient.getDayFraction();
 
-        Vec3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
-        Vec3f normalisedReferencePosition = referencePosition.copy();
+        Vector3f referencePosition = SpyglassAstronomyClient.earthOrbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
+        Vector3f normalisedReferencePosition = new Vector3f(referencePosition);
         normalisedReferencePosition.normalize();
 
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
@@ -138,37 +140,37 @@ public class SpaceRenderingManager {
         if (starVisibility > 0) {
             matrices.pop();
             matrices.push();
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(SpyglassAstronomyClient.getStarAngle()));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(45f));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
             BackgroundRenderer.clearFog();
             
             if (starsVisible) {
                 starsBuffer.bind();
-                starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+                starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
                 VertexBuffer.unbind();
             }
 
             if (constellationsVisible) {
                 constellationsBuffer.bind();
-                constellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+                constellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
                 VertexBuffer.unbind();
                 if (SpyglassAstronomyClient.isDrawingConstellation) {
                     updateDrawingConstellation();
                     drawingConstellationsBuffer.bind();
-                    drawingConstellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+                    drawingConstellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
                 }
             }
 
             if (orbitingBodiesVisible) {
                 matrices.pop();
                 matrices.push();
-                matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
 
                 planetsBuffer.bind();
-                planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorShader());
+                planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
                 VertexBuffer.unbind();
             }
 

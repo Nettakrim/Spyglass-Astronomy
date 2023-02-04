@@ -23,25 +23,25 @@ public class HideCommand implements Command<FabricClientCommandSource> {
 
     public static int hideConstellations(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.constellationsVisible = !SpaceRenderingManager.constellationsVisible;
-        if (!SpaceRenderingManager.constellationsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.constellations");
+        if (!SpaceRenderingManager.constellationsVisible) SpyglassAstronomyClient.say("commands.hide.constellations");
         return 1;
     }
 
     public static int hideStars(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.starsVisible = !SpaceRenderingManager.starsVisible;
-        if (!SpaceRenderingManager.starsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.stars");
+        if (!SpaceRenderingManager.starsVisible) SpyglassAstronomyClient.say("commands.hide.stars");
         return 1;
     }
 
     public static int hideOrbitingBodies(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.orbitingBodiesVisible = !SpaceRenderingManager.orbitingBodiesVisible;
-        if (!SpaceRenderingManager.orbitingBodiesVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.planets");
+        if (!SpaceRenderingManager.orbitingBodiesVisible) SpyglassAstronomyClient.say("commands.hide.planets");
         return 1;
     }
 
     public static int hideOldStars(CommandContext<FabricClientCommandSource> context) {
         SpaceRenderingManager.oldStarsVisible = !SpaceRenderingManager.oldStarsVisible;
-        if (SpaceRenderingManager.oldStarsVisible) SpyglassAstronomyClient.say("spyglass_astronomy.commands.hide.vanillastars");
+        if (SpaceRenderingManager.oldStarsVisible) SpyglassAstronomyClient.say("commands.hide.vanillastars");
         return 1;
     }
 
