@@ -138,3 +138,13 @@ toggles visiblity of the respective type of object
 `/sga:hide vanillastars`
 
 toggles visiblity of the boring, vanilla stars, i dont know why you would want to do this
+
+# Helpful code i used here and there
+
+[Nicer Skies](https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java)
+
+[Bobby](https://github.com/Johni0702/bobby/blob/master/src/main/java/de/johni0702/minecraft/bobby/mixin/BiomeAccessAccessor.java), [Bobby](https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L342), and [Bobby Yet Again](https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86)
+
+[Absolutely Not A Zoom Mod](https://github.com/Nova-Committee/AbsolutelyNotAZoomMod/blob/fabric/universal/src/main/java/committee/nova/anazm/mixin/GameRendererMixin.java)
+
+[Time Display](https://github.com/Iru21/TimeDisplay/blob/master/src/main/kotlin/me/iru/timedisplay/TimeUtils.kt)
