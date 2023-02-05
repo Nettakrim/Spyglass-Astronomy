@@ -33,7 +33,7 @@ public class WorldRendererMixin {
 
     @Inject(
         method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V",
-        at = @At(value = "INVOKE", ordinal = 0, target="Lnet/minecraft/client/world/ClientWorld;method_23787(F)F")
+        at = @At(value = "INVOKE", ordinal = 4, target="Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V")
     )
     public void renderSky(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
         SpyglassAstronomyClient.spaceRenderingManager.Render(matrices, projectionMatrix, tickDelta, camera, bl, runnable);
