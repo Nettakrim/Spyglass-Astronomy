@@ -101,7 +101,9 @@ changes the amount of stars in the sky to `<amount>`, default 1024, max 4095
 `/sga:admin changes discard|save|query`
 
 discard reverts to the last saved data
-save saves data is saved whenever you leave the world or change dimension
+
+save saves data, although it is saved automatically whenever you leave the world or change dimension
+
 qeury says how many changes since last save/discard, what counts as a change can be quite sensitive, so it may be higher than you expect
 
 `/sga:admin bypassknowledge`
