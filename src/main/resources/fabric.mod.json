@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Spyglass Astronomy",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Explore a procedurally generated solar system through the lens of a spyglass!",
   "authors": [
     "Nettakrim"
   ],
