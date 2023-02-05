@@ -407,7 +407,7 @@ public class SpyglassAstronomyCommands {
             }
         }
         SpyglassAstronomyClient.say("commands.find.constellation.fail", name);
-        return null;        
+        return null;
     }
 
     public static Star getStar(CommandContext<FabricClientCommandSource> context) {

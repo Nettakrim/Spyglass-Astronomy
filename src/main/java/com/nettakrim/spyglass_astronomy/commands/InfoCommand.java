@@ -33,21 +33,34 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             displayInfo(OrbitingBody.selected);
             return 1;
         }
+        SpyglassAstronomyClient.say("commands.info.nothingselected");
         return -1;
 	}
 
     public static int getConstellationInfo(CommandContext<FabricClientCommandSource> context) {
-        displayInfo(SpyglassAstronomyCommands.getConstellation(context));
+        Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
+        if (constellation == null) {
+            return -1;
+        }
+        displayInfo(constellation);
         return 1;
     }
 
     public static int getStarInfo(CommandContext<FabricClientCommandSource> context) {
-        displayInfo(SpyglassAstronomyCommands.getStar(context));
+        Star star = SpyglassAstronomyCommands.getStar(context);
+        if (star == null) {
+            return -1;
+        }
+        displayInfo(star);
         return 1;
     }
 
     public static int getOrbitingBodyInfo(CommandContext<FabricClientCommandSource> context) {
-        displayInfo(SpyglassAstronomyCommands.getOrbitingBody(context));
+        OrbitingBody orbitingBody = SpyglassAstronomyCommands.getOrbitingBody(context);
+        if (orbitingBody == null) {
+            return -1;
+        }
+        displayInfo(orbitingBody);
         return 1;
     }
 

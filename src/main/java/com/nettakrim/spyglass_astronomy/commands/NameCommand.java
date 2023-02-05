@@ -30,6 +30,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
             name(OrbitingBody.selected, name);
             return 1;
         }
+        SpyglassAstronomyClient.say("commands.name.nothingselected");
         return -1;
 	}
 

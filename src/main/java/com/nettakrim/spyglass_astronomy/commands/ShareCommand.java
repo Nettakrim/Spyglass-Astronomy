@@ -27,21 +27,34 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
             share(OrbitingBody.selected);
             return 1;
         }
+        SpyglassAstronomyClient.say("commands.share.nothingselected");
         return -1;
 	}
 
     public static int shareConstellation(CommandContext<FabricClientCommandSource> context) {
-        share(SpyglassAstronomyCommands.getConstellation(context));
+        Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
+        if (constellation == null) {
+            return -1;
+        }
+        share(constellation);
         return 1;
     }
 
     public static int shareStar(CommandContext<FabricClientCommandSource> context) {
-        share(SpyglassAstronomyCommands.getStar(context));
+        Star star = SpyglassAstronomyCommands.getStar(context);
+        if (star == null) {
+            return -1;
+        }
+        share(star);
         return 1;
     }
 
     public static int shareOrbitingBody(CommandContext<FabricClientCommandSource> context) {
-        share(SpyglassAstronomyCommands.getOrbitingBody(context));
+        OrbitingBody orbitingBody = SpyglassAstronomyCommands.getOrbitingBody(context);
+        if (orbitingBody == null) {
+            return -1;
+        }
+        share(orbitingBody);
         return 1;
     }
 

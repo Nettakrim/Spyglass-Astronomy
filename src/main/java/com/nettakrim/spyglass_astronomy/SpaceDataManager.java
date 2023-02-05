@@ -26,6 +26,8 @@ public class SpaceDataManager {
     private float yearLength;
 
     private File data = null;
+    private Path storagePath = null;
+    private String fileName;
 
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
@@ -36,19 +38,18 @@ public class SpaceDataManager {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
         long seedHash = ((BiomeAccessAccessor) world.getBiomeAccess()).getSeed();
         boolean useDefault = true;
-        Path storagePath = SpyglassAstronomyClient.client.runDirectory
+        storagePath = SpyglassAstronomyClient.client.runDirectory
                 .toPath()
                 .resolve(".spyglass_astronomy")
                 .resolve(getCurrentWorldOrServerName());
-        
-        try {
-            Files.createDirectories(storagePath);
-            data = new File(storagePath.toString()+"/"+seedHash + ".txt");
+
+        fileName = storagePath.toString()+"/"+seedHash + ".txt";
+
+        if (Files.exists(storagePath)) {
+            data = new File(fileName);
             if (data.exists()) {
                 useDefault = !loadData();
             }
-        } catch (IOException e) {
-            SpyglassAstronomyClient.LOGGER.info("Failed to create .spyglass_astronomy directory");
         }
 
         if (useDefault) {
@@ -124,6 +125,10 @@ public class SpaceDataManager {
     public void saveData() {
         if (changesMade == 0) return;
         try {
+            if (data == null) {
+                Files.createDirectories(storagePath);
+                data = new File(fileName);
+            }
             FileWriter writer = new FileWriter(data);
             StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
             s.append("\n---\n");

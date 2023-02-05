@@ -26,6 +26,7 @@
     "spyglass_astronomy.commands.name.planet.rename" : "Renamed Planet \"%s\" to \"%s\"",
     "spyglass_astronomy.commands.name.comet" : "Named Comet \"%s\"",
     "spyglass_astronomy.commands.name.comet.rename" : "Renamed Comet \"%s\" to \"%s\"",
+    "spyglass_astronomy.commands.name.nothingselected" : "an object must be selected to be Name it",
 
     "spyglass_astronomy.commands.select.constellation.fail" : "Spyglass must be held to be able to select Constellations",
     "spyglass_astronomy.commands.select.star.fail" : "Spyglass must be held to be able to select Stars",
@@ -41,6 +42,7 @@
     "spyglass_astronomy.commands.share.receive.star" : "to add Star \"%s\"",
     "spyglass_astronomy.commands.share.receive.planet" : "to add Planet \"%s\"",
     "spyglass_astronomy.commands.share.receive.comet" : "to add Comet \"%s\"",
+    "spyglass_astronomy.commands.share.nothingselected" : "Select an object or use /sga:share <x> to Share",
 
     "spyglass_astronomy.commands.find.constellation.fail" : "No Constellation with name \"%s\" could be found",
     "spyglass_astronomy.commands.find.star.fail" : "No Star with name \"%s\" could be found",
@@ -100,6 +102,8 @@
     "spyglass_astronomy.commands.info.moonphase.5" : "[ Waxing Crescent",
     "spyglass_astronomy.commands.info.moonphase.6" : "▌  First Quarter",
     "spyglass_astronomy.commands.info.moonphase.7" : "▛ Waxing Gibbous",
+
+    "spyglass_astronomy.commands.info.nothingselected" : "Select an object or use /sga:info <x> to get Information on Something",
 
 
 
