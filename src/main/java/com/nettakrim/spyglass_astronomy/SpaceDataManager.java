@@ -32,7 +32,7 @@ public class SpaceDataManager {
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
 
-    private static int changesMade;
+    private int changesMade;
 
     public SpaceDataManager(ClientWorld world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
@@ -281,12 +281,12 @@ public class SpaceDataManager {
     }
 
     public static void makeChange() {
-        changesMade++;
+        SpyglassAstronomyClient.spaceDataManager.changesMade++;
         SpyglassAstronomyClient.updateKnowledge();
     }
 
     public static int getChanges() {
-        return changesMade;
+        return SpyglassAstronomyClient.spaceDataManager.changesMade;
     }
 
     public class StarData {

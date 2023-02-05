@@ -9,7 +9,9 @@
     "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
     "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
     "spyglass_astronomy.commands.admin.changes.discard" : "Discarded %s unsaved Changes",
+    "spyglass_astronomy.commands.admin.changes.discard.none" : "No unsaved Changes to Discard",
     "spyglass_astronomy.commands.admin.changes.save" : "Saved %s unsaved Changes",
+    "spyglass_astronomy.commands.admin.changes.save.none" : "No unsaved Changes to Save",
     "spyglass_astronomy.commands.admin.changes.query" : "There have been %s Changes since last save",
 
     "spyglass_astronomy.commands.hide.all.hide" : "All hidden, run /sga:hide again to show",

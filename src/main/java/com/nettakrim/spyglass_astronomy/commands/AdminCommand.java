@@ -52,13 +52,23 @@ public class AdminCommand {
     }
 
     public static int saveChanges(CommandContext<FabricClientCommandSource> context) {
-        SpyglassAstronomyClient.say("commands.admin.changes.save", Integer.toString(SpaceDataManager.getChanges()));
+        int changes = SpaceDataManager.getChanges();
+        if (changes != 0) {
+            SpyglassAstronomyClient.say("commands.admin.changes.save", Integer.toString(changes));
+        } else {
+            SpyglassAstronomyClient.say("commands.admin.changes.save.none");
+        }
         SpyglassAstronomyClient.saveSpace();
         return 1;
     }
 
     public static int discardUnsavedChanges(CommandContext<FabricClientCommandSource> context) {
-        SpyglassAstronomyClient.say("commands.admin.changes.discard", Integer.toString(SpaceDataManager.getChanges()));
+        int changes = SpaceDataManager.getChanges();
+        if (changes != 0) {
+            SpyglassAstronomyClient.say("commands.admin.changes.discard", Integer.toString(changes));
+        } else {
+            SpyglassAstronomyClient.say("commands.admin.changes.discard.none");
+        }
         SpyglassAstronomyClient.discardUnsavedChanges();
         return 1;
     }
