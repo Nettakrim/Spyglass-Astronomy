@@ -5,7 +5,7 @@
     "spyglass_astronomy.commands.admin.setplanetseed" : "Set Planet Seed to %s (was %s)",
     "spyglass_astronomy.commands.admin.bypass.on" : "Knowledge Checks bypassed, run again to reset",
     "spyglass_astronomy.commands.admin.bypass.off" : "Knowledge Checks reenabled",
-    "spyglass_astronomy.commands.admin.setyearlength" : "Set Star Seed to %s (was %s)",
+    "spyglass_astronomy.commands.admin.setyearlength" : "Set Year Length to %s days (was %s days)",
     "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
     "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
     "spyglass_astronomy.commands.admin.changes.discard" : "Discarded %s unsaved Changes",
@@ -35,9 +35,13 @@
     "spyglass_astronomy.commands.name.comet.rename" : "Renamed Comet \"%s\" to \"%s\"",
     "spyglass_astronomy.commands.name.nothingselected" : "an object must be selected to be Name it",
 
+    "spyglass_astronomy.commands.select.constellation" : "Selected Constellation \"%s\"",
     "spyglass_astronomy.commands.select.constellation.fail" : "Spyglass must be held to be able to select Constellations",
+    "spyglass_astronomy.commands.select.star" : "Selected Star \"%s\"",
     "spyglass_astronomy.commands.select.star.fail" : "Spyglass must be held to be able to select Stars",
+    "spyglass_astronomy.commands.select.planet" : "Selected Planet \"%s\"",
     "spyglass_astronomy.commands.select.planet.fail" : "Spyglass must be held to be able to select Planets",
+    "spyglass_astronomy.commands.select.comet" : "Selected Comet \"%s\"",    
     "spyglass_astronomy.commands.select.comet.fail" : "Spyglass must be held to be able to select Comets",
 
     "spyglass_astronomy.commands.share.click" : "[Click Here] ",
@@ -114,7 +118,7 @@
 
 
 
-    "spyglass_astronomy.constellation.merge" : "New line merged two Constellations \"%s\" and \"%s\"",
+    "spyglass_astronomy.constellation.merge" : "New Line merged two Constellations \"%s\" and \"%s\"",
     "spyglass_astronomy.constellation.split" : "Removing Line split Constellation \"%s\" into two",
     "spyglass_astronomy.constellation.remove" : "Removed Constellation \"%s\"",
 

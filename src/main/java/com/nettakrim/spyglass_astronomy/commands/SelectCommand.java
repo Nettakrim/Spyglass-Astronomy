@@ -15,10 +15,11 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("commands.select.constellation");
+            SpyglassAstronomyClient.say("commands.select.constellation.fail");
             return -1;
         }
         constellation.select();
+        SpyglassAstronomyClient.say("commands.select.constellation", constellation.name);
         return 1;
     }
 
@@ -28,10 +29,12 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("commands.select.star");
+            SpyglassAstronomyClient.say("commands.select.star.fail");
             return -1;
         }
         star.select();
+        String starName = (star.name == null ? "Unnamed" : star.name);
+        SpyglassAstronomyClient.say("commands.select.star", starName);
         return 1;
     }
 
@@ -41,10 +44,12 @@ public class SelectCommand {
             return -1;
         }
         if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
-            SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet"));
+            SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet")+".fail");
             return -1;
         }
         orbitingBody.select();
+        String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
+        SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet"), orbitingBodyName);
         return 1;
     }
 }
