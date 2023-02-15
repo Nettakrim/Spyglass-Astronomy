@@ -152,7 +152,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
 
         if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
-            text.append(translate("solarsystem.time", Long.toString(SpyglassAstronomyClient.getDay()), Float.toString(Math.round(SpyglassAstronomyClient.getDayFraction()*100)/100).replace("0.","")));
+            text.append(translate("solarsystem.time", Long.toString(SpyglassAstronomyClient.getDay()), Float.toString(MathHelper.floor(SpyglassAstronomyClient.getDayFraction()*100)/100f).replace("0.","")));
         }
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));

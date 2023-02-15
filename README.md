@@ -43,26 +43,38 @@ gets information about the star with name `<name>`
 - Name
 - Current position in the sky (the two numbers shown on F3)
 - What time of year it is most visible
+- Distance from the solar system (in LY)
 
 `/sga:info planet <name>`
 
 gets information about the planet with name `<name>`
 - Name
+- Type ()
 - Orbital Period
 - Orbital Resonance (amount of days between each closest aproach of thisworld and the specified planet, assuming circular orbits)
 - Current position in orbit (% of the way through the planets year)
 - Distance from thiswoorld (in AU)
+- Current position in the sky (the two numbers shown on F3)
 - Eccentricity
 - Inclination
 
 `/sga:info thisworld`
 
 gets information about the minecraft world's orbit
-- Name
+- Current In-game Time
+- Current Moonphase
 - Orbital Period
 - Current position in orbit (% of the way through the planets year)
 - Eccentricity
 - Inclination
+
+
+`/sga:info solarsystem`
+
+gets information about the solar system
+- List of planets (including thisworld) in order of distance from sun
+- List of comets in arbitary order
+- Days since worlds creation
 
 ### `/sga:select`
 
