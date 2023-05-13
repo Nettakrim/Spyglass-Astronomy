@@ -77,9 +77,9 @@ public class OrbitingBody {
 
         float visibilityScale = Math.min(MathHelper.sqrt(distance),8);
 
-        //this isnt needed to run every frame
+        //this isn't needed to run every frame
         {
-            //it may seem a bit weird allowing dayFraction to be outside of 0-1, but it doesnt matter
+            //it may seem a bit weird allowing dayFraction to be outside 0-1, but it doesn't matter
             axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/32), false);
             axis1.sub(referencePosition);
             axis1.normalize();
@@ -135,18 +135,18 @@ public class OrbitingBody {
 
         if (isPlanet) {
             switch (decoration) {
-                case 0:
+                case 0 -> {
                     //triangle half
                     quad2vertex1 = new Vector3f(x, y, z);
                     quad2vertex2 = new Vector3f(quad1vertex2);
                     quad2vertex3 = new Vector3f(quad1vertex3);
                     quad2vertex4 = new Vector3f(quad1vertex4);
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     //ring
                     float ringOut = 1.3f;
                     float ringIn = 0.9f;
-                    Quaternionf slowOppositeRotation = RotationAxis.of(position).rotationDegrees(-angle/2);
+                    Quaternionf slowOppositeRotation = RotationAxis.of(position).rotationDegrees(-angle / 2);
                     Vector3f in1 = new Vector3f(axis1);
                     in1.rotate(slowOppositeRotation);
                     Vector3f out1 = new Vector3f(in1);
@@ -164,14 +164,14 @@ public class OrbitingBody {
                     quad2vertex1.sub(out2);
                     quad2vertex1.sub(in1);
                     quad2vertex2.sub(out1);
-                    quad2vertex2.sub(in2);  
+                    quad2vertex2.sub(in2);
                     quad2vertex3.add(out2);
                     quad2vertex3.add(in1);
                     quad2vertex4.add(out1);
                     quad2vertex4.add(in2);
-                    break;
-                case 2,3:
-                    //quater, quater with point
+                }
+                case 2, 3 -> {
+                    //quarter, quarter with point
                     if (decoration == 2) quad2vertex1 = new Vector3f(x, y, z);
                     else quad2vertex1 = new Vector3f(quad1vertex1);
                     quad2vertex2 = new Vector3f(x, y, z);
@@ -185,7 +185,7 @@ public class OrbitingBody {
                     offset2.mul(0.5f);
                     quad2vertex2.add(offset2);
                     quad2vertex4.add(offset1);
-                    break;
+                }
             }
         } else {
             quad2vertex1 = new Vector3f(x, y, z);
@@ -214,13 +214,13 @@ public class OrbitingBody {
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
-        int colorMult = isSelected ? 1 : 0;
-        int r1 = mainColor[0] >> colorMult;
+        int colorMul = isSelected ? 1 : 0;
+        int r1 = mainColor[0] >> colorMul;
         int g1 = mainColor[1];
-        int b1 = mainColor[2] >> colorMult;
-        int r2 = secondaryColor[0] >> colorMult;
+        int b1 = mainColor[2] >> colorMul;
+        int r2 = secondaryColor[0] >> colorMul;
         int g2 = secondaryColor[1];
-        int b2 = secondaryColor[2] >> colorMult;        
+        int b2 = secondaryColor[2] >> colorMul;
         int decorationAlpha = currentAlpha/3;
 
         bufferBuilder.vertex(
@@ -293,8 +293,12 @@ public class OrbitingBody {
         selected = null;
     }
 
+    public boolean isUnnamed() {
+        return name == null;
+    }
+
     public enum OrbitingBodyType {
-        //ordered roughly by rquired closeness to sun
+        //ordered roughly by required closeness to sun
         TERRESTIAL,
         HABITABLE,
         OCEANPLANET,

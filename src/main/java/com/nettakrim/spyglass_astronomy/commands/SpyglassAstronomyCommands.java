@@ -25,23 +25,23 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class SpyglassAstronomyCommands {
-    public static SuggestionProvider<FabricClientCommandSource> constellations = (context, builder) -> {
+    public static final SuggestionProvider<FabricClientCommandSource> constellations = (context, builder) -> {
         for (Constellation constellation : SpyglassAstronomyClient.constellations) {
             builder.suggest(constellation.name);
         }
         return CompletableFuture.completedFuture(builder.build());
     };
 
-    public static SuggestionProvider<FabricClientCommandSource> stars = (context, builder) -> {
+    public static final SuggestionProvider<FabricClientCommandSource> stars = (context, builder) -> {
         for (Star star : SpyglassAstronomyClient.stars) {
-            if (star.name != null) builder.suggest(star.name);
+            if (!star.isUnnamed()) builder.suggest(star.name);
         }
         return CompletableFuture.completedFuture(builder.build());
     };
 
-    public static SuggestionProvider<FabricClientCommandSource> orbitingBodies = (context, builder) -> {
+    public static final SuggestionProvider<FabricClientCommandSource> orbitingBodies = (context, builder) -> {
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
-            if (orbitingBody.name != null) builder.suggest(orbitingBody.name);
+            if (!orbitingBody.isUnnamed()) builder.suggest(orbitingBody.name);
         }
         return CompletableFuture.completedFuture(builder.build());
     };
@@ -438,7 +438,7 @@ public class SpyglassAstronomyCommands {
 
     public static String getMessageText(CommandContext<FabricClientCommandSource> context, String name) {
         //a lot of digging through #SayCommand to make a MessageArgumentType that works clientside
-        MessageFormat messageFormat = (MessageFormat)context.getArgument(name, MessageFormat.class);
+        MessageFormat messageFormat = context.getArgument(name, MessageFormat.class);
         return messageFormat.getContents();
     }
 

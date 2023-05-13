@@ -8,7 +8,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
 
 public class Constellation {
-    private ArrayList<StarLine> lines = new ArrayList<>();
+    private final ArrayList<StarLine> lines = new ArrayList<>();
 
     public String name = "Unnamed";
 
@@ -20,7 +20,7 @@ public class Constellation {
 
     public Constellation() {
 
-    };
+    }
 
     public Constellation(StarLine starLine) {
         lines.add(starLine);
@@ -47,13 +47,12 @@ public class Constellation {
         return null;
     }
 
-    public Constellation addLine(StarLine starLine) {
+    public void addLine(StarLine starLine) {
         for (StarLine line : lines) {
-            if (line.isSame(starLine)) return null;
+            if (line.isSame(starLine)) return;
         }
         lines.add(starLine);
         averagePositionValid = false;
-        return null;
     }
 
     public Constellation trySplit(StarLine reference) {
@@ -61,7 +60,7 @@ public class Constellation {
         int start = refStars[0].index;
         int end = refStars[1].index;
 
-        ArrayList<Integer> found = new ArrayList<Integer>();
+        ArrayList<Integer> found = new ArrayList<>();
         boolean continueSearch = true;
 
         found.add(start);
@@ -87,7 +86,7 @@ public class Constellation {
         }
 
         //get all stars in the original constellation
-        ArrayList<Integer> all = new ArrayList<Integer>();
+        ArrayList<Integer> all = new ArrayList<>();
         for (StarLine line : lines) {
             Star[] stars = line.getStars();
             int a = stars[0].index;
@@ -169,7 +168,7 @@ public class Constellation {
         if (averagePositionValid) return averagePositionBuffer;
 
         averagePositionBuffer = new Vector3f();
-        ArrayList<Star> stars = new ArrayList<Star>();
+        ArrayList<Star> stars = new ArrayList<>();
         for (StarLine line : lines) {
             Star[] lineStars = line.getStars();
             if (!stars.contains(lineStars[0])) stars.add(lineStars[0]);
@@ -201,5 +200,9 @@ public class Constellation {
         if (selected != null) selected.isSelected = false;
         selected = null;
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+    }
+
+    public boolean isUnnamed() {
+        return name.equals("Unnamed");
     }
 }

@@ -69,10 +69,10 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(Star star) {
-        String starName = (star.name == null ? "Unnamed" : star.name);
+        String starName = (star.isUnnamed() ? "Unnamed" : star.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
             "commands.share.star",
-            "sga:s_"+starName+"|"+Integer.toString(star.index)+"|",
+            "sga:s_"+starName+"|"+ star.index +"|",
             false,
             starName
         );
@@ -80,10 +80,10 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void share(OrbitingBody orbitingBody) {
-        String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
+        String orbitingBodyName = (orbitingBody.isUnnamed() ? "Unnamed" : orbitingBody.name);
         Text text = SpyglassAstronomyCommands.getClickHere(
             "commands.share."+(orbitingBody.isPlanet ?"planet" : "comet"),
-            "sga:p_"+orbitingBodyName+"|"+Integer.toString(SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody))+"|",
+            "sga:p_"+orbitingBodyName+"|"+ SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody) +"|",
             false,
             orbitingBodyName
         );

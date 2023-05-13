@@ -26,8 +26,8 @@ public class SpaceDataManager {
     private float yearLength;
 
     private File data = null;
-    private Path storagePath = null;
-    private String fileName;
+    private Path storagePath;
+    private final String fileName;
 
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
@@ -43,7 +43,7 @@ public class SpaceDataManager {
                 .resolve(".spyglass_astronomy")
                 .resolve(getCurrentWorldOrServerName());
 
-        fileName = storagePath.toString()+"/"+seedHash + ".txt";
+        fileName = storagePath +"/"+seedHash + ".txt";
 
         if (Files.exists(storagePath)) {
             data = new File(fileName);
@@ -66,8 +66,8 @@ public class SpaceDataManager {
             int stage = 0;
             Decoder decoder = Base64.getDecoder();
             int starIndex = 0;
-            starDatas = new ArrayList<StarData>();
-            orbitingBodyDatas = new ArrayList<OrbitingBodyData>();
+            starDatas = new ArrayList<>();
+            orbitingBodyDatas = new ArrayList<>();
             changesMade = 0;
             boolean useDefault = false;
             while (scanner.hasNextLine()) {
@@ -77,41 +77,42 @@ public class SpaceDataManager {
                     continue;
                 }
                 switch (stage) {
-                    case 0:
+                    case 0 -> {
                         int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
                         if (format == 0) useDefault = true;
-                        break;
-                    case 1:
-                        String[] seeds =  s.split(" ");
+                    }
+                    case 1 -> {
+                        String[] seeds = s.split(" ");
                         if (seeds.length == 1) {
                             starSeed = Long.parseLong(s);
                             planetSeed = starSeed;
                         } else {
                             starSeed = Long.parseLong(seeds[0]);
-                            planetSeed = Long.parseLong(seeds[1]);                         
+                            planetSeed = Long.parseLong(seeds[1]);
                         }
-                        break;
-                    case 2:
+                    }
+                    case 2 -> {
                         String[] constellationParts = s.split(" \\| ");
                         SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
-                        break;
-                    case 3:
+                    }
+                    case 3 -> {
                         int starSplit = s.indexOf(' ');
                         starIndex += Integer.parseInt(s.substring(0, starSplit));
-                        String starName = s.substring(starSplit+1);
+                        String starName = s.substring(starSplit + 1);
                         starDatas.add(new StarData(starIndex, starName));
-                        break;
-                    case 4:
+                    }
+                    case 4 -> {
                         int orbitingBodySplit = s.indexOf(' ');
                         int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
-                        String orbitingBodyName = s.substring(orbitingBodySplit+1);
+                        String orbitingBodyName = s.substring(orbitingBodySplit + 1);
                         orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
-                        break;
-                    case 5:
+                    }
+                    case 5 -> {
                         String[] parts = s.split(" ");
                         SpyglassAstronomyClient.setStarCount(Integer.parseInt(parts[0]));
                         if (parts.length > 1) setYearLength(Float.parseFloat(parts[1]));
                         else yearLength = 8;
+                    }
                 }
             }
             scanner.close();
@@ -146,18 +147,18 @@ public class SpaceDataManager {
             s.append("\n---");
             int lastIndex = 0;
             for (Star star : SpyglassAstronomyClient.stars) {
-                if (star.name != null) {
+                if (!star.isUnnamed()) {
                     s.append('\n');
-                    s.append(Integer.toString(star.index-lastIndex)+" "+star.name);
+                    s.append(star.index - lastIndex).append(" ").append(star.name);
                     lastIndex = star.index;
                 }
             }            
             s.append("\n---");
             int index = 0;
             for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
-                if (orbitingBody.name != null) {
+                if (!orbitingBody.isUnnamed()) {
                     s.append('\n');
-                    s.append(Integer.toString(index)+" "+orbitingBody.name);
+                    s.append(index).append(" ").append(orbitingBody.name);
                 }
                 index++;
             }   
@@ -179,11 +180,11 @@ public class SpaceDataManager {
         if (encoder == null) {
             encoder = Base64.getEncoder();
         }
-        String encodedConstellation = constellation.name+" | ";
+        StringBuilder encodedConstellation = new StringBuilder(constellation.name + " | ");
         for (StarLine line : constellation.getLines()) {
-            encodedConstellation += encodeStarLine(encoder, line.getStars());
+            encodedConstellation.append(encodeStarLine(encoder, line.getStars()));
         }
-        return encodedConstellation;
+        return encodedConstellation.toString();
     }
 
     private static String encodeStarLine(Encoder encoder, Star[] stars) {
@@ -289,9 +290,9 @@ public class SpaceDataManager {
         return SpyglassAstronomyClient.spaceDataManager.changesMade;
     }
 
-    public class StarData {
-        public int index;
-        public String name;
+    public static class StarData {
+        public final int index;
+        public final String name;
 
         public StarData(int index, String name) {
             this.index = index;
@@ -299,9 +300,9 @@ public class SpaceDataManager {
         }
     }
 
-    public class OrbitingBodyData {
-        public int index;
-        public String name;
+    public static class OrbitingBodyData {
+        public final int index;
+        public final String name;
 
         public OrbitingBodyData(int index, String name) {
             this.index = index;

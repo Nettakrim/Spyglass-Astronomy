@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import net.minecraft.client.render.GameRenderer;
 
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,8 +29,7 @@ public abstract class GameRendererMixin {
         if (!(SpyglassAstronomyClient.client.player.isUsingSpyglass() && SpyglassAstronomyClient.client.options.getPerspective().isFirstPerson())) SpyglassAstronomyClient.zoom = 0;
 
         float f = 1.0f;
-        if (SpyglassAstronomyClient.client.getCameraEntity() instanceof AbstractClientPlayerEntity) {
-            AbstractClientPlayerEntity abstractClientPlayerEntity = (AbstractClientPlayerEntity)SpyglassAstronomyClient.client.getCameraEntity();
+        if (SpyglassAstronomyClient.client.getCameraEntity() instanceof AbstractClientPlayerEntity abstractClientPlayerEntity) {
             f = abstractClientPlayerEntity.getFovMultiplier();
         }
         f *= (float)Math.pow(1.25d, SpyglassAstronomyClient.zoom);

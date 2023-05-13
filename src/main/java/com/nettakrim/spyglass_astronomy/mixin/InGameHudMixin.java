@@ -18,14 +18,9 @@ public class InGameHudMixin {
     @Redirect(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V"))
     public void swapTexture(int i, Identifier identifier){
         switch (SpyglassAstronomyClient.editMode) {
-            case 1:
-                RenderSystem.setShaderTexture(i, CONSTELLATION_SPYGLASS_SCOPE);
-                break;
-            case 2:
-                RenderSystem.setShaderTexture(i, STAR_SPYGLASS_SCOPE);
-                break;
-            default:
-            RenderSystem.setShaderTexture(i, identifier);
+            case 1 -> RenderSystem.setShaderTexture(i, CONSTELLATION_SPYGLASS_SCOPE);
+            case 2 -> RenderSystem.setShaderTexture(i, STAR_SPYGLASS_SCOPE);
+            default -> RenderSystem.setShaderTexture(i, identifier);
         }
     }
 }

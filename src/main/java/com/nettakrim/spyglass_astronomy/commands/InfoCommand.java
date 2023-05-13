@@ -89,7 +89,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     private static void displayInfo(Star star) {
         int[] flags = new int[] {-1, -1};
         MutableText text = Text.empty();
-        text.append(translate("star.name", star.name == null ? "Unnamed" : star.name));
+        text.append(translate("star.name", star.isUnnamed() ? "Unnamed" : star.name));
 
         Vector3f position = star.getPositionAsVector3f();
         staticVisibilityInfo(text, position, flags);
@@ -110,7 +110,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     private static void displayInfo(OrbitingBody orbitingBody) {
         int[] flags = new int[] {-1, -1};
         MutableText text = Text.empty();
-        text.append(translate("planet.name", orbitingBody.name == null ? "Unnamed" : orbitingBody.name));
+        text.append(translate("planet.name", orbitingBody.isUnnamed() ? "Unnamed" : orbitingBody.name));
         text.append(translate("planet.type."+orbitingBody.type.toString().toLowerCase()));
         orbitInfo(text, orbitingBody.orbit, flags);
 
@@ -144,7 +144,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 text.append(translate("solarsystem.comets"));
                 stage = 2;
             }
-            if (orbitingBody.name == null) {
+            if (orbitingBody.isUnnamed()) {
                 text.append(translate("solarsystem.unknown"));
             } else {
                 text.append(translate("solarsystem.named", orbitingBody.name));
@@ -185,7 +185,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
                 int nearestDay = (int)angle;
                 if (period == 8) {
-                    text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+Integer.toString(nearestDay)));
+                    text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
                 } else {
                     int inDays = nearestDay - ((int)(SpyglassAstronomyClient.getDay()%((long)period)));
                     if (inDays < 0) inDays += 8;
@@ -271,7 +271,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     //https://github.com/Iru21/TimeDisplay/blob/master/src/main/kotlin/me/iru/timedisplay/TimeUtils.kt
     private static String getMinecraftTime() {
-        Long timeDay = SpyglassAstronomyClient.world.getTimeOfDay();
+        long timeDay = SpyglassAstronomyClient.world.getTimeOfDay();
         int dayTicks = (int)(timeDay % 24000);
         int hour = (dayTicks / 1000 + 6) % 24;
         int min = ((int)(dayTicks / 16.666666f)) % 60;
@@ -282,9 +282,9 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     private static String formatTime(int hour, int min, int sec) {
         String time = Integer.toString(sec);
         if (time.length() == 1) time = "0"+time;
-        time = Integer.toString(min) + ":" + time;
+        time = min + ":" + time;
         if (time.length() == 4) time ="0"+time;
-        time = Integer.toString(hour) + ":" + time;
+        time = hour + ":" + time;
         if (time.length() == 7) time ="0"+time;
         return time;   
     }

@@ -33,7 +33,7 @@ public class SelectCommand {
             return -1;
         }
         star.select();
-        String starName = (star.name == null ? "Unnamed" : star.name);
+        String starName = (star.isUnnamed() ? "Unnamed" : star.name);
         SpyglassAstronomyClient.say("commands.select.star", starName);
         return 1;
     }
@@ -48,7 +48,7 @@ public class SelectCommand {
             return -1;
         }
         orbitingBody.select();
-        String orbitingBodyName = (orbitingBody.name == null ? "Unnamed" : orbitingBody.name);
+        String orbitingBodyName = (orbitingBody.isUnnamed() ? "Unnamed" : orbitingBody.name);
         SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet"), orbitingBodyName);
         return 1;
     }

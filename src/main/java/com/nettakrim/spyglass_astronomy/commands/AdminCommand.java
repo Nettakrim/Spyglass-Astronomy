@@ -22,7 +22,7 @@ public class AdminCommand {
     }
 
     public static int setStarSeed(CommandContext<FabricClientCommandSource> context) {
-        Long seed = LongArgumentType.getLong(context, "seed");
+        long seed = LongArgumentType.getLong(context, "seed");
         SpyglassAstronomyClient.say("commands.admin.setstarseed", Long.toString(seed), Long.toString(SpyglassAstronomyClient.spaceDataManager.getStarSeed()));
         SpyglassAstronomyClient.spaceDataManager.setStarSeed(seed);
         SpyglassAstronomyClient.generateStars(null, true);
@@ -31,7 +31,7 @@ public class AdminCommand {
     }
 
     public static int setPlanetSeed(CommandContext<FabricClientCommandSource> context) {
-        Long seed = LongArgumentType.getLong(context, "seed");
+        long seed = LongArgumentType.getLong(context, "seed");
         SpyglassAstronomyClient.say("commands.admin.setplanetseed", Long.toString(seed), Long.toString(SpyglassAstronomyClient.spaceDataManager.getPlanetSeed()));
         SpyglassAstronomyClient.spaceDataManager.setPlanetSeed(seed);
         SpyglassAstronomyClient.generatePlanets(null, true);

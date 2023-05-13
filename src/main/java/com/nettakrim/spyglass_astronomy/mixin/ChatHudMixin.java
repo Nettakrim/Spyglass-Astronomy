@@ -17,7 +17,7 @@ import net.minecraft.text.Text;
 
 @Mixin(ChatHud.class)
 public class ChatHudMixin {
-    @Inject(at = @At("TAIL"), method = "Lnet/minecraft/client/gui/hud/ChatHud;addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V")
+    @Inject(at = @At("TAIL"), method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V")
     public void onChat(Text messageText, MessageSignatureData messageSignatureData, MessageIndicator messageIndicator, CallbackInfo ci) {
         String message = messageText.getString();
         int sgaIndex = message.indexOf("sga:");
@@ -32,62 +32,57 @@ public class ChatHudMixin {
 
 
         switch (data.charAt(0)) {
-            case 'c':
+            case 'c' -> {
                 //constellation shared with sga:c_Name|AAAA|
                 if (secondIndex == -1) return;
                 String constellationName = data.substring(2, firstIndex);
-                String constellationData = data.substring(firstIndex+1, secondIndex);
-                
+                String constellationData = data.substring(firstIndex + 1, secondIndex);
                 Text constellationText = SpyglassAstronomyCommands.getClickHere(
-                    "commands.share.receive.constellation",
-                    "/sga:admin add constellation "+constellationData+" "+constellationName,
-                    true,
-                    constellationName
+                        "commands.share.receive.constellation",
+                        "/sga:admin add constellation " + constellationData + " " + constellationName,
+                        true,
+                        constellationName
                 );
                 SpyglassAstronomyClient.sayText(constellationText);
-                break;
-            case 's':
+            }
+            case 's' -> {
                 //star shared with sga:s_Name|index|
                 if (secondIndex == -1) return;
                 String starName = data.substring(2, firstIndex);
-                int starIndex = -1;
+                int starIndex;
                 try {
-                    starIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                    starIndex = Integer.parseInt(data.substring(firstIndex + 1, secondIndex));
                 } catch (Exception e) {
                     break;
                 }
-
                 Text starText = SpyglassAstronomyCommands.getClickHere(
-                    "commands.share.receive.star",
-                    "/sga:admin rename star "+Integer.toString(starIndex)+" "+starName,
-                    true,
-                    starName
+                        "commands.share.receive.star",
+                        "/sga:admin rename star " + starIndex + " " + starName,
+                        true,
+                        starName
                 );
                 SpyglassAstronomyClient.sayText(starText);
-                break;
-            case 'p':
+            }
+            case 'p' -> {
                 //planets shared with sga:p_Name|index|
                 if (secondIndex == -1) return;
                 String orbitingBodyName = data.substring(2, firstIndex);
-                int orbitingBodyIndex = -1;
+                int orbitingBodyIndex;
                 try {
-                    orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex+1, secondIndex));
+                    orbitingBodyIndex = Integer.parseInt(data.substring(firstIndex + 1, secondIndex));
                 } catch (Exception e) {
                     break;
                 }
-
                 if (orbitingBodyIndex >= SpyglassAstronomyClient.orbitingBodies.size()) break;
-
                 OrbitingBody orbitingBody = SpyglassAstronomyClient.orbitingBodies.get(orbitingBodyIndex);
-
                 Text orbitingBodyText = SpyglassAstronomyCommands.getClickHere(
-                    "commands.share.receive."+(orbitingBody.isPlanet ? "planet" : "comet"),
-                    "/sga:admin rename planet "+Integer.toString(orbitingBodyIndex)+" "+orbitingBodyName,
-                    true,
-                    orbitingBodyName
+                        "commands.share.receive." + (orbitingBody.isPlanet ? "planet" : "comet"),
+                        "/sga:admin rename planet " + orbitingBodyIndex + " " + orbitingBodyName,
+                        true,
+                        orbitingBodyName
                 );
                 SpyglassAstronomyClient.sayText(orbitingBodyText);
-                break;           
+            }
         }
     }
 }

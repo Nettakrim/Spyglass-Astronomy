@@ -64,7 +64,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         SpyglassAstronomyCommands.initialize();
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {update();});
+        ClientTickEvents.END_CLIENT_TICK.register(client -> update());
 	}
 
     public static void saveSpace() {
@@ -82,9 +82,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         world = clientWorld;
 
-        stars = new ArrayList<Star>();
-        constellations = new ArrayList<Constellation>();
-        orbitingBodies = new ArrayList<OrbitingBody>();
+        stars = new ArrayList<>();
+        constellations = new ArrayList<>();
+        orbitingBodies = new ArrayList<>();
 
         spaceDataManager = new SpaceDataManager(clientWorld);
 
@@ -111,8 +111,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         if (reset) {
-            stars = new ArrayList<Star>();
-            constellations = new ArrayList<Constellation>();
+            stars = new ArrayList<>();
+            constellations = new ArrayList<>();
         }
 
         int currentStars = 0;
@@ -171,7 +171,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         Random lowPriorityRandom = Random.create(spaceDataManager.getPlanetSeed());
         
         if (reset) {
-            orbitingBodies = new ArrayList<OrbitingBody>();
+            orbitingBodies = new ArrayList<>();
         }
 
         IntTetrisBagRandom planetDesignRandom = new IntTetrisBagRandom(random, 3);
@@ -343,26 +343,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         return new Orbit(period, eccentricity, rotation, inclination, timeOffset);
     }
 
-    public static float getPreciseMoonPhase() {
-        return (world.getLunarTime()%24000/24000.0f)+(world.getMoonPhase());
-    }
-
     public static float getStarAngle() {
         return getPositionInOrbit(starAngleMultiplier);
     }
 
     public static float getPositionInOrbit(float scale) {
-        Long time = world.getTimeOfDay();
-        return ((float)((time/24000)%earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
+        long time = world.getTimeOfDay();
+        return (((time/24000)%earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
     }
 
     public static Long getDay() {
-        Long time = world.getTimeOfDay();
+        long time = world.getTimeOfDay();
         return time/24000;        
     }
 
     public static float getDayFraction() {
-        Long time = world.getTimeOfDay();
+        long time = world.getTimeOfDay();
         return ((time%24000)/24000.0f); 
     }
 
@@ -411,7 +407,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 Star star = astralObject.star;
 
                 if (editMode == 2) {
-                    if (star.name == null) {
+                    if (star.isUnnamed()) {
                         if (star == Star.selected) {
                             sayActionBar("prompt.name.star");
                             return;
@@ -426,15 +422,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
                 for (Constellation constellation : constellations) {
                     if (constellation.hasStar(star)) {
-                        if (constellation.name.equals("Unnamed")) {
+                        if (constellation.isUnnamed()) {
                             if (constellation == Constellation.selected) {
                                 sayActionBar("prompt.name.constellation");
-                            } else if (star.name == null) {
+                            } else if (star.isUnnamed()) {
                                 sayActionBar("prompt.unnamed.constellation");
                             } else {
                                 sayActionBar("prompt.unnamed.constellationandstar", star.name);
                             }
-                        } else if (star.name == null) {
+                        } else if (star.isUnnamed()) {
                             sayActionBar("prompt.constellation", constellation.name);
                         } else {
                             sayActionBar("prompt.constellationandstar", constellation.name, star.name);
@@ -445,7 +441,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             } else {
                 OrbitingBody orbitingBody = astralObject.orbitingBody;
                 String type = orbitingBody.isPlanet ? "planet" : "comet";
-                if (orbitingBody.name == null) {
+                if (orbitingBody.isUnnamed()) {
                     if (orbitingBody == OrbitingBody.selected) {
                         sayActionBar("prompt.name."+type);
                     } else {
@@ -463,14 +459,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void toggleEditMode() {
         editMode = (editMode+1)%3;
-    }
-
-    public static void selectStar() {
-        Vector3f lookVector = getLookVector();
-        rotateVectorToStarRotation(lookVector);
-        Star star = getNearestStar(lookVector.x, lookVector.y, lookVector.z);
-        if (star == null) return;
-        star.select();
     }
 
     public static void selectAstralObject() {
@@ -523,7 +511,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                         target.addLine(line);
                     }
                     say("constellation.merge", target.name, constellation.name);
-                    if (target.name.equals("Unnamed")) target.name = constellation.name;
+                    if (target.isUnnamed()) target.name = constellation.name;
                     constellations.remove(i);
                     break;
                 }

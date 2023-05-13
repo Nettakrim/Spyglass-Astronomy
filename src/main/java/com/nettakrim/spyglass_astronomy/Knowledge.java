@@ -22,7 +22,7 @@ public class Knowledge {
     public void updateStarKnowledge(ArrayList<Constellation> constellations, ArrayList<Star> stars) {
         int namedStars = 0;
         for (Star star : stars) {
-            if (star.name != null) {
+            if (!star.isUnnamed()) {
                 namedStars++;
             }
         }
@@ -42,16 +42,12 @@ public class Knowledge {
     }
 
     public MutableText getInstructionsToStarKnowledgeStage(int stage) {
-        switch (stage) {
-            case 1:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toadept", "5");
-            case 2:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.toexpert", "10", "3");
-            case 3:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.starknowledge.tomaster", "20", "8");
-            default:
-                return Text.empty();
-        }
+        return switch (stage) {
+            case 1 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toadept", "5");
+            case 2 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toexpert", "10", "3");
+            case 3 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.tomaster", "20", "8");
+            default -> Text.empty();
+        };
     }
 
     public void updateOrbitKnowledge(ArrayList<OrbitingBody> orbitingBodies, int planets, int comets) {
@@ -60,7 +56,7 @@ public class Knowledge {
         this.planets = planets;
         this.comets = comets;
         for (OrbitingBody orbitingBody : orbitingBodies) {
-            if (orbitingBody.name != null) {
+            if (!orbitingBody.isUnnamed()) {
                 if (orbitingBody.isPlanet) namedPlanets++;
                 else namedComets++;
             }
@@ -78,38 +74,24 @@ public class Knowledge {
             return;
         }
         orbitKnowledge = Level.NOVICE;
-        return;
     }
 
     public MutableText getInstructionsToOrbitKnowledgeStage(int stage) {
-        switch (stage) {
-            case 1:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toadept", Integer.toString(planets/3), "1");
-            case 2:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.toexpert", Integer.toString(planets/3*2), "2");
-            case 3:
-                return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info.orbitknowledge.tomaster", Integer.toString(planets-1), Integer.toString(comets-1));
-            default:
-                return Text.empty();
-        }
+        return switch (stage) {
+            case 1 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toadept", Integer.toString(planets / 3), "1");
+            case 2 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toexpert", Integer.toString(planets / 3 * 2), "2");
+            case 3 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.tomaster", Integer.toString(planets - 1), Integer.toString(comets - 1));
+            default -> Text.empty();
+        };
     }
 
     private void updateFlags(Level level, int[] flags, int index) {
-        int current = -1;
-        switch (level) {
-            case NOVICE:
-                current = 0;
-                break;
-            case ADEPT:
-                current = 1;
-                break;
-            case EXPERT:
-                current = 2;
-                break;
-            case MASTER:
-                current = 3;
-                break;
-        }
+        int current = switch (level) {
+            case NOVICE -> 0;
+            case ADEPT -> 1;
+            case EXPERT -> 2;
+            case MASTER -> 3;
+        };
         if (flags[index] == -1) flags[index] = current;
         else flags[index] = Math.min(flags[index], current);
     }

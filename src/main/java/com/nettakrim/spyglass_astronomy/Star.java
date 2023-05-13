@@ -74,8 +74,6 @@ public class Star {
     public float getCurrentNonTwinkledAlpha() {
         float heightScale = SpaceRenderingManager.getHeightScale();
         float brightness = heightScale*Math.max(alpha/2 + heightScale/2, 2*alpha-1) + (1-heightScale) * alpha * alpha * alpha;
-        //float brightness = (((1-heightScale) * alpha * alpha * alpha + heightScale * heightScale));
-        //brightness = MathHelper.clamp((brightness+alpha)/2, 3*alpha-2, brightness);
         if (connectedStars == 0) {
             return brightness;
         }
@@ -138,5 +136,9 @@ public class Star {
     public static void deselect() {
         if (selected != null) selected.isSelected = false;
         selected = null;
+    }
+
+    public boolean isUnnamed() {
+        return name == null;
     }
 }

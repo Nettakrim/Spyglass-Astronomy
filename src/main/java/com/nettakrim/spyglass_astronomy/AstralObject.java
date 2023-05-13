@@ -25,10 +25,9 @@ public class AstralObject {
     public static boolean isNull(AstralObject astralObject) {
         if (astralObject == null) return true;
         if (astralObject.isStar) {
-            if (astralObject.star == null) return true;
+            return astralObject.star == null;
         } else {
-            if (astralObject.orbitingBody == null) return true;
+            return astralObject.orbitingBody == null;
         }
-        return false;
     }
 }

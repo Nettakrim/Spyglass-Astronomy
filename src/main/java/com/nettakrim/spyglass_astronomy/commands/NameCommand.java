@@ -56,7 +56,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void name(Constellation constellation, String name) {
-        if (constellation.name.equals("Unnamed")) {
+        if (constellation.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name.constellation", name);
         } else {
             SpyglassAstronomyClient.say("commands.name.constellation.rename", constellation.name, name);
@@ -67,7 +67,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void name(Star star, String name) {
-        if (star.name == null) {
+        if (star.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name.star", name);
         } else {
             SpyglassAstronomyClient.say("commands.name.star.rename", star.name, name);
@@ -78,7 +78,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
     }
 
     public static void name(OrbitingBody orbitingBody, String name) {
-        if (orbitingBody.name == null) {
+        if (orbitingBody.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name."+(orbitingBody.isPlanet ? "planet" : "comet"), name);
         } else {
             SpyglassAstronomyClient.say("commands.name."+(orbitingBody.isPlanet ? "planet" : "comet")+".rename", orbitingBody.name, name);
