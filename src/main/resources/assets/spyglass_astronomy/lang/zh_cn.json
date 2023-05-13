@@ -67,10 +67,10 @@
     "spyglass_astronomy.commands.info.star.distance" : "\n距离: %s LY(光年)",
 
     "spyglass_astronomy.commands.info.planet.name" : "\n名称: %s",
-    "spyglass_astronomy.commands.info.planet.type.terrestial" : "\n种类: 陆地",
-    "spyglass_astronomy.commands.info.planet.type.habitable" : "\n种类: 宜居",
+    "spyglass_astronomy.commands.info.planet.type.terrestial" : "\n种类: 类地行星",
+    "spyglass_astronomy.commands.info.planet.type.habitable" : "\n种类: 宜居行星",
     "spyglass_astronomy.commands.info.planet.type.oceanplanet" : "\n种类: 海洋行星",
-    "spyglass_astronomy.commands.info.planet.type.iceplanet" : "\n种类: 冰行星",
+    "spyglass_astronomy.commands.info.planet.type.iceplanet" : "\n种类: 冰质行星",
     "spyglass_astronomy.commands.info.planet.type.gasgiant" : "\n种类: 气态巨行星",
     "spyglass_astronomy.commands.info.planet.type.icegiant" : "\n种类: 冰态巨行星",
     "spyglass_astronomy.commands.info.planet.type.comet" : "\n种类: 彗星",

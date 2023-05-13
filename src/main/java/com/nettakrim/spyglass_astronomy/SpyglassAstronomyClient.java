@@ -232,7 +232,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             addRandomOrbitingBody(random, lowPriorityRandom, orbit, true, planetDesignRandom, type);
         }
 
-        //outer planets rougly double in period each planet, further out planets will have slightly more irregular orbits
+        //outer planets roughly double in period each planet, further out planets will have slightly more irregular orbits
         float[] periodOffsets = new float[] {0.75f, 1f, 1f, 1.25f};
         for (float x = 0; x < outerPlanets; x++) {
             float period = (yearLength * (2 << ((int)x+1))) * periodOffsets[random.nextInt(periodOffsets.length)];
@@ -265,8 +265,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             addRandomOrbitingBody(random, lowPriorityRandom, orbit, true, planetDesignRandom, type);
         }
 
-        //comets have a very high eccentrity, halley's for instance, has an eccentricity of 0.97
-        //halleys comet also has a period of 76 years though, so the eccentricity and period of our comets is a bit lower on average
+        //comets have a very high eccentricity, halley's for instance, has an eccentricity of 0.97
+        //halley's comet also has a period of 76 years though, so the eccentricity and period of our comets is a bit lower on average
         for (int x = 0; x < comets; x++) {
             float periodRaw = random.nextFloat();
             float eccentricity = (random.nextFloat()*0.2f)+0.75f;
@@ -388,6 +388,11 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (spyglassing) {
             updateHover();
         }
+
+        if (!isHoldingSpyglass()) {
+            editMode = 0;
+        }
+
         lastToggle = toggle;
     }
 
@@ -404,10 +409,31 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (AstralObject.isNull(astralObject)) return;
             if (astralObject.isStar) {
                 Star star = astralObject.star;
+
+                if (editMode == 2) {
+                    if (star.name == null) {
+                        if (star == Star.selected) {
+                            sayActionBar("prompt.name.star");
+                            return;
+                        } else {
+                            sayActionBar("prompt.unnamed.star");
+                        }
+                    }
+                    else {
+                        sayActionBar("prompt.star", star.name);
+                    }
+                }
+
                 for (Constellation constellation : constellations) {
                     if (constellation.hasStar(star)) {
                         if (constellation.name.equals("Unnamed")) {
-                            sayActionBar("prompt.name.constellation");
+                            if (constellation == Constellation.selected) {
+                                sayActionBar("prompt.name.constellation");
+                            } else if (star.name == null) {
+                                sayActionBar("prompt.unnamed.constellation");
+                            } else {
+                                sayActionBar("prompt.unnamed.constellationandstar", star.name);
+                            }
                         } else if (star.name == null) {
                             sayActionBar("prompt.constellation", constellation.name);
                         } else {
@@ -416,21 +442,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                         return;
                     }
                 }
-
-                if (editMode == 2) {
-                    if (star.name == null) sayActionBar("prompt.name.star");
-                    else sayActionBar("prompt.star", star.name);
-                }
             } else {
                 OrbitingBody orbitingBody = astralObject.orbitingBody;
-                if (orbitingBody.name == null) sayActionBar("prompt.name."+(orbitingBody.isPlanet ? "planet" : "comet"));
-                else sayActionBar("prompt.planet", orbitingBody.name);
+                String type = orbitingBody.isPlanet ? "planet" : "comet";
+                if (orbitingBody.name == null) {
+                    if (orbitingBody == OrbitingBody.selected) {
+                        sayActionBar("prompt.name."+type);
+                    } else {
+                        sayActionBar("prompt.unnamed."+type);
+                    }
+                }
+                else sayActionBar("prompt."+type, orbitingBody.name);
             }
         }
     }
 
     public static void startUsingSpyglass() {
-        editMode = 0;
         zoom = 0;
     }
 
