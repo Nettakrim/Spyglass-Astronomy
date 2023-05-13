@@ -126,10 +126,16 @@
     "spyglass_astronomy.prompt.name.star" : "Use /sga:name to name this Star!",
     "spyglass_astronomy.prompt.name.planet" : "Use /sga:name to name this Planet!",
     "spyglass_astronomy.prompt.name.comet" : "Use /sga:name to name this Comet!",
+    "spyglass_astronomy.prompt.unnamed.constellation" : "Unnamed Constellation",
+    "spyglass_astronomy.prompt.unnamed.constellationandstar" : "Unnamed Constellation | %s",
+    "spyglass_astronomy.prompt.unnamed.star" : "Unnamed Star",
+    "spyglass_astronomy.prompt.unnamed.planet" : "Unnamed Planet",
+    "spyglass_astronomy.prompt.unnamed.comet" : "Unnamed Comet",
     "spyglass_astronomy.prompt.constellation" : "%s",
     "spyglass_astronomy.prompt.constellationandstar" : "%s | %s",
     "spyglass_astronomy.prompt.star" : "%s",
     "spyglass_astronomy.prompt.planet" : "%s",
+    "spyglass_astronomy.prompt.comet" : "%s",
 
     "spyglass_astronomy.say" : "[Spyglass Astronomy] ",
     "spyglass_astronomy.longsay" : "- [Spyglass Astronomy] -"
