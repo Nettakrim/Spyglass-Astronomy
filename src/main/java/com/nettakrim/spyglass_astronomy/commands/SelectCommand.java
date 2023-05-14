@@ -1,15 +1,56 @@
 package com.nettakrim.spyglass_astronomy.commands;
 
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.Constellation;
 import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.argument.MessageArgumentType;
 
 public class SelectCommand {
-    public static int selectConstellation(CommandContext<FabricClientCommandSource> context) {
+    public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
+        LiteralCommandNode<FabricClientCommandSource> selectNode = ClientCommandManager
+            .literal("sga:select")
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> constellationSelectNode = ClientCommandManager
+            .literal("constellation")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.constellations)
+                    .executes(SelectCommand::selectConstellation)
+            )
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> starSelectNode = ClientCommandManager
+            .literal("star")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.stars)
+                    .executes(SelectCommand::selectStar)
+            )
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodySelectNode = ClientCommandManager
+            .literal("planet")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.orbitingBodies)
+                    .executes(SelectCommand::selectOrbitingBody)
+            )
+            .build();
+
+        selectNode.addChild(constellationSelectNode);
+        selectNode.addChild(starSelectNode);
+        selectNode.addChild(orbitingBodySelectNode);
+        return selectNode;
+    }
+
+    private static int selectConstellation(CommandContext<FabricClientCommandSource> context) {
         Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
         if (constellation == null) {
             return -1;
@@ -23,7 +64,7 @@ public class SelectCommand {
         return 1;
     }
 
-    public static int selectStar(CommandContext<FabricClientCommandSource> context) {
+    private static int selectStar(CommandContext<FabricClientCommandSource> context) {
         Star star = SpyglassAstronomyCommands.getStar(context);
         if (star == null) {
             return -1;
@@ -38,7 +79,7 @@ public class SelectCommand {
         return 1;
     }
 
-    public static int selectOrbitingBody(CommandContext<FabricClientCommandSource> context) {
+    private static int selectOrbitingBody(CommandContext<FabricClientCommandSource> context) {
         OrbitingBody orbitingBody = SpyglassAstronomyCommands.getOrbitingBody(context);
         if (orbitingBody == null) {
             return -1;

@@ -1,5 +1,8 @@
 package com.nettakrim.spyglass_astronomy.commands;
 
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.minecraft.command.argument.MessageArgumentType;
 import org.joml.Vector3f;
 
 import com.mojang.brigadier.Command;
@@ -19,6 +22,58 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
 public class InfoCommand implements Command<FabricClientCommandSource> {
+
+    public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
+        LiteralCommandNode<FabricClientCommandSource> infoNode = ClientCommandManager
+            .literal("sga:info")
+            .executes(new InfoCommand())
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> constellationInfoNode = ClientCommandManager
+            .literal("constellation")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.constellations)
+                    .executes(InfoCommand::getConstellationInfo)
+            )
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> starInfoNode = ClientCommandManager
+            .literal("star")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.stars)
+                    .executes(InfoCommand::getStarInfo)
+            )
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodyInfoNode = ClientCommandManager
+            .literal("planet")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .suggests(SpyglassAstronomyCommands.orbitingBodies)
+                    .executes(InfoCommand::getOrbitingBodyInfo)
+            )
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> earthInfoNode = ClientCommandManager
+            .literal("thisworld")
+            .executes(InfoCommand::getEarthInfo)
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> solarSystemInfoNode = ClientCommandManager
+            .literal("solarsystem")
+            .executes(InfoCommand::getSolarSystemInfo)
+            .build();
+
+        infoNode.addChild(constellationInfoNode);
+        infoNode.addChild(starInfoNode);
+        infoNode.addChild(orbitingBodyInfoNode);
+        infoNode.addChild(earthInfoNode);
+        infoNode.addChild(solarSystemInfoNode);
+        return infoNode;
+    }
+
 	@Override
 	public int run(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         if (Constellation.selected != null) {
@@ -37,7 +92,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return -1;
 	}
 
-    public static int getConstellationInfo(CommandContext<FabricClientCommandSource> context) {
+    private static int getConstellationInfo(CommandContext<FabricClientCommandSource> context) {
         Constellation constellation = SpyglassAstronomyCommands.getConstellation(context);
         if (constellation == null) {
             return -1;
@@ -46,7 +101,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return 1;
     }
 
-    public static int getStarInfo(CommandContext<FabricClientCommandSource> context) {
+    private static int getStarInfo(CommandContext<FabricClientCommandSource> context) {
         Star star = SpyglassAstronomyCommands.getStar(context);
         if (star == null) {
             return -1;
@@ -55,7 +110,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return 1;
     }
 
-    public static int getOrbitingBodyInfo(CommandContext<FabricClientCommandSource> context) {
+    private static int getOrbitingBodyInfo(CommandContext<FabricClientCommandSource> context) {
         OrbitingBody orbitingBody = SpyglassAstronomyCommands.getOrbitingBody(context);
         if (orbitingBody == null) {
             return -1;
@@ -64,12 +119,12 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return 1;
     }
 
-    public static int getEarthInfo(CommandContext<FabricClientCommandSource> context) {
+    private static int getEarthInfo(CommandContext<FabricClientCommandSource> context) {
         displayEarthInfo();
         return 1;
     }
 
-    public static int getSolarSystemInfo(CommandContext<FabricClientCommandSource> context) {
+    private static int getSolarSystemInfo(CommandContext<FabricClientCommandSource> context) {
         displaySolarSystemInfo();
         return 1;
     }
@@ -136,18 +191,18 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         int stage = 0;
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
             if (stage == 0 && orbitingBody.orbit.period > SpyglassAstronomyClient.earthOrbit.period) {
-                text.append(translate("solarsystem.thisworld"));
-                stage = 1;
+            text.append(translate("solarsystem.thisworld"));
+            stage = 1;
             }
             if (stage == 1 && !orbitingBody.isPlanet) {
-                if (!SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT, flags)) break;
-                text.append(translate("solarsystem.comets"));
-                stage = 2;
+            if (!SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT, flags)) break;
+            text.append(translate("solarsystem.comets"));
+            stage = 2;
             }
             if (orbitingBody.isUnnamed()) {
-                text.append(translate("solarsystem.unknown"));
+            text.append(translate("solarsystem.unknown"));
             } else {
-                text.append(translate("solarsystem.named", orbitingBody.name));
+            text.append(translate("solarsystem.named", orbitingBody.name));
             }
         }
 
@@ -177,22 +232,22 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
             pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
             if (MathHelper.abs(pos.z) < 0.9f) {
-                float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
-                angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
-                if (referenceYaw < 0) angle = 180 - angle;
-                if (angle < 0) angle += 360;
-                float period = SpyglassAstronomyClient.earthOrbit.period;
-                angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
-                int nearestDay = (int)angle;
-                if (period == 8) {
-                    text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
-                } else {
-                    int inDays = nearestDay - ((int)(SpyglassAstronomyClient.getDay()%((long)period)));
-                    if (inDays < 0) inDays += 8;
-                    text.append(translate("visibility.time.date", nearestDay, inDays));
-                }
+            float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+            angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
+            if (referenceYaw < 0) angle = 180 - angle;
+            if (angle < 0) angle += 360;
+            float period = SpyglassAstronomyClient.earthOrbit.period;
+            angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
+            int nearestDay = (int)angle;
+            if (period == 8) {
+                text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
             } else {
-                text.append(translate("visibility.time.always"));
+                int inDays = nearestDay - ((int)(SpyglassAstronomyClient.getDay()%((long)period)));
+                if (inDays < 0) inDays += 8;
+                text.append(translate("visibility.time.date", nearestDay, inDays));
+            }
+            } else {
+            text.append(translate("visibility.time.always"));
             }
         }
     }
@@ -206,13 +261,13 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
-                float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
-                float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
-                // max/min is often 1 less iteration for getDenominator
-                double[] fraction = getFraction(max/min);
+            float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+            float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+            // max/min is often 1 less iteration for getDenominator
+            double[] fraction = getFraction(max/min);
 
-                float resonance = ((float)fraction[1]*max)/(float)(fraction[0] - fraction[1]);
-                text.append(translate("orbit.resonance", prettyFloat(resonance)));
+            float resonance = ((float)fraction[1]*max)/(float)(fraction[0] - fraction[1]);
+            text.append(translate("orbit.resonance", prettyFloat(resonance)));
             }
         }
 
@@ -221,21 +276,21 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
-                Vector3f pos = orbit.getLastRotatedPosition();
+            Vector3f pos = orbit.getLastRotatedPosition();
 
-                Vector3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
-                pos.sub(earthPos);
-                float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
+            Vector3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
+            pos.sub(earthPos);
+            float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
 
-                text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
+            text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
 
-                pos.normalize();
-                pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+            pos.normalize();
+            pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
-                float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
-                float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
-                
-                text.append(translate("orbit.angle", prettyFloat(yaw), prettyFloat(angle)));
+            float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+            float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
+
+            text.append(translate("orbit.angle", prettyFloat(yaw), prettyFloat(angle)));
             }
         }
 

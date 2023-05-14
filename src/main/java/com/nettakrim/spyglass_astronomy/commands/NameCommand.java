@@ -4,15 +4,30 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.Constellation;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.argument.MessageArgumentType;
 
 public class NameCommand implements Command<FabricClientCommandSource> {
+    public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
+        LiteralCommandNode<FabricClientCommandSource> nameNode = ClientCommandManager
+            .literal("sga:name")
+            .then(
+                ClientCommandManager.argument("name", MessageArgumentType.message())
+                    .executes(new NameCommand())
+            )
+            .build();
+
+        return nameNode;
+    }
+
 	@Override
 	public int run(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String name = SpyglassAstronomyCommands.getMessageText(context);
@@ -55,7 +70,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         return 1;
     }
 
-    public static void name(Constellation constellation, String name) {
+    private static void name(Constellation constellation, String name) {
         if (constellation.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name.constellation", name);
         } else {
@@ -66,7 +81,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         SpaceDataManager.makeChange();
     }
 
-    public static void name(Star star, String name) {
+    private static void name(Star star, String name) {
         if (star.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name.star", name);
         } else {
@@ -77,7 +92,7 @@ public class NameCommand implements Command<FabricClientCommandSource> {
         SpaceDataManager.makeChange();
     }
 
-    public static void name(OrbitingBody orbitingBody, String name) {
+    private static void name(OrbitingBody orbitingBody, String name) {
         if (orbitingBody.isUnnamed()) {
             SpyglassAstronomyClient.say("commands.name."+(orbitingBody.isPlanet ? "planet" : "comet"), name);
         } else {
