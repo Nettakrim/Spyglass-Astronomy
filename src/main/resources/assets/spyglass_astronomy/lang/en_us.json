@@ -39,7 +39,7 @@
     "spyglass_astronomy.commands.name.planet.rename" : "Renamed Planet \"%s\" to \"%s\"",
     "spyglass_astronomy.commands.name.comet" : "Named Comet \"%s\"",
     "spyglass_astronomy.commands.name.comet.rename" : "Renamed Comet \"%s\" to \"%s\"",
-    "spyglass_astronomy.commands.name.nothingselected" : "an object must be selected to be Name it",
+    "spyglass_astronomy.commands.name.nothingselected" : "Select an object to Name it",
 
     "spyglass_astronomy.commands.select.constellation" : "Selected Constellation \"%s\"",
     "spyglass_astronomy.commands.select.constellation.fail" : "Spyglass must be held to be able to select Constellations",
