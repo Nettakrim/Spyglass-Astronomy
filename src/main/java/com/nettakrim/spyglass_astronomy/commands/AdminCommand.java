@@ -397,14 +397,29 @@ public class AdminCommand {
         int lines = 0;
         int maxLines = random.nextBetween(4,8);
         int maxConnections = random.nextBetween(3,5);
+        float maxAngle = maxLines <= 5 ? 0.98f : (maxConnections <= 3 ? 0.975f : 0.97f);
         Constellation constellation = new Constellation();
         while (lines < maxLines) {
             for (Star star : SpyglassAstronomyClient.stars) {
                 if (star.getAlpha() < random.nextFloat()*2) continue;
                 Vector3f starPos = star.getPositionAsVector3f();
+
                 if (starPos.distanceSquared(lastPosition) > 0.1f*(star.getAlpha()+0.5f) || starPos.distanceSquared(location) > 0.2f) continue;
                 if (lastStar != null) {
                     StarLine starLine = new StarLine(star.index, lastStar.index, false);
+                    Vector3f direction = new Vector3f(starPos).sub(lastPosition);
+
+                    boolean failedCheck = false;
+                    for (StarLine line : constellation.getLines()) {
+                        if (line.intersects(star.index, lastStar.index)) {
+                            Star[] stars = line.getStars();
+                            if (MathHelper.abs(direction.angleCos(stars[0].getPositionAsVector3f().sub(stars[1].getPositionAsVector3f()))) > maxAngle) {
+                                failedCheck = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (failedCheck) continue;
                     constellation.addLine(starLine);
                     lines++;
                     if (lines >= maxLines) break;
