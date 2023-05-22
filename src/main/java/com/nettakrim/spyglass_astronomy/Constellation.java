@@ -146,6 +146,13 @@ public class Constellation {
         return false;
     }
 
+    public boolean hasNoMatchingLine(StarLine starLine) {
+        for (StarLine line : lines) {
+            if (line.isSame(starLine)) return false;
+        }
+        return true;
+    }
+
     public boolean hasStar(Star star) {
         int index = star.index;
         for (StarLine line : lines) {

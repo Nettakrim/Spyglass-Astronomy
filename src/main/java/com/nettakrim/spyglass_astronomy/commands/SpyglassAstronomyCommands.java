@@ -16,7 +16,6 @@ import net.minecraft.command.argument.MessageArgumentType.MessageFormat;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class SpyglassAstronomyCommands {
     public static final SuggestionProvider<FabricClientCommandSource> constellations = (context, builder) -> {
@@ -50,7 +49,6 @@ public class SpyglassAstronomyCommands {
             root.addChild(ShareCommand.getCommandNode());
             root.addChild(AdminCommand.getCommandNode());
             root.addChild(HideCommand.getCommandNode());
-            root.addChild(AutoCommand.getCommandNode());
         });
     }
 

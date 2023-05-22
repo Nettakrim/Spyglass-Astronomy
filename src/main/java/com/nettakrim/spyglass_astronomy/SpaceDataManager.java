@@ -76,43 +76,47 @@ public class SpaceDataManager {
                     stage++;
                     continue;
                 }
-                switch (stage) {
-                    case 0 -> {
-                        int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
-                        if (format == 0) useDefault = true;
-                    }
-                    case 1 -> {
-                        String[] seeds = s.split(" ");
-                        if (seeds.length == 1) {
-                            starSeed = Long.parseLong(s);
-                            planetSeed = starSeed;
-                        } else {
-                            starSeed = Long.parseLong(seeds[0]);
-                            planetSeed = Long.parseLong(seeds[1]);
+                try {
+                    switch (stage) {
+                        case 0 -> {
+                            int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
+                            if (format == 0) useDefault = true;
+                        }
+                        case 1 -> {
+                            String[] seeds = s.split(" ");
+                            if (seeds.length == 1) {
+                                starSeed = Long.parseLong(s);
+                                planetSeed = starSeed;
+                            } else {
+                                starSeed = Long.parseLong(seeds[0]);
+                                planetSeed = Long.parseLong(seeds[1]);
+                            }
+                        }
+                        case 2 -> {
+                            String[] constellationParts = s.split(" \\| ");
+                            SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
+                        }
+                        case 3 -> {
+                            int starSplit = s.indexOf(' ');
+                            starIndex += Integer.parseInt(s.substring(0, starSplit));
+                            String starName = s.substring(starSplit + 1);
+                            starDatas.add(new StarData(starIndex, starName));
+                        }
+                        case 4 -> {
+                            int orbitingBodySplit = s.indexOf(' ');
+                            int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
+                            String orbitingBodyName = s.substring(orbitingBodySplit + 1);
+                            orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
+                        }
+                        case 5 -> {
+                            String[] parts = s.split(" ");
+                            SpyglassAstronomyClient.setStarCount(Integer.parseInt(parts[0]));
+                            if (parts.length > 1) setYearLength(Float.parseFloat(parts[1]));
+                            else yearLength = 8;
                         }
                     }
-                    case 2 -> {
-                        String[] constellationParts = s.split(" \\| ");
-                        SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
-                    }
-                    case 3 -> {
-                        int starSplit = s.indexOf(' ');
-                        starIndex += Integer.parseInt(s.substring(0, starSplit));
-                        String starName = s.substring(starSplit + 1);
-                        starDatas.add(new StarData(starIndex, starName));
-                    }
-                    case 4 -> {
-                        int orbitingBodySplit = s.indexOf(' ');
-                        int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
-                        String orbitingBodyName = s.substring(orbitingBodySplit + 1);
-                        orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
-                    }
-                    case 5 -> {
-                        String[] parts = s.split(" ");
-                        SpyglassAstronomyClient.setStarCount(Integer.parseInt(parts[0]));
-                        if (parts.length > 1) setYearLength(Float.parseFloat(parts[1]));
-                        else yearLength = 8;
-                    }
+                } catch (Exception e) {
+                    SpyglassAstronomyClient.LOGGER.info("Failed to load line in stage "+stage);
                 }
             }
             scanner.close();
@@ -308,5 +312,5 @@ public class SpaceDataManager {
             this.index = index;
             this.name = name;
         }
-    }    
+    }
 }

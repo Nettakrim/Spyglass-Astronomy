@@ -39,7 +39,7 @@ public class ChatHudMixin {
                 String constellationData = data.substring(firstIndex + 1, secondIndex);
                 Text constellationText = SpyglassAstronomyCommands.getClickHere(
                         "commands.share.receive.constellation",
-                        "/sga:admin add constellation " + constellationData + " " + constellationName,
+                        "/sga:admin constellations add " + constellationData + " " + constellationName,
                         true,
                         constellationName
                 );

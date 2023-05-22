@@ -121,12 +121,12 @@ public class Star {
         if (connectedStars > 0) connectedStars -= 2;
     }
 
-    public float getAlpha() {
-        return alpha;
+    public void clearAllConnections() {
+        connectedStars = 0;
     }
 
-    public int getConnectedStars() {
-        return connectedStars;
+    public float getAlpha() {
+        return alpha;
     }
 
     public void select() {
