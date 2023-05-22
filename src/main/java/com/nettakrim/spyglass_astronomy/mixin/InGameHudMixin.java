@@ -8,19 +8,18 @@ import net.minecraft.util.Identifier;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
     private static final Identifier CONSTELLATION_SPYGLASS_SCOPE = new Identifier(SpyglassAstronomyClient.MODID,"textures/constellation_spyglass_scope.png");
     private static final Identifier STAR_SPYGLASS_SCOPE = new Identifier(SpyglassAstronomyClient.MODID,"textures/star_spyglass_scope.png");    
 
-    @Redirect(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V"))
-    public void swapTexture(int i, Identifier identifier){
-        switch (SpyglassAstronomyClient.editMode) {
-            case 1 -> RenderSystem.setShaderTexture(i, CONSTELLATION_SPYGLASS_SCOPE);
-            case 2 -> RenderSystem.setShaderTexture(i, STAR_SPYGLASS_SCOPE);
-            default -> RenderSystem.setShaderTexture(i, identifier);
+    @Inject(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/render/BufferBuilder;begin(Lnet/minecraft/client/render/VertexFormat$DrawMode;Lnet/minecraft/client/render/VertexFormat;)V"))
+    public void swapTexture(CallbackInfo ci){
+        if (SpyglassAstronomyClient.editMode != 0) {
+            RenderSystem.setShaderTexture(0, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE);
         }
     }
 }

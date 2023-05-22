@@ -8,7 +8,6 @@
   "client": [
     "WorldRendererMixin",
     "MouseMixin",
-    "SpyglassItemMixin",
     "InGameHudMixin",
     "MinecraftClientMixin",
     "BiomeAccessAccessor",

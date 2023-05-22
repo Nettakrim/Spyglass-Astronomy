@@ -2,6 +2,7 @@ package com.nettakrim.spyglass_astronomy;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Items;
@@ -65,6 +66,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static TextColor nameTextColor = TextColor.fromFormatting(Formatting.LIGHT_PURPLE);
     public static TextColor buttonTextColor = TextColor.fromFormatting(Formatting.GREEN);
 
+    private static boolean spyglassImprovementsIsLoaded;
+
 	@Override
 	public void onInitializeClient() {
         client = MinecraftClient.getInstance();
@@ -72,6 +75,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         SpyglassAstronomyCommands.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> update());
+
+        spyglassImprovementsIsLoaded = FabricLoader.getInstance().isModLoaded("spyglass-improvements");
 	}
 
     public static void saveSpace() {
@@ -393,6 +398,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         if (spyglassing && spaceRenderingManager.starsCurrentlyVisible()) {
             updateHover();
+            if (isDrawingConstellation && spyglassImprovementsIsLoaded) updateDrawingConstellation();
         }
 
         if (!isHoldingSpyglass()) {
@@ -461,10 +467,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 else sayActionBar("prompt."+type, orbitingBody.name);
             }
         }
-    }
-
-    public static void startUsingSpyglass() {
-        zoom = 0;
     }
 
     public static void toggleEditMode() {
