@@ -7,6 +7,7 @@
     "spyglass_astronomy.commands.admin.bypass.off" : "Knowledge Checks reenabled",
     "spyglass_astronomy.commands.admin.setyearlength" : "Set Year Length to %s days (was %s days)",
     "spyglass_astronomy.commands.admin.addconstellation" : "Added new Constellation \"%s\"",
+    "spyglass_astronomy.commands.admin.addconstellation.invalid" : "Cannot add new Constellation \"%s\": invalid data",
     "spyglass_astronomy.commands.admin.addconstellation.fail" : "Cannot add new Constellation \"%s\": collision with \"%s\"",
     "spyglass_astronomy.commands.admin.changes.discard" : "Discarded %s unsaved Changes",
     "spyglass_astronomy.commands.admin.changes.discard.none" : "No unsaved Changes to Discard",

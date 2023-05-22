@@ -5,7 +5,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Items;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.random.Random;
 
 import org.joml.Vector3f;
@@ -57,6 +60,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static float zoom;
 
     public static Knowledge knowledge;
+
+    public static TextColor textColor = TextColor.fromRgb(0xAAAAAA);
+    public static TextColor nameTextColor = TextColor.fromFormatting(Formatting.LIGHT_PURPLE);
+    public static TextColor buttonTextColor = TextColor.fromFormatting(Formatting.GREEN);
 
 	@Override
 	public void onInitializeClient() {
@@ -113,6 +120,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (reset) {
             stars = new ArrayList<>();
             constellations = new ArrayList<>();
+            spaceRenderingManager.scheduleConstellationsUpdate();
         }
 
         int currentStars = 0;
@@ -381,7 +389,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             selectAstralObject();
         }
 
-        if (spyglassing) {
+        if (spyglassing && spaceRenderingManager.starsCurrentlyVisible()) {
             updateHover();
         }
 
@@ -501,16 +509,25 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             return;
         }
 
+        addStarLine(drawingLine, drawingConstellation, true, true);
+
+        selectConstellation(star, false);
+        SpaceDataManager.makeChange();
+
+        spaceRenderingManager.scheduleConstellationsUpdate();
+    }
+
+    public static void addStarLine(StarLine newLine, Constellation newConstellation, boolean canRemove, boolean sayFeedback) {
         Constellation target = null;
         int end = constellations.size();
         for (int i = 0; i < end; i++) {
             Constellation constellation = constellations.get(i);
-            if (constellation.lineIntersects(drawingLine)) {
+            if (constellation.lineIntersects(newLine)) {
                 if (target != null) {
                     for (StarLine line : constellation.getLines()) {
                         target.addLine(line);
                     }
-                    say("constellation.merge", target.name, constellation.name);
+                    if (sayFeedback) say("constellation.merge", target.name, constellation.name);
                     if (target.isUnnamed()) target.name = constellation.name;
                     constellations.remove(i);
                     break;
@@ -519,22 +536,22 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             }
         }
         if (target != null) {
-            Constellation potentialNew = target.addLineCanRemove(drawingLine);
-            if (potentialNew != null) {
-                say("constellation.split", target.name);
-                constellations.add(potentialNew);
-            }
-            if (target.getLines().size() == 0) {
-                say("constellation.remove", target.name);
-                constellations.remove(target);
+            if (canRemove) {
+                Constellation potentialNew = target.addLineCanRemove(newLine);
+                if (potentialNew != null) {
+                    if (sayFeedback) say("constellation.split", target.name);
+                    constellations.add(potentialNew);
+                }
+                if (target.getLines().size() == 0) {
+                    if (sayFeedback) say("constellation.remove", target.name);
+                    constellations.remove(target);
+                }
+            } else {
+                target.addLine(newLine);
             }
         } else {
-            constellations.add(drawingConstellation);
+            constellations.add(newConstellation);
         }
-        selectConstellation(star, false);
-        SpaceDataManager.makeChange();
-
-        spaceRenderingManager.scheduleConstellationsUpdate();
     }
 
     public static void updateDrawingConstellation() {
@@ -662,15 +679,15 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void say(String key, Object... args) {
-        say(Text.translatable(MODID+".say").append(Text.translatable(MODID+"."+key, args)));
+        say(Text.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(Text.translatable(MODID+"."+key, args).setStyle(Style.EMPTY.withColor(textColor))));
     }
 
     public static void sayText(Text text) {
-        say(Text.translatable(MODID+".say").append(text));
+        say(Text.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
     }
 
     public static void longSay(Text text) {
-        client.player.sendMessage(Text.translatable(MODID+".longsay").append(text));
+        client.player.sendMessage(Text.translatable(MODID+".longsay").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
     }
 
     public static void sayActionBar(String key, Object... args) {

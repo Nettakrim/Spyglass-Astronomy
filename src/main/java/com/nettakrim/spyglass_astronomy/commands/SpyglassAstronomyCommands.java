@@ -102,7 +102,7 @@ public class SpyglassAstronomyCommands {
         .withClickEvent(
             new ClickEvent(run ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command)
         )
-        .withColor(Formatting.GREEN))
-        .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        .withColor(SpyglassAstronomyClient.buttonTextColor))
+        .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor)));
     }
 }

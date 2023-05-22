@@ -40,6 +40,8 @@ public class SpaceRenderingManager {
     public static boolean orbitingBodiesVisible;
     public static boolean oldStarsVisible;
 
+    private float starVisibility;
+
     public SpaceRenderingManager() {
         constellationsVisible = true;
         starsVisible = true;
@@ -136,7 +138,7 @@ public class SpaceRenderingManager {
     }
 
     public void Render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable) {
-        float starVisibility = SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
+        starVisibility = SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
             matrices.pop();
             matrices.push();
@@ -184,5 +186,9 @@ public class SpaceRenderingManager {
 
     public static float getHeightScale() {
         return heightScale;
+    }
+
+    public boolean starsCurrentlyVisible() {
+        return starVisibility > 0;
     }
 }

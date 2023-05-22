@@ -248,6 +248,10 @@ public class AdminCommand {
         int index = dataRaw.indexOf(' ');
         Constellation constellation = SpaceDataManager.decodeConstellation(null, dataRaw.substring(index+1), dataRaw.substring(0, index));
         constellation.initaliseStarLines();
+        if (constellation.getLines().size() == 0) {
+            SpyglassAstronomyClient.say("commands.admin.addconstellation.invalid", constellation.name);
+            return -1;
+        }
         for (Constellation targetConstellation : SpyglassAstronomyClient.constellations) {
             for (StarLine line : constellation.getLines()) {
                 if (targetConstellation.lineIntersects(line)) {

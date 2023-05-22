@@ -3,6 +3,7 @@ package com.nettakrim.spyglass_astronomy.commands;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.command.argument.MessageArgumentType;
+import net.minecraft.text.Style;
 import org.joml.Vector3f;
 
 import com.mojang.brigadier.Command;
@@ -138,6 +139,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         staticVisibilityInfo(text, position, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
+        text.setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor));
         SpyglassAstronomyClient.longSay(text);
     }
 
@@ -159,6 +161,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
+        text.setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor));
         SpyglassAstronomyClient.longSay(text);
     }
 
@@ -170,6 +173,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         orbitInfo(text, orbitingBody.orbit, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
+        text.setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor));
         SpyglassAstronomyClient.longSay(text);
     }
 
@@ -181,6 +185,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         orbitInfo(text, SpyglassAstronomyClient.earthOrbit, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
+        text.setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor));
         SpyglassAstronomyClient.longSay(text);
     }
 
@@ -211,7 +216,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
-
+        text.setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor));
         SpyglassAstronomyClient.longSay(text);
     }
 

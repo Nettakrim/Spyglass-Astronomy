@@ -125,6 +125,10 @@ public class Star {
         return alpha;
     }
 
+    public int getConnectedStars() {
+        return connectedStars;
+    }
+
     public void select() {
         Constellation.deselect();
         OrbitingBody.deselect();
