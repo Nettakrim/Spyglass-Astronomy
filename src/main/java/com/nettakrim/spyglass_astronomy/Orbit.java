@@ -11,6 +11,7 @@ public class Orbit {
     public final float semiMajorAxis;
     public final float distance;
     public final float rotation;
+    public final float ascension;
     public final float inclination;
     public final float timeOffset;
 
@@ -19,7 +20,7 @@ public class Orbit {
     //orbit speed scale, k = 1 means that a period of 1 lasts 1 minecraft day
     private final static double k = 1;
 
-    public Orbit(double period, double eccentricity, float rotation, float inclination, float timeOffset) {
+    public Orbit(double period, double eccentricity, float rotation, float ascension, float inclination, float timeOffset) {
         double semiMajorAxis = Math.cbrt((period*period)/k);
         double distance = semiMajorAxis*(1-eccentricity*eccentricity);
         
@@ -29,6 +30,7 @@ public class Orbit {
         this.distance = (float) distance;
 
         this.rotation = rotation;
+        this.ascension = ascension;
         this.inclination = inclination;
         this.timeOffset = timeOffset;
     }
@@ -53,9 +55,8 @@ public class Orbit {
     }
 
     public void rotateLocalPosition(Vector3f vector) {
-        //ascending node is always such that the highest and lowest points relative to the reference plane are the apoapsis and periapsis
-        //in other words, i think inclination is actually incorrect? idk
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(inclination));
+        vector.rotate(RotationAxis.POSITIVE_X.rotationDegrees(inclination));
+        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(ascension));
         vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
     }
 

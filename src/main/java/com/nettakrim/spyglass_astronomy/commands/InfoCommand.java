@@ -196,18 +196,18 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         int stage = 0;
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
             if (stage == 0 && orbitingBody.orbit.period > SpyglassAstronomyClient.earthOrbit.period) {
-            text.append(translate("solarsystem.thisworld"));
-            stage = 1;
+                text.append(translate("solarsystem.thisworld"));
+                stage = 1;
             }
             if (stage == 1 && !orbitingBody.isPlanet) {
-            if (!SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT, flags)) break;
-            text.append(translate("solarsystem.comets"));
-            stage = 2;
+                if (!SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.ADEPT, flags)) break;
+                text.append(translate("solarsystem.comets"));
+                stage = 2;
             }
             if (orbitingBody.isUnnamed()) {
-            text.append(translate("solarsystem.unknown"));
+                text.append(translate("solarsystem.unknown"));
             } else {
-            text.append(translate("solarsystem.named", orbitingBody.name));
+                text.append(translate("solarsystem.named", orbitingBody.name));
             }
         }
 
@@ -237,22 +237,22 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
             pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
             pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
             if (MathHelper.abs(pos.z) < 0.9f) {
-            float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
-            angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
-            if (referenceYaw < 0) angle = 180 - angle;
-            if (angle < 0) angle += 360;
-            float period = SpyglassAstronomyClient.earthOrbit.period;
-            angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
-            int nearestDay = (int)angle;
-            if (period == 8) {
-                text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
+                float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+                angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
+                if (referenceYaw < 0) angle = 180 - angle;
+                if (angle < 0) angle += 360;
+                float period = SpyglassAstronomyClient.earthOrbit.period;
+                angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
+                int nearestDay = (int)angle;
+                if (period == 8) {
+                    text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
+                } else {
+                    int inDays = nearestDay - ((int)(SpyglassAstronomyClient.getDay()%((long)period)));
+                    if (inDays < 0) inDays += 8;
+                    text.append(translate("visibility.time.date", nearestDay, inDays));
+                }
             } else {
-                int inDays = nearestDay - ((int)(SpyglassAstronomyClient.getDay()%((long)period)));
-                if (inDays < 0) inDays += 8;
-                text.append(translate("visibility.time.date", nearestDay, inDays));
-            }
-            } else {
-            text.append(translate("visibility.time.always"));
+                text.append(translate("visibility.time.always"));
             }
         }
     }
@@ -266,13 +266,13 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
-            float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
-            float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
-            // max/min is often 1 less iteration for getDenominator
-            double[] fraction = getFraction(max/min);
+                float max = Math.max(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+                float min = Math.min(orbit.period, SpyglassAstronomyClient.earthOrbit.period);
+                // max/min is often 1 less iteration for getDenominator
+                double[] fraction = getFraction(max/min);
 
-            float resonance = ((float)fraction[1]*max)/(float)(fraction[0] - fraction[1]);
-            text.append(translate("orbit.resonance", prettyFloat(resonance)));
+                float resonance = ((float)fraction[1]*max)/(float)(fraction[0] - fraction[1]);
+                text.append(translate("orbit.resonance", prettyFloat(resonance)));
             }
         }
 
@@ -281,26 +281,27 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
         if (!isEarth) {
             if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
-            Vector3f pos = orbit.getLastRotatedPosition();
+                Vector3f pos = orbit.getLastRotatedPosition();
 
-            Vector3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
-            pos.sub(earthPos);
-            float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
+                Vector3f earthPos = SpyglassAstronomyClient.earthOrbit.getLastRotatedPosition();
+                pos.sub(earthPos);
+                float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
 
-            text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
+                text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
 
-            pos.normalize();
-            pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+                pos.normalize();
+                pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
-            float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
-            float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
+                float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
+                float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
 
-            text.append(translate("orbit.angle", prettyFloat(yaw), prettyFloat(angle)));
+                text.append(translate("orbit.angle", prettyFloat(yaw), prettyFloat(angle)));
             }
         }
 
         if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.MASTER, flags)) {
             text.append(translate("orbit.eccentricity", prettyFloat(orbit.eccentricity)));
+            text.append(translate("orbit.ascension", prettyFloat(orbit.ascension)));
             text.append(translate("orbit.inclination", prettyFloat(orbit.inclination)));
         }
     }

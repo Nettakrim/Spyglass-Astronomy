@@ -196,7 +196,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float yearLength = spaceDataManager.getYearLength();
         
         //earth will have a largely circular orbit
-        earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 10f, true);
+        earthOrbit = generateRandomOrbit(random, yearLength, 0.05f, 10f, 5f, true);
     
         starAngleMultiplier = ((yearLength + 1) / yearLength) * 360f;
 
@@ -236,7 +236,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 }
             }
             
-            Orbit orbit = generateRandomOrbit(random, period, 0.1f, 20f, false);
+            Orbit orbit = generateRandomOrbit(random, period, 0.1f, 20f, 10f, false);
             addRandomOrbitingBody(random, lowPriorityRandom, orbit, true, planetDesignRandom, type);
         }
 
@@ -245,7 +245,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         for (float x = 0; x < outerPlanets; x++) {
             float period = (yearLength * (2 << ((int)x+1))) * periodOffsets[random.nextInt(periodOffsets.length)];
             float settingsMultiplier = (x/8)+1;
-            Orbit orbit = generateRandomOrbit(random, period, Math.min(0.15f*settingsMultiplier,0.5f), Math.min(20f*settingsMultiplier,60f), false);
+            Orbit orbit = generateRandomOrbit(random, period, Math.min(0.15f*settingsMultiplier,0.5f), Math.min(30f*settingsMultiplier,60f), Math.min(20f*settingsMultiplier,60f), false);
             
             OrbitingBodyType type;
             if (otherHabitable == 1 && x == innerPlanets) {
@@ -283,9 +283,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             period *= yearLength;
 
             float rotation = random.nextFloat() * 360;
+            float ascension = (random.nextFloat() * 180) - 90;
             float inclination = (random.nextFloat() * 180) - 90;
-            float timeOffset = random.nextFloat();
-            Orbit orbit = new Orbit(period, eccentricity, rotation, inclination, timeOffset);
+            float timeOffset = ((float)comets)/x;
+            Orbit orbit = new Orbit(period, eccentricity, rotation, ascension, inclination, timeOffset);
             addRandomOrbitingBody(random, lowPriorityRandom, orbit, false, cometDesignRandom, OrbitingBodyType.COMET);
         }
 
@@ -336,19 +337,20 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed, isPlanet, decoration, mainColor, secondaryColor, type));
     }
 
-    private static Orbit generateRandomOrbit(Random random, float period, float maxEccentricity, float maxInclination, boolean isEarth) {
+    private static Orbit generateRandomOrbit(Random random, float period, float maxEccentricity, float maxAscension, float maxInclination, boolean isEarth) {
         float eccentricityRaw = random.nextFloat();
         float rotationRaw = random.nextFloat();
+        float ascensionRaw = (random.nextFloat()*2)-1;
         float inclinationRaw = (random.nextFloat()*2)-1;
-        random.nextFloat(); //unused ascencion random
 
         float eccentricity = eccentricityRaw * maxEccentricity;
         float rotation = rotationRaw*360f;
+        float ascension = (ascensionRaw*Math.abs(ascensionRaw))*maxAscension;
         float inclination = (inclinationRaw*Math.abs(inclinationRaw))*maxInclination;
 
         float timeOffset = isEarth ? 0 : random.nextFloat();
 
-        return new Orbit(period, eccentricity, rotation, inclination, timeOffset);
+        return new Orbit(period, eccentricity, rotation, ascension, inclination, timeOffset);
     }
 
     public static float getStarAngle() {

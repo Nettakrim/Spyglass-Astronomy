@@ -63,7 +63,7 @@ public class OrbitingBody {
         angle = (angle+rotationSpeed)%360;
 
         position = orbit.getRotatedPositionAtGlobalTime(day, dayFraction, true);
-        
+
         Vector3f similarityVector = new Vector3f(position);
         similarityVector.normalize();
         float similarity = similarityVector.dot(normalisedReferencePosition);
@@ -131,7 +131,7 @@ public class OrbitingBody {
         quad1vertex1.sub(rotatedAxis2);
         quad1vertex2.sub(rotatedAxis1);
         quad1vertex3.add(rotatedAxis2);
-        quad1vertex4.add(rotatedAxis1);        
+        quad1vertex4.add(rotatedAxis1);
 
         if (isPlanet) {
             switch (decoration) {

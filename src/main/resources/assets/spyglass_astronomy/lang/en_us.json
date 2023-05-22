@@ -97,6 +97,7 @@
     "spyglass_astronomy.commands.info.orbit.distance" : "\nDistance: %s AU",
     "spyglass_astronomy.commands.info.orbit.angle" : "\nCurrent Angle: %s %s",
     "spyglass_astronomy.commands.info.orbit.eccentricity" : "\nEccentricity: %s",
+    "spyglass_astronomy.commands.info.orbit.ascension" : "\nAscension: %s",
     "spyglass_astronomy.commands.info.orbit.inclination" : "\nInclination: %s",
 
     "spyglass_astronomy.commands.info.starknowledge.toadept" : "\nDraw %s Constellations to learn more",
