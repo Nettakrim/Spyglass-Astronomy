@@ -55,7 +55,7 @@ public class SpaceDataManager {
         if (useDefault) {
             starSeed = seedHash;
             planetSeed = seedHash;
-            yearLength = 8;
+            yearLength = 8f;
         }
     }
 

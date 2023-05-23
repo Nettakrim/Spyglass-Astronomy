@@ -14,6 +14,16 @@ public class YearLengthCommand {
             .literal("yearlength")
             .build();
 
+        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
+            .literal("query")
+            .executes(YearLengthCommand::queryYearLength)
+            .build();
+
+        LiteralCommandNode<FabricClientCommandSource> resetNode = ClientCommandManager
+            .literal("reset")
+            .executes(YearLengthCommand::resetYearLength)
+            .build();
+
         LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommandManager
             .literal("set")
             .then(
@@ -22,18 +32,21 @@ public class YearLengthCommand {
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
-            .literal("query")
-            .executes(YearLengthCommand::queryYearLength)
-            .build();
-
-        yearLengthNode.addChild(setNode);
         yearLengthNode.addChild(queryNode);
+        yearLengthNode.addChild(resetNode);
+        yearLengthNode.addChild(setNode);
         return yearLengthNode;
     }
 
-    public static int setYearLength(CommandContext<FabricClientCommandSource> context) {
-        float yearLength = FloatArgumentType.getFloat(context, "days");
+    private static int setYearLength(CommandContext<FabricClientCommandSource> context) {
+        return setYearLength(FloatArgumentType.getFloat(context, "days"));
+    }
+
+    private static int resetYearLength(CommandContext<FabricClientCommandSource> context) {
+        return setYearLength(8f);
+    }
+
+    public static int setYearLength(float yearLength) {
         SpyglassAstronomyClient.say("commands.admin.yearlength.set", Float.toString(yearLength), Float.toString(SpyglassAstronomyClient.spaceDataManager.getYearLength()));
         SpyglassAstronomyClient.spaceDataManager.setYearLength(yearLength);
         SpyglassAstronomyClient.generatePlanets(null, true);
@@ -41,7 +54,7 @@ public class YearLengthCommand {
         return 1;
     }
 
-    public static int queryYearLength(CommandContext<FabricClientCommandSource> context) {
+    private static int queryYearLength(CommandContext<FabricClientCommandSource> context) {
         SpyglassAstronomyClient.say("commands.admin.yearlength.query", Float.toString(SpyglassAstronomyClient.spaceDataManager.getYearLength()));
         return 1;
     }
