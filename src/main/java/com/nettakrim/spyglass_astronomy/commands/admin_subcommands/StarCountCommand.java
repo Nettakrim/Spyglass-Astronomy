@@ -36,7 +36,7 @@ public class StarCountCommand {
         return starCountNode;
     }
 
-    public static ArrayList<Constellation> invalidatedConstellations = new ArrayList<>();
+    public static final ArrayList<Constellation> invalidatedConstellations = new ArrayList<>();
 
     private static int setStarCount(CommandContext<FabricClientCommandSource> context) {
         int amount = IntegerArgumentType.getInteger(context, "amount");

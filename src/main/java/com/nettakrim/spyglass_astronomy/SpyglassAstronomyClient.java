@@ -62,9 +62,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static Knowledge knowledge;
 
-    public static TextColor textColor = TextColor.fromRgb(0xAAAAAA);
-    public static TextColor nameTextColor = TextColor.fromRgb(0xB38EF3);
-    public static TextColor buttonTextColor = TextColor.fromRgb(0x41F384);
+    public static final TextColor textColor = TextColor.fromRgb(0xAAAAAA);
+    public static final TextColor nameTextColor = TextColor.fromRgb(0xB38EF3);
+    public static final TextColor buttonTextColor = TextColor.fromRgb(0x41F384);
 
     private static boolean spyglassImprovementsIsLoaded;
 
@@ -145,7 +145,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             //makes sure position is a uniform point in a sphere, then normalises position to the outside of a sphere
             float distance = posX * posX + posY * posY + posZ * posZ;
             if (!(distance < 1.0) || !(distance > 0.01)) continue;
-            distance = MathHelper.fastInverseSqrt(distance);
+            distance = MathHelper.inverseSqrt(distance);
             posX *= distance;
             posY *= distance;
             posZ *= distance;

@@ -70,7 +70,7 @@ public class OrbitingBody {
     
         position.sub(referencePosition);
         float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(position.x, position.y, position.z);
-        float inverseSqrt = MathHelper.fastInverseSqrt(sqrDistance);
+        float inverseSqrt = MathHelper.inverseSqrt(sqrDistance);
         position.mul(inverseSqrt);
 
         float distance = (1/inverseSqrt)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis;

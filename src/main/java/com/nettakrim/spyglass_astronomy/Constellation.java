@@ -187,7 +187,7 @@ public class Constellation {
         float x = averagePositionBuffer.x;
         float y = averagePositionBuffer.y;
         float z = averagePositionBuffer.z;
-        float isqrt = MathHelper.fastInverseSqrt(x * x + y * y + z * z);
+        float isqrt = MathHelper.inverseSqrt(x * x + y * y + z * z);
         averagePositionBuffer.mul(isqrt);
         averagePositionValid = true;
 
