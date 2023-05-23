@@ -43,12 +43,12 @@ public class SpyglassAstronomyCommands {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             RootCommandNode<FabricClientCommandSource> root = dispatcher.getRoot();
 
-            root.addChild(InfoCommand.getCommandNode());
-            root.addChild(SelectCommand.getCommandNode());
-            root.addChild(NameCommand.getCommandNode());
-            root.addChild(ShareCommand.getCommandNode());
             root.addChild(AdminCommand.getCommandNode());
             root.addChild(HideCommand.getCommandNode());
+            root.addChild(InfoCommand.getCommandNode());
+            root.addChild(NameCommand.getCommandNode());
+            root.addChild(SelectCommand.getCommandNode());
+            root.addChild(ShareCommand.getCommandNode());
         });
     }
 

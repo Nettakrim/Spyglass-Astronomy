@@ -1,7 +1,7 @@
 # Spyglass Astronomy
 Explore a procedurally generated solar system through the lens of a spyglass!
 
-The mod is entirely client-side and designed for helping with worldbuilding and immersion, it is encouraged you think of lore about all the constellations you draw and planets you name!
+The mod is entirely client-side and designed for helping with world-building and immersion, it is encouraged you think of lore about all the constellations you draw and planets you name!
 
 Planets and stars will be the same for all players on a particular world, and are generated randomly (and largely scientifically accurately) per world, and you can easily share constellations between players using a client-side command
 
@@ -16,15 +16,15 @@ Star mode allows you to select stars and planets, note that comets are referred 
 
 Once an object is selected you can name it with `/sga:name <name>`, or get useful information with `/sga:info`, you can also get the information of a specific object without selecting it by following the suggestions after typing `/sga:info <x>`
 
-If youre playing on a multiplayer server, you can use `/sga:share` or `/sga:share <x>` to share the currently selected or specified object respectively, this gives you a code you can send in chat or /message to someone directly, which allows them to easily add a constellation or name of a planet or star on their side, provided they have the mod too, of course.
+If you're playing on a multiplayer server, you can use `/sga:share` or `/sga:share <x>` to share the currently selected or specified object respectively, this gives you a code you can send in chat or /message to someone directly, which allows them to easily add a constellation or name of a planet or star on their side, provided they have the mod too, of course.
 
-All the client side commands can be seen by looking at the suggestions after typing `/sga:`, or by refering to the list below
+All the client side commands can be seen by looking at the suggestions after typing `/sga:`, or by referring to the list below
 
 # Commands
 
 ### `/sga:info`
 
-most information is not given until you fufill a certain criteria, this can be bypassed with `/sga:admin bypassknowledge`
+most information is not given until you fulfil a certain criteria, this can be bypassed with `/sga:admin bypassknowledge`
 
 `/sga:info`
 
@@ -49,11 +49,11 @@ gets information about the star with name `<name>`
 
 gets information about the planet with name `<name>`
 - Name
-- Type ()
+- Type
 - Orbital Period
-- Orbital Resonance (amount of days between each closest aproach of thisworld and the specified planet, assuming circular orbits)
-- Current position in orbit (% of the way through the planets year)
-- Distance from thiswoorld (in AU)
+- Orbital Resonance (amount of days between each closest approach of thisworld and the specified planet, assuming circular orbits)
+- Current position in orbit (% of the way through the planet's year)
+- Distance from thisworld (in AU)
 - Current position in the sky (the two numbers shown on F3)
 - Eccentricity
 - Inclination
@@ -62,9 +62,9 @@ gets information about the planet with name `<name>`
 
 gets information about the minecraft world's orbit
 - Current In-game Time
-- Current Moonphase
+- Current Moon-phase
 - Orbital Period
-- Current position in orbit (% of the way through the planets year)
+- Current position in orbit (% of the way through the planet's year)
 - Eccentricity
 - Inclination
 
@@ -73,7 +73,7 @@ gets information about the minecraft world's orbit
 
 gets information about the solar system
 - List of planets (including thisworld) in order of distance from sun
-- List of comets in arbitary order
+- List of comets in arbitrary order
 - Days since worlds creation
 
 ### `/sga:select`
@@ -96,11 +96,11 @@ redirects to the appropriate command for the currently selected constellation, s
 
 `/sga:share constellation|star|planet <name>`
 
-displays a [Click Here] button, clicking the button will open chat with some suggested text representing the object, if anyone recieves this text as part of a message (e.g, though just sending it in chat directly, or with a /msg), they get a [Click Here] button which when clicked gives them the shared object
+displays a [Click Here] button, clicking the button will open chat with some suggested text representing the object, if anyone receives this text as part of a message (e.g, though just sending it in chat directly, or with a /msg), they get a [Click Here] button which when clicked gives them the shared object
 
 ### `/sga:admin`
 
-there is generally little reason to use `sga:admin` commands, but some may still be useful for messing around
+there is generally little reason to use `sga:admin` commands other than while setting up a world, but some may still be useful for messing around
 
 `/sga:admin removeconstellation <name>`
 
@@ -116,15 +116,15 @@ discard reverts to the last saved data
 
 save saves data, although it is saved automatically whenever you leave the world or change dimension
 
-qeury says how many changes since last save/discard, what counts as a change can be quite sensitive, so it may be higher than you expect
+query says how many changes since last save/discard, what counts as a change can be quite sensitive, so it may be higher than you expect
 
 `/sga:admin bypassknowledge`
 
-bypass knowledge checks for `/sga:info` until a relog
+bypass knowledge checks for `/sga:info` until a re-log or until it is run again
 
 `/sga:admin setyearlength <days>`
 
-sets the length of the year in days, decimals are allowed but it has to be 0.125 or more, by default it is 8
+sets the length of the year in days, decimals are allowed, but it has to be 0.125 or more, by default it is 8
 
 `/sga:admin setseed star <seed>`
 
@@ -147,13 +147,13 @@ toggles visibilities of stars, constellations, and planets
 
 `/sga:hide stars|constellations|planets`
 
-toggles visiblity of the respective type of object
+toggles visibility of the respective type of object
 
 `/sga:hide vanillastars`
 
-toggles visiblity of the boring, vanilla stars, i dont know why you would want to do this
+toggles visibility of the boring, vanilla stars, I don't know why you would want to do this :P
 
-# Helpful code i used here and there
+# Helpful code I used here and there
 
 [Nicer Skies](https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java)
 

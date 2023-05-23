@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy;
 
+import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.StarCountCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -9,7 +10,6 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.random.Random;
 
 import org.joml.Vector3f;
@@ -63,8 +63,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static Knowledge knowledge;
 
     public static TextColor textColor = TextColor.fromRgb(0xAAAAAA);
-    public static TextColor nameTextColor = TextColor.fromFormatting(Formatting.LIGHT_PURPLE);
-    public static TextColor buttonTextColor = TextColor.fromFormatting(Formatting.GREEN);
+    public static TextColor nameTextColor = TextColor.fromRgb(0xB38EF3);
+    public static TextColor buttonTextColor = TextColor.fromRgb(0x41F384);
 
     private static boolean spyglassImprovementsIsLoaded;
 
@@ -101,6 +101,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager = new SpaceDataManager(clientWorld);
 
         generateSpace(false);
+        StarCountCommand.invalidatedConstellations.clear();
 
         knowledge = new Knowledge();
         updateKnowledge();
@@ -108,26 +109,31 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void generateSpace(boolean reset) {
         Random random = Random.create(0);
-        generateStars(random, reset);
+        generateStars(random, reset, reset);
         generatePlanets(random, reset);
+
+        for (Constellation constellation : constellations) {
+            constellation.initaliseStarLines();
+        }
 
         spaceRenderingManager = new SpaceRenderingManager();
         spaceRenderingManager.updateSpace(0);
     }
 
-    public static void generateStars(Random random, boolean reset) {
+    public static void generateStars(Random random, boolean resetStars, boolean resetConstellations) {
         if (random == null) {
             random = Random.create(spaceDataManager.getStarSeed());
         } else {
             random.setSeed(spaceDataManager.getStarSeed());
         }
 
-        if (reset) {
+        if (resetStars) {
             stars = new ArrayList<>();
+        }
+        if (resetConstellations) {
             constellations = new ArrayList<>();
             spaceRenderingManager.scheduleConstellationsUpdate();
         }
-
         int currentStars = 0;
         while (currentStars < starCount) {
             float posX = random.nextFloat() * 2.0f - 1.0f;
@@ -167,10 +173,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         ready = true;
 
-        for (Constellation constellation : constellations) {
-            constellation.initaliseStarLines();
-        }
-
         spaceDataManager.loadStarDatas();
     }
 
@@ -190,7 +192,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         IntTetrisBagRandom planetDesignRandom = new IntTetrisBagRandom(random, 3);
         IntTetrisBagRandom cometDesignRandom = new IntTetrisBagRandom(random, 2);
 
-        //always atleast 5 planets, and always atleast 2 outer planets
+        //always at least 5 planets, and always at least 2 outer planets
         //between 1 and 3 inner planets
         int innerPlanets = random.nextInt(3)+1;
         //between 4 and 8 outer planets for 1 inner, between 2 and 8 for 3 inner
@@ -205,7 +207,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         starAngleMultiplier = ((yearLength + 1) / yearLength) * 360f;
 
-        //inner planets are spaced rougly evenly, and rounded to 8ths of an earth year
+        //inner planets are spaced roughly evenly, and rounded to 8ths of an earth year
         float innerRoundAmount = 8;
         while (innerPlanets >= innerRoundAmount) innerRoundAmount *= 2;
 

@@ -51,6 +51,15 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static int nameConstellation(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
+        int size = SpyglassAstronomyClient.constellations.size();
+        if (index >= size) {
+            if (size == 0) {
+                SpyglassAstronomyClient.say("commands.name.constellation.fail.none");
+            } else {
+                SpyglassAstronomyClient.say("commands.name.constellation.fail", size);
+            }
+            return -1;
+        }
         String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.constellations.get(index), name);
         return 1;
@@ -58,6 +67,10 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static int nameStar(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
+        if (index >= SpyglassAstronomyClient.stars.size()) {
+            SpyglassAstronomyClient.say("commands.name.star.fail");
+            return -1;
+        }
         String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.stars.get(index), name);
         return 1;
@@ -65,6 +78,10 @@ public class NameCommand implements Command<FabricClientCommandSource> {
 
     public static int nameOrbitingBody(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
+        if (index >= SpyglassAstronomyClient.orbitingBodies.size()) {
+            SpyglassAstronomyClient.say("commands.name.planet.fail");
+            return -1;
+        }
         String name = SpyglassAstronomyCommands.getMessageText(context);
         name(SpyglassAstronomyClient.orbitingBodies.get(index), name);
         return 1;
