@@ -5,7 +5,7 @@ The mod is entirely client-side and designed for helping with world-building and
 
 Planets and stars will be the same for all players on a particular world, and are generated randomly (and largely scientifically accurately) per world, and you can easily share constellations between players using a client-side command
 
-![Planet overlooking a far away mountain](https://cdn.modrinth.com/data/EdBSdqge/images/3dc17c154655fdc2dc7fc3989a38e16e9052d269.png)
+![Screenshot of some planets and constellations from atop a mountain](https://cdn.modrinth.com/data/EdBSdqge/images/3dc17c154655fdc2dc7fc3989a38e16e9052d269.png)
 # How to use
 
 To interact with the cosmos there are three spyglass modes: vanilla, constellation (amethyst), and star (emerald), these are cycled with the pick block button (middle click) while zoomed in.
@@ -102,13 +102,9 @@ displays a [Click Here] button, clicking the button will open chat with some sug
 
 there is generally little reason to use `sga:admin` commands other than while setting up a world, but some may still be useful for messing around
 
-`/sga:admin removeconstellation <name>`
+`/sga:admin bypassknowledge`
 
-removes the constellation with name `<name>`
-
-`/sga:admin setstarcount <amount>`
-
-changes the amount of stars in the sky to `<amount>`, default 1024, max 4095
+bypass knowledge checks for `/sga:info` until a re-log or until it is run again
 
 `/sga:admin changes discard|save|query`
 
@@ -118,26 +114,38 @@ save saves data, although it is saved automatically whenever you leave the world
 
 query says how many changes since last save/discard, what counts as a change can be quite sensitive, so it may be higher than you expect
 
-`/sga:admin bypassknowledge`
+`/sga:admin constellations add`
 
-bypass knowledge checks for `/sga:info` until a re-log or until it is run again
+used by the share command to add constellations, there is little reason to use this yourself
 
-`/sga:admin setyearlength <days>`
+`/sga:admin constellations generate`
 
-sets the length of the year in days, decimals are allowed, but it has to be 0.125 or more, by default it is 8
+generates constellations randomly based on the star seed
 
-`/sga:admin setseed star <seed>`
+`/sga:admin constellations remove <name>`
 
-sets the seed that stars use to generate, by default this is the biome seed of the world
+removes the constellation with name `<name>`, if no name is given it will remove the currently selected constellation
 
-`/sga:admin setseed planet <seed>`
+`/sga:admin constellations removeall`
 
-sets the seed that planets use to generate, by default this is the biome seed of the world
+removes all constellations
 
 `/sga:admin rename constellation|star|planet <index> <name>`
 
-renames the `<index>`th object of the specified type to `<name>`, then selects it
-there is little reason you would want to use this, however it is needed for `/sga:share` to work
+used by the share command to rename the `<index>`th object of the specified type to `<name>`, then select it
+there is little reason to use this yourself
+
+`/sga:admin seed planet|star query|reset|(set <seed>)`
+
+gets, resets, or sets the seed that planets or stars use to generate, by default this is the biome seed of the world
+
+`/sga:admin starcount query|reset|(set <amount>)`
+
+gets, resets, or sets the amount of stars in the sky to `<amount>`, default 1024, max 4095
+
+`/sga:admin yearlength query|reset|(set <days>)`
+
+gets, resets, or sets the length of the year in days, decimals are allowed, but it has to be 0.125 or more, by default it is 8
 
 ### `/sga:hide`
 
