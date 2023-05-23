@@ -35,6 +35,11 @@ public class ConstellationsCommand {
             )
             .build();
 
+        LiteralCommandNode<FabricClientCommandSource> removeAllNode = ClientCommandManager
+            .literal("removeall")
+            .executes(ConstellationsCommand::removeAllConstellations)
+            .build();
+
         LiteralCommandNode<FabricClientCommandSource> generateNode = ClientCommandManager
             .literal("generate")
             .executes(ConstellationsCommand::generateConstellations)
@@ -42,6 +47,7 @@ public class ConstellationsCommand {
 
         constellationsNode.addChild(addNode);
         constellationsNode.addChild(removeNode);
+        constellationsNode.addChild(removeAllNode);
         constellationsNode.addChild(generateNode);
         return constellationsNode;
     }
@@ -163,6 +169,17 @@ public class ConstellationsCommand {
         SpyglassAstronomyClient.say("commands.admin.constellations.remove", constellation.name);
         clearConnections(constellation);
         SpyglassAstronomyClient.constellations.remove(constellation);
+        SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        SpaceDataManager.makeChange();
+        return 1;
+    }
+
+    private static int removeAllConstellations(CommandContext<FabricClientCommandSource> context) {
+        SpyglassAstronomyClient.say("commands.admin.constellations.remove.all", SpyglassAstronomyClient.constellations.size());
+        for (Constellation constellation : SpyglassAstronomyClient.constellations) {
+            clearConnections(constellation);
+        }
+        SpyglassAstronomyClient.constellations.clear();
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
         SpaceDataManager.makeChange();
         return 1;

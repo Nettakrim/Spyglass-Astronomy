@@ -10,6 +10,7 @@
 
     "spyglass_astronomy.commands.admin.constellations.remove" : "Removed Constellation \"%s\"",
     "spyglass_astronomy.commands.admin.constellations.remove.nothingselected" : "Select a Constellation or use /sga:admin constellations remove <x> to Remove a Constellation",
+    "spyglass_astronomy.commands.admin.constellations.remove.all" : "Removed all %s Constellations",
     "spyglass_astronomy.commands.admin.constellations.add" : "Added new Constellation \"%s\"",
     "spyglass_astronomy.commands.admin.constellations.add.fail.data" : "Cannot add new Constellation \"%s\": invalid data",
     "spyglass_astronomy.commands.admin.constellations.add.fail.stars" : "Cannot add new Constellation \"%s\": at least %s Stars are required, there are currently %s",
@@ -23,13 +24,14 @@
     "spyglass_astronomy.commands.admin.seed.star.query" : "The Star Seed is %s",
 
     "spyglass_astronomy.commands.admin.starcount.set" : "Set Star Count to %s (was %s)",
-    "spyglass_astronomy.commands.admin.starcount.set.invalidate" : "%s Constellations are no longer valid",
-    "spyglass_astronomy.commands.admin.starcount.set.validate" : "%s Constellations are valid again",
+    "spyglass_astronomy.commands.admin.starcount.set.invalidate" : "%s Constellations are no longer valid due to missing Stars - Returning the Stars will Recover as many Constellations as possible",
+    "spyglass_astronomy.commands.admin.starcount.set.validate" : "%s Constellations are valid again and have been Recovered",
     "spyglass_astronomy.commands.admin.starcount.query" : "There are %s stars",
 
     "spyglass_astronomy.commands.admin.yearlength.set" : "Set Year Length to %s days (was %s days)",
     "spyglass_astronomy.commands.admin.yearlength.query" : "The Year Length is %s days",
 
+    
 
     "spyglass_astronomy.commands.hide.all.hide" : "All hidden, run /sga:hide again to show",
     "spyglass_astronomy.commands.hide.all.show" : "All shown, run /sga:hide again to hide",

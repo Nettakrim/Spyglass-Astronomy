@@ -1,18 +1,37 @@
 {
-    "spyglass_astronomy.commands.admin.removeconstellation" : "移除星座 \"%s\"",
-    "spyglass_astronomy.commands.admin.setstarcount" : "设置星辰数量为 %s (改动前 %s)",
-    "spyglass_astronomy.commands.admin.setstarseed" : "设置星辰种子为 %s (改动前 %s)",
-    "spyglass_astronomy.commands.admin.setplanetseed" : "设置行星种子为 %s (改动前 %s)",
     "spyglass_astronomy.commands.admin.bypass.on" : "已跳过探索限制，再次输入以重置",
     "spyglass_astronomy.commands.admin.bypass.off" : "重新启用探索限制",
-    "spyglass_astronomy.commands.admin.setyearlength" : "设置一年长度为 %s (改动前 %s)",
-    "spyglass_astronomy.commands.admin.addconstellation" : "添加新的星座 \"%s\"",
-    "spyglass_astronomy.commands.admin.addconstellation.fail" : "无法添加新星座 \"%s\": 与 \"%s\" 冲突",
+    
     "spyglass_astronomy.commands.admin.changes.discard" : "未保存的更改 %s 将会丢失",
     "spyglass_astronomy.commands.admin.changes.discard.none" : "无未保存的更改",
     "spyglass_astronomy.commands.admin.changes.save" : "未保存的更改 %s 已保存",
     "spyglass_astronomy.commands.admin.changes.save.none" : "无未保存的更改",
     "spyglass_astronomy.commands.admin.changes.query" : "自上次更改后已有 %s 次更改",
+
+    "spyglass_astronomy.commands.admin.constellations.remove" : "移除星座 \"%s\"",
+    "spyglass_astronomy.commands.admin.constellations.remove.nothingselected": "#Select a Constellation or use /sga:admin constellations remove <x> to Remove a Constellation",
+    "spyglass_astronomy.commands.admin.constellations.remove.all" : "#Removed all %s Constellations",
+    "spyglass_astronomy.commands.admin.constellations.add" : "添加新的星座 \"%s\"",
+    "spyglass_astronomy.commands.admin.constellations.add.fail.data": "#Cannot add new Constellation \"%s\": invalid data",
+    "spyglass_astronomy.commands.admin.constellations.add.fail.stars": "#Cannot add new Constellation \"%s\": at least %s Stars are required, there are currently %s",
+    "spyglass_astronomy.commands.admin.constellations.add.fail.collision" : "无法添加新星座 \"%s\": 与 \"%s\" 冲突",
+    "spyglass_astronomy.commands.admin.constellations.add.edit": "#Changed existing Constellation \"%s\"",
+    "spyglass_astronomy.commands.admin.constellations.generate": "#Created %s new Constellations",
+
+    "spyglass_astronomy.commands.admin.seed.planet.set" : "设置行星种子为 %s (改动前 %s)",
+    "spyglass_astronomy.commands.admin.seed.planet.query": "#The Planet Seed is %s",
+    "spyglass_astronomy.commands.admin.seed.star.set" : "设置星辰种子为 %s (改动前 %s)",
+    "spyglass_astronomy.commands.admin.seed.star.query": "#The Star Seed is %s",
+
+    "spyglass_astronomy.commands.admin.starcount.set" : "设置星辰数量为 %s (改动前 %s)",
+    "spyglass_astronomy.commands.admin.starcount.set.invalidate" : "#%s Constellations are no longer valid due to missing Stars - Returning the Stars will Recover as many Constellations as possible",
+    "spyglass_astronomy.commands.admin.starcount.set.validate" : "#%s Constellations are valid again and have been Recovered",
+    "spyglass_astronomy.commands.admin.starcount.query": "#There are %s stars",
+
+    "spyglass_astronomy.commands.admin.yearlength.set" : "设置一年长度为 %s (改动前 %s)",
+    "spyglass_astronomy.commands.admin.yearlength.query": "#The Year Length is %s days",
+
+    
 
     "spyglass_astronomy.commands.hide.all.hide" : "已全部隐藏，再次运行/sga:hide 以显示",
     "spyglass_astronomy.commands.hide.all.show" : "已全部显示，再次运行/sga:hide 以隐藏",
@@ -27,12 +46,16 @@
 
     "spyglass_astronomy.commands.name.constellation" : "新星座被命名为 \"%s\"",
     "spyglass_astronomy.commands.name.constellation.rename" : "星座 \"%s\" 被重命名为 \"%s\"",
+    "spyglass_astronomy.commands.name.constellation.fail": "#Not enough Constellations exist, try a number less than %s",
+    "spyglass_astronomy.commands.name.constellation.fail.none": "#No Constellations exist, try creating some first",
     "spyglass_astronomy.commands.name.star" : "新星辰被命名为 \"%s\"",
     "spyglass_astronomy.commands.name.star.rename" : "星辰 \"%s\" 被重命名为 \"%s\"",
+    "spyglass_astronomy.commands.name.star.fail": "#Not enough Stars exist, are you using the correct starcount? (/sga:admin starcount query)",
     "spyglass_astronomy.commands.name.planet" : "新行星被命名为 \"%s\"",
     "spyglass_astronomy.commands.name.planet.rename" : "行星 \"%s\" 被重命名为 \"%s\"",
     "spyglass_astronomy.commands.name.comet" : "新彗星被命名为 \"%s\"",
     "spyglass_astronomy.commands.name.comet.rename" : "彗星 \"%s\" 被重命名为 \"%s\"",
+    "spyglass_astronomy.commands.name.planet.fail": "#Not enough Planets or Comets exist, are you using the correct planet seed? (/sga:admin seed planet query)",
     "spyglass_astronomy.commands.name.nothingselected" : "必须选择一个对象才能为其命名",
 
     "spyglass_astronomy.commands.select.constellation" : "选择星座 \"%s\"",
@@ -96,6 +119,7 @@
     "spyglass_astronomy.commands.info.orbit.distance" : "\n距离: %s AU(天文单位)",
     "spyglass_astronomy.commands.info.orbit.angle" : "\n当前角度: %s %s",
     "spyglass_astronomy.commands.info.orbit.eccentricity" : "\n轨道偏心率: %s",
+    "spyglass_astronomy.commands.info.orbit.ascension": "\n#Ascension: %s",
     "spyglass_astronomy.commands.info.orbit.inclination" : "\n倾角: %s",
 
     "spyglass_astronomy.commands.info.starknowledge.toadept" : "\n绘制 %s 个星座以了解更多",
@@ -126,10 +150,16 @@
     "spyglass_astronomy.prompt.name.star" : "使用/sga:name 命名这个星辰！",
     "spyglass_astronomy.prompt.name.planet" : "使用/sga:name 命名这个行星！",
     "spyglass_astronomy.prompt.name.comet" : "使用/sga:name 命名这个彗星！",
+    "spyglass_astronomy.prompt.unnamed.constellation": "#Unnamed Constellation",
+    "spyglass_astronomy.prompt.unnamed.constellationandstar": "#Unnamed Constellation | %s",
+    "spyglass_astronomy.prompt.unnamed.star": "#Unnamed Star",
+    "spyglass_astronomy.prompt.unnamed.planet": "#Unnamed Planet",
+    "spyglass_astronomy.prompt.unnamed.comet": "#Unnamed Comet",
     "spyglass_astronomy.prompt.constellation" : "%s",
     "spyglass_astronomy.prompt.constellationandstar" : "%s | %s",
     "spyglass_astronomy.prompt.star" : "%s",
     "spyglass_astronomy.prompt.planet" : "%s",
+    "spyglass_astronomy.prompt.comet": "%s",
 
     "spyglass_astronomy.say" : "[天文学望远镜] ",
     "spyglass_astronomy.longsay" : "- [天文学望远镜] -"
