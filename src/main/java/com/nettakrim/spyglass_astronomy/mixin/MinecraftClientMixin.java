@@ -21,5 +21,5 @@ public class MinecraftClientMixin {
     @Inject(method = "joinWorld(Lnet/minecraft/client/world/ClientWorld;)V", at = @At("RETURN"))
     private void loadSpace(ClientWorld world, CallbackInfo ci) {
         SpyglassAstronomyClient.loadSpace(world, true);
-    }    
+    }
 }

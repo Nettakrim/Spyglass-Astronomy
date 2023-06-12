@@ -1,6 +1,7 @@
 package com.nettakrim.spyglass_astronomy;
 
 import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.gl.VertexBuffer.Usage;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -20,17 +21,17 @@ import org.joml.Vector3f;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 public class SpaceRenderingManager {
-    private final VertexBuffer starsBuffer = new VertexBuffer();
+    private final VertexBuffer starsBuffer = new VertexBuffer(Usage.STATIC);
     private final BufferBuilder starBufferBuilder = Tessellator.getInstance().getBuffer();
 
-    private final VertexBuffer constellationsBuffer = new VertexBuffer();
+    private final VertexBuffer constellationsBuffer = new VertexBuffer(Usage.STATIC);
     private final BufferBuilder constellationsBufferBuilder = Tessellator.getInstance().getBuffer();
     private boolean constellationsNeedsUpdate = true;
 
-    private final VertexBuffer drawingConstellationsBuffer = new VertexBuffer();
+    private final VertexBuffer drawingConstellationsBuffer = new VertexBuffer(Usage.STATIC);
     private final BufferBuilder drawingConstellationsBufferBuilder = Tessellator.getInstance().getBuffer();
 
-    private final VertexBuffer planetsBuffer = new VertexBuffer();
+    private final VertexBuffer planetsBuffer = new VertexBuffer(Usage.STATIC);
     private final BufferBuilder planetsBufferBuilder = Tessellator.getInstance().getBuffer();
 
     private static float heightScale = 1;

@@ -294,23 +294,7 @@ public class SpaceDataManager {
         return SpyglassAstronomyClient.spaceDataManager.changesMade;
     }
 
-    public static class StarData {
-        public final int index;
-        public final String name;
+    public record StarData (int index, String name) {}
 
-        public StarData(int index, String name) {
-            this.index = index;
-            this.name = name;
-        }
-    }
-
-    public static class OrbitingBodyData {
-        public final int index;
-        public final String name;
-
-        public OrbitingBodyData(int index, String name) {
-            this.index = index;
-            this.name = name;
-        }
-    }
+    public record OrbitingBodyData (int index, String name) {}
 }
