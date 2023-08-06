@@ -41,7 +41,7 @@ public class SpaceDataManager {
         storagePath = SpyglassAstronomyClient.client.runDirectory
                 .toPath()
                 .resolve(".spyglass_astronomy")
-                .resolve(getCurrentWorldOrServerName());
+                .resolve(getCurrentWorldOrServerName().replaceAll("[\\\\/:*?\"<>|]", "_"));
 
         fileName = storagePath +"/"+seedHash + ".txt";
 

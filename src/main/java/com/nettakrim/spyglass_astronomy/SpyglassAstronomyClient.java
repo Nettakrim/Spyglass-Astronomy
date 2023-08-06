@@ -391,7 +391,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void update() {
-        if (!ready) return;
+        if (!ready || client.player == null) return;
         boolean spyglassing = client.player.isUsingSpyglass();
         boolean toggle = client.options.pickItemKey.isPressed();
 
@@ -723,7 +723,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static boolean isHoldingSpyglass() {
-        if (!ready) return false;
+        if (!ready || client.player == null) return false;
         return client.player.getMainHandStack().isOf(Items.SPYGLASS) || client.player.getOffHandStack().isOf(Items.SPYGLASS);
     }
 
