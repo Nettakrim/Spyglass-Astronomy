@@ -43,6 +43,8 @@
     "spyglass_astronomy.commands.hide.planets.show" : "行星和彗星已全部显示，再次运行/sga:hide planets 以隐藏",
     "spyglass_astronomy.commands.hide.vanillastars.hide" : "原版星辰已全部隐藏，再次运行/sga:hide vanillastars 以显示",
     "spyglass_astronomy.commands.hide.vanillastars.show" : "原版星辰已全部显示，再次运行/sga:hide vanillastars 以隐藏",
+    "spyglass_astronomy.commands.hide.daytime.hide" : "#All night-only, run /sga:hide daytime again to show all during day",
+    "spyglass_astronomy.commands.hide.daytime.show" : "#All shown during day, run /sga:hide daytime again for night-only",
 
     "spyglass_astronomy.commands.name.constellation" : "新星座被命名为 \"%s\"",
     "spyglass_astronomy.commands.name.constellation.rename" : "星座 \"%s\" 被重命名为 \"%s\"",

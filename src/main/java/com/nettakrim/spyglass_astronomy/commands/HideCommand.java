@@ -37,10 +37,16 @@ public class HideCommand implements Command<FabricClientCommandSource> {
             .executes(HideCommand::hideOldStars)
             .build();
 
+        LiteralCommandNode<FabricClientCommandSource> dayTimeHideNode = ClientCommandManager
+            .literal("daytime")
+            .executes(HideCommand::hideDaytime)
+            .build();
+
         hideNode.addChild(constellationsHideNode);
         hideNode.addChild(starsHideNode);
         hideNode.addChild(orbitingBodiesHideNode);
         hideNode.addChild(oldStarsHideNode);
+        hideNode.addChild(dayTimeHideNode);
 
         return hideNode;
     }
@@ -79,6 +85,13 @@ public class HideCommand implements Command<FabricClientCommandSource> {
         sayHideUpdate("vanillastars", SpaceRenderingManager.oldStarsVisible);
         return 1;
     }
+
+    private static int hideDaytime(CommandContext<FabricClientCommandSource> context) {
+        SpaceRenderingManager.starsAlwaysVisible = !SpaceRenderingManager.starsAlwaysVisible;
+        sayHideUpdate("daytime", SpaceRenderingManager.starsAlwaysVisible);
+        return 1;
+    }
+
 
     private static void sayHideUpdate(String base, boolean active) {
         SpyglassAstronomyClient.say("commands.hide."+base+(active ? ".show" :".hide"));

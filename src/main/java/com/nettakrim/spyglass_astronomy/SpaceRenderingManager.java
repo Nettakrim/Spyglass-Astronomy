@@ -40,6 +40,7 @@ public class SpaceRenderingManager {
 	public static boolean starsVisible;
     public static boolean orbitingBodiesVisible;
     public static boolean oldStarsVisible;
+    public static boolean starsAlwaysVisible;
 
     private float starVisibility;
 
@@ -48,6 +49,7 @@ public class SpaceRenderingManager {
         starsVisible = true;
         orbitingBodiesVisible = true;
         oldStarsVisible = false;
+        starsAlwaysVisible = false;
     }
 
     public void updateSpace(int ticks) {
@@ -139,7 +141,7 @@ public class SpaceRenderingManager {
     }
 
     public void Render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable) {
-        starVisibility = SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
+        starVisibility = starsAlwaysVisible ? 1 : SpyglassAstronomyClient.world.method_23787(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
             matrices.pop();
             matrices.push();

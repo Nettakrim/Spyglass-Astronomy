@@ -43,6 +43,8 @@
     "spyglass_astronomy.commands.hide.planets.show" : "Planets and Comets shown, run /sga:hide planets again to hide",
     "spyglass_astronomy.commands.hide.vanillastars.hide" : "Vanilla Stars hidden, run /sga:hide vanillastars again to show",
     "spyglass_astronomy.commands.hide.vanillastars.show" : "Vanilla Stars shown, run /sga:hide vanillastars again to hide",
+    "spyglass_astronomy.commands.hide.daytime.hide" : "All night-only, run /sga:hide daytime again to show all during day",
+    "spyglass_astronomy.commands.hide.daytime.show" : "All shown during day, run /sga:hide daytime again for night-only",
 
     "spyglass_astronomy.commands.name.constellation" : "Named new Constellation \"%s\"",
     "spyglass_astronomy.commands.name.constellation.rename" : "Renamed Constellation \"%s\" to \"%s\"",
