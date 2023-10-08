@@ -250,19 +250,17 @@ public class SpaceDataManager {
     }
 
     private static String getCurrentWorldOrServerName() {
-        //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L342
+        // https://github.com/Johni0702/bobby/blob/master/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L357
         IntegratedServer integratedServer = SpyglassAstronomyClient.client.getServer();
         if (integratedServer != null) {
             return integratedServer.getSaveProperties().getLevelName();
         }
 
-        // Needs to be before the ServerInfo because that one will contain a random IP
-        if (SpyglassAstronomyClient.client.isConnectedToRealms()) {
-            return "realms";
-        }
-
         ServerInfo serverInfo = SpyglassAstronomyClient.client.getCurrentServerEntry();
         if (serverInfo != null) {
+            if (serverInfo.isRealm()) {
+                return "realms";
+            }
             return serverInfo.address.replace(':', '_');
         }
 
