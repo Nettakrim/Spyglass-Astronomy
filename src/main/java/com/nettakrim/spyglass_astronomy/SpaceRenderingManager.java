@@ -20,6 +20,13 @@ import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Scanner;
+
 public class SpaceRenderingManager {
     private final VertexBuffer starsBuffer = new VertexBuffer(Usage.STATIC);
     private final BufferBuilder starBufferBuilder = Tessellator.getInstance().getBuffer();
@@ -44,12 +51,65 @@ public class SpaceRenderingManager {
 
     private float starVisibility;
 
+    private File data = null;
+    private Path storagePath;
+    private final String fileName;
+
     public SpaceRenderingManager() {
+        storagePath = SpyglassAstronomyClient.client.runDirectory.toPath().resolve(".spyglass_astronomy");
+
+        fileName = storagePath +"/rendering.txt";
+
         constellationsVisible = true;
         starsVisible = true;
         orbitingBodiesVisible = true;
         oldStarsVisible = false;
         starsAlwaysVisible = false;
+
+        if (Files.exists(storagePath)) {
+            data = new File(fileName);
+            if (data.exists()) {
+                loadData();
+            }
+        }
+    }
+
+    private void loadData() {
+        try {
+            if (data.createNewFile()) {
+                return;
+            }
+            Scanner scanner = new Scanner(data);
+            String s = scanner.nextLine();
+            scanner.close();
+            constellationsVisible = charTrue(s, 0);
+            starsVisible = charTrue(s, 1);
+            orbitingBodiesVisible = charTrue(s, 2);
+            oldStarsVisible = charTrue(s, 3);
+            starsAlwaysVisible = charTrue(s, 4);
+        } catch (IOException e) {
+            SpyglassAstronomyClient.LOGGER.info("Failed to load data");
+        }
+    }
+
+    private boolean charTrue(String s, int index) {
+        return index < s.length() && s.charAt(index) == '1';
+    }
+
+    public void saveData() {
+        try {
+            if (data == null) {
+                Files.createDirectories(storagePath);
+                data = new File(fileName);
+            }
+            FileWriter writer = new FileWriter(data);
+            String s = (constellationsVisible ? "1" : "0") + (starsVisible ? "1" : "0") + (orbitingBodiesVisible ? "1" : "0") + (oldStarsVisible ? "1" : "0") + (starsAlwaysVisible ? "1" : "0");
+            writer.write(s);
+            writer.close();
+
+        } catch (IOException e) {
+            SpyglassAstronomyClient.LOGGER.info("Failed to save data");
+        }
     }
 
     public void updateSpace(int ticks) {

@@ -83,6 +83,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (spaceDataManager != null) {
             spaceDataManager.saveData();
         }
+        if (spaceRenderingManager != null) {
+            spaceRenderingManager.saveData();
+        }
     }
 
     public static void discardUnsavedChanges() {
