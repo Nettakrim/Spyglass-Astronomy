@@ -295,7 +295,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float rotation = random.nextFloat() * 360;
             float ascension = (random.nextFloat() * 180) - 90;
             float inclination = (random.nextFloat() * 180) - 90;
-            float timeOffset = ((float)comets)/x;
+            float timeOffset = ((float)comets)/(x+1);
             Orbit orbit = new Orbit(period, eccentricity, rotation, ascension, inclination, timeOffset);
             addRandomOrbitingBody(random, lowPriorityRandom, orbit, false, cometDesignRandom, OrbitingBodyType.COMET);
         }
