@@ -78,7 +78,7 @@ public class OrbitingBody {
         float visibilityScale = Math.min(MathHelper.sqrt(distance),8);
 
         //this isn't needed to run every frame
-        {
+        if ((ticks&7) == 0 || axis1 == null) {
             //it may seem a bit weird allowing dayFraction to be outside 0-1, but it doesn't matter
             axis1 = orbit.getRotatedPositionAtGlobalTime(day, dayFraction-(orbit.period/32), false);
             axis1.sub(referencePosition);
