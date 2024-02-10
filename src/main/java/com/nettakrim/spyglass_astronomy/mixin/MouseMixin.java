@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.Mouse;
@@ -8,14 +9,15 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.MathHelper;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Mouse.class)
 public class MouseMixin {
+    @Unique
     private double sensitivityScale;
 
     @Inject(at = @At("TAIL"), method = "updateMouse")
@@ -24,21 +26,20 @@ public class MouseMixin {
             SpyglassAstronomyClient.updateDrawingConstellation();
         }
     }
-
-    @Redirect(
+    @WrapWithCondition(
         method = "onMouseScroll",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(D)V"
         )
     )
-    private void onMouseScroll(PlayerInventory inventory, double scroll){
+    private boolean onMouseScroll(PlayerInventory inventory, double scroll){
         ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
         if(player != null && player.isUsingSpyglass()){
             SpyglassAstronomyClient.zoom = MathHelper.clamp(SpyglassAstronomyClient.zoom - (float)scroll, -10, 10);
-            return;
+            return false;
         }
-        inventory.scrollInHotbar(scroll);
+        return true;
     }
 
     @ModifyVariable(
