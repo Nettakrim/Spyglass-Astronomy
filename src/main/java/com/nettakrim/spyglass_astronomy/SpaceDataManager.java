@@ -256,11 +256,17 @@ public class SpaceDataManager {
             return integratedServer.getSaveProperties().getLevelName();
         }
 
-        ServerInfo serverInfo = SpyglassAstronomyClient.client.getCurrentServerEntry();
-        if (serverInfo != null) {
-            if (serverInfo.isRealm()) {
+        try {
+            // Needs to be before the ServerInfo because that one will contain a random IP if connected to realms
+            if (SpyglassAstronomyClient.client.isConnectedToRealms()) {
                 return "realms";
             }
+        } catch (Exception ignored) {
+            //for some reason this seems to cause crashes
+        }
+
+        ServerInfo serverInfo = SpyglassAstronomyClient.client.getCurrentServerEntry();
+        if (serverInfo != null) {
             return serverInfo.address.replace(':', '_');
         }
 
