@@ -21,6 +21,7 @@ classes/
 .settings/
 .vscode/
 bin/
+.factorypath
 .classpath
 .project
 

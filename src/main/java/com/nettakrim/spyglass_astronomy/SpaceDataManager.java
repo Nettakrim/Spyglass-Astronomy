@@ -8,15 +8,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
 import com.nettakrim.spyglass_astronomy.mixin.BiomeAccessAccessor;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.WorldSavePath;
 
 public class SpaceDataManager {
     public static final int SAVE_FORMAT = 1;
@@ -25,9 +28,10 @@ public class SpaceDataManager {
     private long planetSeed;
     private float yearLength;
 
-    private File data = null;
-    private Path storagePath;
+    private final File data;
+    private final Path storagePath;
     private final String fileName;
+    private final boolean isWorldFolder;
 
     public ArrayList<StarData> starDatas;
     public ArrayList<OrbitingBodyData> orbitingBodyDatas;
@@ -38,24 +42,58 @@ public class SpaceDataManager {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
         long seedHash = ((BiomeAccessAccessor) world.getBiomeAccess()).getSeed();
         boolean useDefault = true;
-        storagePath = SpyglassAstronomyClient.client.runDirectory
-                .toPath()
-                .resolve(".spyglass_astronomy")
-                .resolve(getCurrentWorldOrServerName().replaceAll("[\\\\/:*?\"<>|]", "_"));
+        Optional<Path> localPath = getLocalStorage();
+        this.isWorldFolder = localPath.isPresent();
+        storagePath = localPath.orElse(getGlobalStorage());
 
         fileName = storagePath +"/"+seedHash + ".txt";
+        data = new File(fileName);
 
-        if (Files.exists(storagePath)) {
-            data = new File(fileName);
-            if (data.exists()) {
-                useDefault = !loadData();
-            }
+        tryMigrateOldData();
+        if (data.exists()) {
+            useDefault = !loadData();
         }
 
         if (useDefault) {
             starSeed = seedHash;
             planetSeed = seedHash;
             yearLength = 8f;
+        }
+    }
+
+    static public Path getGlobalStorage(){
+        return SpyglassAstronomyClient.client.runDirectory.toPath()
+            .resolve(".spyglass_astronomy")
+            .resolve(getCurrentWorldOrServerName().replaceAll("[\\\\/:*?\"<>|]", "_"))
+            ;
+    }
+
+    static public Optional<Path> getLocalStorage(){
+        IntegratedServer localServer = MinecraftClient.getInstance().getServer();
+        if (localServer == null)
+            return Optional.empty();
+
+        return Optional.of(
+            localServer.getSavePath(WorldSavePath.ROOT)
+                .resolve("data")
+                .resolve("spyglass_astronomy")
+        );
+    }
+
+    public void tryMigrateOldData() {
+        if (this.isWorldFolder && !data.exists())
+        {
+            Path oldFile = getGlobalStorage().resolve(data.getName());
+            if (Files.exists(oldFile)) {
+                try {
+                    Files.createDirectories(storagePath);
+                    Files.copy(oldFile, data.toPath());
+                    SpyglassAstronomyClient.LOGGER.info("Migrated old astronomy data into the world's folder.");
+                }
+                catch (IOException e){
+                    SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
+                }
+            }
         }
     }
 
@@ -130,9 +168,8 @@ public class SpaceDataManager {
     public void saveData() {
         if (changesMade == 0) return;
         try {
-            if (data == null) {
+            if (!data.exists()) {
                 Files.createDirectories(storagePath);
-                data = new File(fileName);
             }
             FileWriter writer = new FileWriter(data);
             StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
