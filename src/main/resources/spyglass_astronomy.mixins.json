@@ -6,13 +6,14 @@
   "mixins": [
   ],
   "client": [
-    "WorldRendererMixin",
-    "MouseMixin",
+    "BiomeAccessAccessor",
+    "ChatHudMixin",
+    "GameRendererMixin",
     "InGameHudMixin",
     "MinecraftClientMixin",
-    "BiomeAccessAccessor",
-    "GameRendererMixin",
-    "ChatHudMixin"
+    "MouseMixin",
+    "SkyRenderingMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

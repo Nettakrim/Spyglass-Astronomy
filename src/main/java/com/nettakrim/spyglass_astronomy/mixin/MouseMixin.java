@@ -1,6 +1,7 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.Mouse;
@@ -30,13 +31,13 @@ public class MouseMixin {
         method = "onMouseScroll",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(D)V"
+            target = "Lnet/minecraft/entity/player/PlayerInventory;setSelectedSlot(I)V"
         )
     )
-    private boolean onMouseScroll(PlayerInventory inventory, double scroll){
+    private boolean onMouseScroll(PlayerInventory instance, int slot, @Local int i){
         ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
         if(player != null && player.isUsingSpyglass()){
-            SpyglassAstronomyClient.zoom = MathHelper.clamp(SpyglassAstronomyClient.zoom - (float)scroll, -10, 10);
+            SpyglassAstronomyClient.zoom = MathHelper.clamp(SpyglassAstronomyClient.zoom - (float)i, -10, 10);
             return false;
         }
         return true;

@@ -1,7 +1,8 @@
 package com.nettakrim.spyglass_astronomy;
 
+import net.minecraft.client.gl.GlUsage;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.gl.VertexBuffer.Usage;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 
@@ -10,6 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -22,16 +24,16 @@ import java.nio.file.Path;
 import java.util.Scanner;
 
 public class SpaceRenderingManager {
-    private final VertexBuffer starsBuffer = new VertexBuffer(Usage.STATIC);
+    private final VertexBuffer starsBuffer = new VertexBuffer(GlUsage.STATIC_WRITE);
     private boolean starsReady = false;
 
-    private final VertexBuffer constellationsBuffer = new VertexBuffer(Usage.STATIC);
+    private final VertexBuffer constellationsBuffer = new VertexBuffer(GlUsage.STATIC_WRITE);
     private boolean constellationsReady = false;
 
-    private final VertexBuffer drawingConstellationsBuffer = new VertexBuffer(Usage.STATIC);
+    private final VertexBuffer drawingConstellationsBuffer = new VertexBuffer(GlUsage.STATIC_WRITE);
     private boolean drawingReady = false;
 
-    private final VertexBuffer planetsBuffer = new VertexBuffer(Usage.STATIC);
+    private final VertexBuffer planetsBuffer = new VertexBuffer(GlUsage.STATIC_WRITE);
     private boolean planetsReady = false;
 
     private static float heightScale = 1;
@@ -219,34 +221,42 @@ public class SpaceRenderingManager {
         drawingConstellationsBuffer.upload(drawingConstellationsBufferBuilder.end());
     }
 
-    public void Render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta) {
+    public void render(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta) {
         starVisibility = starsAlwaysVisible ? 1 : SpyglassAstronomyClient.world.getStarBrightness(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
-            matrices.pop();
             matrices.push();
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
+
+            Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+            matrix4fStack.pushMatrix();
+            matrix4fStack.mul(matrices.peek().getPositionMatrix());
+
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
-            BackgroundRenderer.clearFog();
-            
+
+            RenderSystem.depthMask(false);
+            RenderSystem.overlayBlendFunc();
+            RenderSystem.enableBlend();
+
             if (starsVisible && starsReady) {
                 starsBuffer.bind();
-                starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
+                starsBuffer.draw(matrix4fStack, projectionMatrix, RenderSystem.getShader());
                 VertexBuffer.unbind();
             }
 
             if (constellationsVisible) {
                 if (constellationsReady) {
                     constellationsBuffer.bind();
-                    constellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
+                    constellationsBuffer.draw(matrix4fStack, projectionMatrix, RenderSystem.getShader());
                     VertexBuffer.unbind();
                 }
                 if (SpyglassAstronomyClient.isDrawingConstellation || drawingReady) {
                     updateDrawingConstellation();
                     drawingConstellationsBuffer.bind();
-                    drawingConstellationsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
+                    drawingConstellationsBuffer.draw(matrix4fStack, projectionMatrix, RenderSystem.getShader());
                 }
             }
 
@@ -255,10 +265,21 @@ public class SpaceRenderingManager {
                 matrices.push();
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
 
+                matrix4fStack.popMatrix();
+                matrix4fStack.pushMatrix();
+                matrix4fStack.mul(matrices.peek().getPositionMatrix());
+
                 planetsBuffer.bind();
-                planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());
+                planetsBuffer.draw(matrix4fStack, projectionMatrix, RenderSystem.getShader());
                 VertexBuffer.unbind();
             }
+
+            matrices.pop();
+            matrix4fStack.popMatrix();
+
+            RenderSystem.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
         }
     }
 

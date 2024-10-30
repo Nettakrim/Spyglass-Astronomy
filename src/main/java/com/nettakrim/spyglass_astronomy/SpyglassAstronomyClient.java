@@ -700,7 +700,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static void say(Text text) {
         if (client.player == null) return;
-        client.player.sendMessage(text);
+        client.player.sendMessage(text, false);
     }
 
     public static void say(String key, Object... args) {
