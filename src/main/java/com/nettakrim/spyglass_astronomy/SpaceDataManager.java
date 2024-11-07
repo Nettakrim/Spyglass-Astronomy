@@ -15,7 +15,9 @@ import java.util.Base64.Encoder;
 
 import com.nettakrim.spyglass_astronomy.mixin.BiomeAccessAccessor;
 
+import com.nettakrim.spyglass_astronomy.mixin.ClientWorldAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -44,12 +46,12 @@ public class SpaceDataManager {
         boolean useDefault = true;
         Optional<Path> localPath = getLocalStorage();
         this.isWorldFolder = localPath.isPresent();
-        storagePath = localPath.orElse(getGlobalStorage());
+        storagePath = localPath.orElse(getGlobalStorage(world));
 
         fileName = storagePath +"/"+seedHash + ".txt";
         data = new File(fileName);
 
-        tryMigrateOldData();
+        tryMigrateOldData(world);
         if (data.exists()) {
             useDefault = !loadData();
         }
@@ -61,10 +63,10 @@ public class SpaceDataManager {
         }
     }
 
-    static public Path getGlobalStorage(){
+    static public Path getGlobalStorage(ClientWorld world){
         return SpyglassAstronomyClient.client.runDirectory.toPath()
             .resolve(".spyglass_astronomy")
-            .resolve(getCurrentWorldOrServerName().replaceAll("[\\\\/:*?\"<>|]", "_"))
+            .resolve(getCurrentWorldOrServerName(world).replaceAll("[\\\\/:*?\"<>|]", "_"))
             ;
     }
 
@@ -80,10 +82,10 @@ public class SpaceDataManager {
         );
     }
 
-    public void tryMigrateOldData() {
+    public void tryMigrateOldData(ClientWorld world) {
         if (this.isWorldFolder && !data.exists())
         {
-            Path oldFile = getGlobalStorage().resolve(data.getName());
+            Path oldFile = getGlobalStorage(world).resolve(data.getName());
             if (Files.exists(oldFile)) {
                 try {
                     Files.createDirectories(storagePath);
@@ -286,7 +288,7 @@ public class SpaceDataManager {
         this.yearLength = yearLength;
     }
 
-    private static String getCurrentWorldOrServerName() {
+    private static String getCurrentWorldOrServerName(ClientWorld world) {
         // https://github.com/Johni0702/bobby/blob/master/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L357
         IntegratedServer integratedServer = SpyglassAstronomyClient.client.getServer();
         if (integratedServer != null) {
@@ -302,9 +304,12 @@ public class SpaceDataManager {
             //for some reason this seems to cause crashes
         }
 
-        ServerInfo serverInfo = SpyglassAstronomyClient.client.getCurrentServerEntry();
-        if (serverInfo != null) {
-            return serverInfo.address.replace(':', '_');
+        ClientPlayNetworkHandler clientPlayNetworkHandler = ((ClientWorldAccessor)world).getNetworkHandler();
+        if (clientPlayNetworkHandler != null) {
+            ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
+            if (serverInfo != null) {
+                return serverInfo.address.replace(':', '_');
+            }
         }
 
         return "unknown";

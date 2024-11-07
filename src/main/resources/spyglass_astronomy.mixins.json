@@ -3,11 +3,10 @@
   "minVersion": "0.8",
   "package": "com.nettakrim.spyglass_astronomy.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-  ],
   "client": [
     "BiomeAccessAccessor",
     "ChatHudMixin",
+    "ClientWorldAccessor",
     "GameRendererMixin",
     "InGameHudMixin",
     "MinecraftClientMixin",
