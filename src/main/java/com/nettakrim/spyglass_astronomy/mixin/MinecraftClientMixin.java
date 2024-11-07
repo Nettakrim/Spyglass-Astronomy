@@ -3,7 +3,6 @@ package com.nettakrim.spyglass_astronomy.mixin;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.client.world.ClientWorld;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +19,7 @@ public class MinecraftClientMixin {
     }
 
     @Inject(method = "joinWorld", at = @At("TAIL"))
-    private void loadSpace(ClientWorld world, DownloadingTerrainScreen.WorldEntryReason worldEntryReason, CallbackInfo ci) {
+    private void loadSpace(ClientWorld world, CallbackInfo ci) {
         SpyglassAstronomyClient.loadSpace(world, true);
     }
 }

@@ -30,7 +30,7 @@ public abstract class GameRendererMixin {
 
         float f = 1.0f;
         if (SpyglassAstronomyClient.client.getCameraEntity() instanceof AbstractClientPlayerEntity abstractClientPlayerEntity) {
-            f = abstractClientPlayerEntity.getFovMultiplier(true, 0);
+            f = abstractClientPlayerEntity.getFovMultiplier();
         }
         //1.25892541179 would be more accurate, but it doesnt really matter
         f *= (float)Math.pow(1.25d, SpyglassAstronomyClient.zoom);

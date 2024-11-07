@@ -92,7 +92,7 @@ public class SpyglassAstronomyCommands {
     public static String getMessageText(CommandContext<FabricClientCommandSource> context, String name) {
         //a lot of digging through #SayCommand to make a MessageArgumentType that works clientside
         MessageFormat messageFormat = context.getArgument(name, MessageFormat.class);
-        return messageFormat.contents();
+        return messageFormat.getContents();
     }
 
     public static Text getClickHere(String actionKey, String command, boolean run, Object... formatting) {

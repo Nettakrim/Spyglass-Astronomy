@@ -12,7 +12,6 @@
     "InGameHudMixin",
     "MinecraftClientMixin",
     "MouseMixin",
-    "SkyRenderingMixin",
     "WorldRendererMixin"
   ],
   "injectors": {

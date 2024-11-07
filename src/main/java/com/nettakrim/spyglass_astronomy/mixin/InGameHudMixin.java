@@ -5,7 +5,6 @@ import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +23,7 @@ public class InGameHudMixin {
     @Inject(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/DrawContext;fill(Lnet/minecraft/client/render/RenderLayer;IIIIII)V",ordinal = 0))
     public void renderSpyglassMode(DrawContext context, float scale, CallbackInfo ci, @Local(name = "k") int k, @Local(name = "l") int l, @Local(name = "i") int i, @Local(name = "j") int j){
         if (SpyglassAstronomyClient.editMode != 0) {
-            context.drawTexture(RenderLayer::getGuiTextured, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, k, l, 0.0F, 0.0F, i, j, i, j);
+            context.drawTexture(SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, k, l, -90, 0.0F, 0.0F, i, j, i, j);
         }
     }
 }
