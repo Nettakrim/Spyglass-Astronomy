@@ -152,25 +152,25 @@ public class StarLine {
             vertexA1.x,
             vertexA1.y,
             vertexA1.z)
-        .color(ar, ag, ab, aa);
+        .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
             vertexA2.x,
             vertexA2.y,
             vertexA2.z)
-        .color(ar, ag, ab, aa);
+        .color(ar, ag, ab, aa).next();
 
         bufferBuilder.vertex(
             vertexB1.x,
             vertexB1.y,
             vertexB1.z)
-        .color(br, bg, bb, ba);
+        .color(br, bg, bb, ba).next();
 
         bufferBuilder.vertex(
             vertexB2.x,
             vertexB2.y,
             vertexB2.z)
-        .color(br, bg, bb, ba);
+        .color(br, bg, bb, ba).next();
     }
 
     public void clear() {

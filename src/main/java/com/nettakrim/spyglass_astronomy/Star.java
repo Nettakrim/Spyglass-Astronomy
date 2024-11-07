@@ -93,7 +93,7 @@ public class Star {
            float rotatedBLat = -(rotatedA * latitudeCos);
            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha);
+           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha).next();
         }
     }
 

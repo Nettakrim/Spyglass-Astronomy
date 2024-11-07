@@ -227,49 +227,49 @@ public class OrbitingBody {
             quad1vertex1.x,
             quad1vertex1.y,
             quad1vertex1.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex2.x,
             quad1vertex2.y,
             quad1vertex2.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex3.x,
             quad1vertex3.y,
             quad1vertex3.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad1vertex4.x,
             quad1vertex4.y,
             quad1vertex4.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).color(r1, g1, b1, currentAlpha).next();
 
         bufferBuilder.vertex(
             quad2vertex1.x,
             quad2vertex1.y,
             quad2vertex1.z
-        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0);
+        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
             quad2vertex2.x,
             quad2vertex2.y,
             quad2vertex2.z
-        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0);
+        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0).next();
 
         bufferBuilder.vertex(
             quad2vertex3.x,
             quad2vertex3.y,
             quad2vertex3.z
-        ).color(r2, g2, b2, decorationAlpha);
+        ).color(r2, g2, b2, decorationAlpha).next();
 
         bufferBuilder.vertex(
             quad2vertex4.x,
             quad2vertex4.y,
             quad2vertex4.z
-        ).color(r2, g2, b2, decorationAlpha);
+        ).color(r2, g2, b2, decorationAlpha).next();
     }
 
     public Vector3f getPosition() {
