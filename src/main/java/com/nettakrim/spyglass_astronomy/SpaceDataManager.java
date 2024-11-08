@@ -51,7 +51,7 @@ public class SpaceDataManager {
         fileName = storagePath +"/"+seedHash + ".txt";
         data = new File(fileName);
 
-        tryMigrateOldData(world);
+        tryMigrateOldData();
         if (data.exists()) {
             useDefault = !loadData();
         }
@@ -82,19 +82,19 @@ public class SpaceDataManager {
         );
     }
 
-    public void tryMigrateOldData(ClientWorld world) {
-        if (this.isWorldFolder && !data.exists())
-        {
-            Path oldFile = getGlobalStorage(world).resolve(data.getName());
-            if (Files.exists(oldFile)) {
-                try {
-                    Files.createDirectories(storagePath);
-                    Files.copy(oldFile, data.toPath());
-                    SpyglassAstronomyClient.LOGGER.info("Migrated old astronomy data into the world's folder.");
-                }
-                catch (IOException e){
-                    SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
-                }
+    public void tryMigrateOldData() {
+        if (data.exists()) return;
+
+        Path oldFile = getGlobalStorage(null).resolve(data.getName());
+
+        if (Files.exists(oldFile)) {
+            try {
+                Files.createDirectories(storagePath);
+                Files.copy(oldFile, data.toPath());
+                SpyglassAstronomyClient.LOGGER.info(isWorldFolder ? "Migrated old astronomy data into the world's folder." : "Migrated old astronomy data to the correct server folder.");
+            }
+            catch (IOException e){
+                SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
             }
         }
     }
@@ -304,11 +304,13 @@ public class SpaceDataManager {
             //for some reason this seems to cause crashes
         }
 
-        ClientPlayNetworkHandler clientPlayNetworkHandler = ((ClientWorldAccessor)world).getNetworkHandler();
-        if (clientPlayNetworkHandler != null) {
-            ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
-            if (serverInfo != null) {
-                return serverInfo.address.replace(':', '_');
+        if (world != null) {
+            ClientPlayNetworkHandler clientPlayNetworkHandler = ((ClientWorldAccessor)world).getNetworkHandler();
+            if (clientPlayNetworkHandler != null) {
+                ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
+                if (serverInfo != null) {
+                    return serverInfo.address.replace(':', '_');
+                }
             }
         }
 
