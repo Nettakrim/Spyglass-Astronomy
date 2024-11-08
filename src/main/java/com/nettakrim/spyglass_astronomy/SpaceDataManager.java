@@ -15,7 +15,9 @@ import java.util.Base64.Encoder;
 
 import com.nettakrim.spyglass_astronomy.mixin.BiomeAccessAccessor;
 
+import com.nettakrim.spyglass_astronomy.mixin.ClientWorldAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -44,7 +46,7 @@ public class SpaceDataManager {
         boolean useDefault = true;
         Optional<Path> localPath = getLocalStorage();
         this.isWorldFolder = localPath.isPresent();
-        storagePath = localPath.orElse(getGlobalStorage());
+        storagePath = localPath.orElse(getGlobalStorage(world));
 
         fileName = storagePath +"/"+seedHash + ".txt";
         data = new File(fileName);
@@ -61,10 +63,10 @@ public class SpaceDataManager {
         }
     }
 
-    static public Path getGlobalStorage(){
+    static public Path getGlobalStorage(ClientWorld world){
         return SpyglassAstronomyClient.client.runDirectory.toPath()
             .resolve(".spyglass_astronomy")
-            .resolve(getCurrentWorldOrServerName().replaceAll("[\\\\/:*?\"<>|]", "_"))
+            .resolve(getCurrentWorldOrServerName(world).replaceAll("[\\\\/:*?\"<>|]", "_"))
             ;
     }
 
@@ -81,18 +83,18 @@ public class SpaceDataManager {
     }
 
     public void tryMigrateOldData() {
-        if (this.isWorldFolder && !data.exists())
-        {
-            Path oldFile = getGlobalStorage().resolve(data.getName());
-            if (Files.exists(oldFile)) {
-                try {
-                    Files.createDirectories(storagePath);
-                    Files.copy(oldFile, data.toPath());
-                    SpyglassAstronomyClient.LOGGER.info("Migrated old astronomy data into the world's folder.");
-                }
-                catch (IOException e){
-                    SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
-                }
+        if (data.exists()) return;
+
+        Path oldFile = getGlobalStorage(null).resolve(data.getName());
+
+        if (Files.exists(oldFile)) {
+            try {
+                Files.createDirectories(storagePath);
+                Files.copy(oldFile, data.toPath());
+                SpyglassAstronomyClient.LOGGER.info(isWorldFolder ? "Migrated old astronomy data into the world's folder." : "Migrated old astronomy data to the correct server folder.");
+            }
+            catch (IOException e){
+                SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
             }
         }
     }
@@ -193,7 +195,7 @@ public class SpaceDataManager {
                     s.append(star.index - lastIndex).append(" ").append(star.name);
                     lastIndex = star.index;
                 }
-            }            
+            }
             s.append("\n---");
             int index = 0;
             for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
@@ -202,7 +204,7 @@ public class SpaceDataManager {
                     s.append(index).append(" ").append(orbitingBody.name);
                 }
                 index++;
-            }   
+            }
             s.append("\n---\n");
             s.append(SpyglassAstronomyClient.getStarCount());
             s.append(" ");
@@ -286,19 +288,21 @@ public class SpaceDataManager {
         this.yearLength = yearLength;
     }
 
-    private static String getCurrentWorldOrServerName() {
+    private static String getCurrentWorldOrServerName(ClientWorld world) {
         // https://github.com/Johni0702/bobby/blob/master/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L357
         IntegratedServer integratedServer = SpyglassAstronomyClient.client.getServer();
         if (integratedServer != null) {
             return integratedServer.getSaveProperties().getLevelName();
         }
 
-        ServerInfo serverInfo = SpyglassAstronomyClient.client.getCurrentServerEntry();
-        if (serverInfo != null) {
-            if (serverInfo.isRealm()) {
-                return serverInfo.name;
+        if (world != null) {
+            ClientPlayNetworkHandler clientPlayNetworkHandler = ((ClientWorldAccessor)world).getNetworkHandler();
+            if (clientPlayNetworkHandler != null) {
+                ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
+                if (serverInfo != null) {
+                    return serverInfo.address.replace(':', '_');
+                }
             }
-            return serverInfo.address.replace(':', '_');
         }
 
         return "unknown";
@@ -317,7 +321,7 @@ public class SpaceDataManager {
         for (OrbitingBodyData orbitingBodyData : orbitingBodyDatas) {
             SpyglassAstronomyClient.orbitingBodies.get(orbitingBodyData.index).name = orbitingBodyData.name;
         }
-        orbitingBodyDatas = null;        
+        orbitingBodyDatas = null;
     }
 
     public static void makeChange() {
