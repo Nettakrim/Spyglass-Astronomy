@@ -22,7 +22,7 @@ public class InGameHudMixin {
     private static final Identifier STAR_SPYGLASS_SCOPE = Identifier.of(SpyglassAstronomyClient.MODID,"textures/star_spyglass_scope.png");
 
     @Inject(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/DrawContext;fill(Lnet/minecraft/client/render/RenderLayer;IIIIII)V",ordinal = 0))
-    public void renderSpyglassMode(DrawContext context, float scale, CallbackInfo ci, @Local(name = "k") int k, @Local(name = "l") int l, @Local(name = "i") int i, @Local(name = "j") int j){
+    public void renderSpyglassMode(DrawContext context, float scale, CallbackInfo ci, @Local(ordinal = 2) int k, @Local(ordinal = 3) int l, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j){
         if (SpyglassAstronomyClient.editMode != 0) {
             context.drawTexture(RenderLayer::getGuiTextured, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, k, l, 0.0F, 0.0F, i, j, i, j);
         }
