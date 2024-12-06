@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.gl.GlUsage;
 import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gl.VertexBuffer;
@@ -238,7 +239,7 @@ public class SpaceRenderingManager {
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
 
             RenderSystem.depthMask(false);
-            RenderSystem.overlayBlendFunc();
+            RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
             RenderSystem.enableBlend();
 
             if (starsVisible && starsReady) {
@@ -277,6 +278,8 @@ public class SpaceRenderingManager {
             matrices.pop();
             matrix4fStack.popMatrix();
 
+            // i think this is reset correctly, its hard to figure out the previous state
+            RenderSystem.setShaderColor(1, 1 ,1, 1);
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
             RenderSystem.defaultBlendFunc();
