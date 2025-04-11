@@ -1,7 +1,6 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -32,6 +31,6 @@ public class WorldRendererMixin {
 
     @Inject(method = "method_62215", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/SkyRendering;renderCelestialBodies(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;FIFFLnet/minecraft/client/render/Fog;)V"))
     public void renderSky(Fog fog, DimensionEffects.SkyType skyType, float f, DimensionEffects dimensionEffects, CallbackInfo ci, @Local MatrixStack matrices) {
-        SpyglassAstronomyClient.spaceRenderingManager.render(matrices, RenderSystem.getProjectionMatrix(), tickDelta);
+        SpyglassAstronomyClient.spaceRenderingManager.render(matrices, tickDelta);
     }
 }

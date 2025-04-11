@@ -96,11 +96,8 @@ public class SpyglassAstronomyCommands {
     }
 
     public static Text getClickHere(String actionKey, String command, boolean run, Object... formatting) {
-        return Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.click").setStyle(Style.EMPTY
-        .withClickEvent(
-            new ClickEvent(run ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command)
-        )
-        .withColor(SpyglassAstronomyClient.buttonTextColor))
-        .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor)));
+        return Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.click")
+                .setStyle(Style.EMPTY.withClickEvent(run ? new ClickEvent.RunCommand(command) : new ClickEvent.SuggestCommand(command)).withColor(SpyglassAstronomyClient.buttonTextColor))
+                .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor)));
     }
 }
