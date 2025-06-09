@@ -266,30 +266,40 @@ public class SpaceRenderingManager {
             matrix4fStack.pushMatrix();
             matrix4fStack.mul(matrices.peek().getPositionMatrix());
 
-            renderPass.setPipeline(pipeline);
+            try {
+                renderPass.setPipeline(pipeline);
 
-            if (starsVisible) {
-                draw(renderPass, starsBuffer, starsCount);
-            }
-
-            if (constellationsVisible) {
-                draw(renderPass, constellationsBuffer, constellationsCount);
-
-                if (SpyglassAstronomyClient.isDrawingConstellation) {
-                    draw(renderPass, drawingBuffer, drawingCount);
+                if (starsVisible) {
+                    draw(renderPass, starsBuffer, starsCount);
                 }
-            }
 
-            if (orbitingBodiesVisible && planetsCount > 0) {
-                matrices.pop();
-                matrices.push();
-                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+                if (constellationsVisible) {
+                    draw(renderPass, constellationsBuffer, constellationsCount);
 
-                matrix4fStack.popMatrix();
-                matrix4fStack.pushMatrix();
-                matrix4fStack.mul(matrices.peek().getPositionMatrix());
+                    if (SpyglassAstronomyClient.isDrawingConstellation) {
+                        draw(renderPass, drawingBuffer, drawingCount);
+                    }
+                }
 
-                draw(renderPass, planetsBuffer, planetsCount);
+                if (orbitingBodiesVisible && planetsCount > 0) {
+                    matrices.pop();
+                    matrices.push();
+                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f) * (1 - 1 / SpyglassAstronomyClient.earthOrbit.period) + 180));
+
+                    matrix4fStack.popMatrix();
+                    matrix4fStack.pushMatrix();
+                    matrix4fStack.mul(matrices.peek().getPositionMatrix());
+
+                    draw(renderPass, planetsBuffer, planetsCount);
+                }
+            } catch (Throwable e) {
+                if (renderPass != null) {
+                    try {
+                        renderPass.close();
+                    } catch (Throwable ignored) {
+
+                    }
+                }
             }
 
             matrices.pop();
