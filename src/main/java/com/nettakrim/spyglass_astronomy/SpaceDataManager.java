@@ -300,6 +300,9 @@ public class SpaceDataManager {
             if (clientPlayNetworkHandler != null) {
                 ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
                 if (serverInfo != null) {
+                    if (serverInfo.isRealm()) {
+                        return "realm";
+                    }
                     return serverInfo.address.replace(':', '_');
                 }
             }
