@@ -3,9 +3,9 @@ package com.nettakrim.spyglass_astronomy.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,10 +21,10 @@ public class InGameHudMixin {
     @Unique
     private static final Identifier STAR_SPYGLASS_SCOPE = Identifier.of(SpyglassAstronomyClient.MODID,"textures/star_spyglass_scope.png");
 
-    @Inject(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/DrawContext;fill(Lnet/minecraft/client/render/RenderLayer;IIIIII)V",ordinal = 0))
+    @Inject(method = "renderSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/DrawContext;fill(Lcom/mojang/blaze3d/pipeline/RenderPipeline;IIIII)V", ordinal = 0))
     public void renderSpyglassMode(DrawContext context, float scale, CallbackInfo ci, @Local(ordinal = 2) int k, @Local(ordinal = 3) int l, @Local(ordinal = 0) int i, @Local(ordinal = 1) int j){
         if (SpyglassAstronomyClient.editMode != 0) {
-            context.drawTexture(RenderLayer::getGuiTextured, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, k, l, 0.0F, 0.0F, i, j, i, j);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, k, l, 0.0F, 0.0F, i, j, i, j);
         }
     }
 }

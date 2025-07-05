@@ -1,12 +1,11 @@
 package com.nettakrim.spyglass_astronomy;
 
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
@@ -17,10 +16,12 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
+import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import org.joml.Vector4f;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -62,7 +63,7 @@ public class SpaceRenderingManager {
     private final Path storagePath;
     private final String fileName;
 
-    private static final RenderPipeline pipeline = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET).withLocation("pipeline/sga_stars")
+    private static final RenderPipeline pipeline = RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET).withLocation("pipeline/sga_stars")
             .withVertexShader("core/position_color").withFragmentShader("core/position_color")
             .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.QUADS)
             .withBlend(BlendFunction.OVERLAY).withDepthWrite(false).build();
@@ -182,7 +183,7 @@ public class SpaceRenderingManager {
         }
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
-        constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE, builtBuffer.getBuffer());
+        constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", 40, builtBuffer.getBuffer());
         constellationsCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
     }
@@ -201,7 +202,7 @@ public class SpaceRenderingManager {
         }
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
-        starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE, builtBuffer.getBuffer());
+        starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", 40, builtBuffer.getBuffer());
         starsCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
     }
@@ -227,7 +228,7 @@ public class SpaceRenderingManager {
         }
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
-        planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE, builtBuffer.getBuffer());
+        planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", 40, builtBuffer.getBuffer());
         planetsCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
     }
@@ -238,7 +239,7 @@ public class SpaceRenderingManager {
         SpyglassAstronomyClient.drawingConstellation.setVertices(bufferBuilder, true);
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
-        drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", BufferType.VERTICES, BufferUsage.STATIC_WRITE, builtBuffer.getBuffer());
+        drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", 40, builtBuffer.getBuffer());
         drawingCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
     }
@@ -247,15 +248,10 @@ public class SpaceRenderingManager {
         starVisibility = starsAlwaysVisible ? 1 : SpyglassAstronomyClient.world.getStarBrightness(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
         if (starVisibility > 0) {
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
-            RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
 
             if (constellationsVisible && SpyglassAstronomyClient.isDrawingConstellation || drawingCount > 0) {
                 updateDrawingConstellation();
             }
-
-            GpuTexture mainColor = MinecraftClient.getInstance().getFramebuffer().getColorAttachment();
-            GpuTexture mainDepth = MinecraftClient.getInstance().getFramebuffer().getDepthAttachment();
-            RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
 
             matrices.push();
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
@@ -265,6 +261,13 @@ public class SpaceRenderingManager {
             Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
             matrix4fStack.pushMatrix();
             matrix4fStack.mul(matrices.peek().getPositionMatrix());
+
+            GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
+
+            GpuTextureView mainColor = MinecraftClient.getInstance().getFramebuffer().getColorAttachmentView();
+            GpuTextureView mainDepth = MinecraftClient.getInstance().getFramebuffer().getDepthAttachmentView();
+            RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
+            renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 
             try {
                 renderPass.setPipeline(pipeline);
@@ -293,20 +296,14 @@ public class SpaceRenderingManager {
                     draw(renderPass, planetsBuffer, planetsCount);
                 }
             } catch (Throwable e) {
-                if (renderPass != null) {
-                    try {
-                        renderPass.close();
-                    } catch (Throwable ignored) {
-
-                    }
-                }
+                try {
+                    renderPass.close();
+                } catch (Throwable ignored) {}
             }
 
             matrices.pop();
             matrix4fStack.popMatrix();
             renderPass.close();
-
-            RenderSystem.setShaderColor(1, 1 ,1, 1);
         }
     }
 
@@ -327,6 +324,6 @@ public class SpaceRenderingManager {
 
         renderPass.setVertexBuffer(0, gpuBuffer);
         renderPass.setIndexBuffer(indexBuffer.getIndexBuffer(count), indexBuffer.getIndexType());
-        renderPass.drawIndexed(0, count);
+        renderPass.drawIndexed(0,0, count, 1);
     }
 }

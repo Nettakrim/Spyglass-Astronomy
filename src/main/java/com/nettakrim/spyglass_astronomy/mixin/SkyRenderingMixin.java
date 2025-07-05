@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 public class SkyRenderingMixin {
 	@WrapWithCondition(
         method = "renderCelestialBodies",
-        at = @At(value = "INVOKE", target="Lnet/minecraft/client/render/SkyRendering;renderStars(Lnet/minecraft/client/render/Fog;FLnet/minecraft/client/util/math/MatrixStack;)V")
+        at = @At(value = "INVOKE", target="Lnet/minecraft/client/render/SkyRendering;renderStars(FLnet/minecraft/client/util/math/MatrixStack;)V")
     )
-	private boolean stopStarRender(SkyRendering instance, Fog fog, float color, MatrixStack matrices) {
+	private boolean stopStarRender(SkyRendering instance, float brightness, MatrixStack matrices) {
         return SpaceRenderingManager.oldStarsVisible;
     }
 }
