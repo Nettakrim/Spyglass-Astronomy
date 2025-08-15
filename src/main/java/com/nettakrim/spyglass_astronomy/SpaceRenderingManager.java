@@ -253,57 +253,64 @@ public class SpaceRenderingManager {
                 updateDrawingConstellation();
             }
 
-            matrices.push();
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
-
-            Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
-            matrix4fStack.pushMatrix();
-            matrix4fStack.mul(matrices.peek().getPositionMatrix());
-
-            GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
-
             GpuTextureView mainColor = MinecraftClient.getInstance().getFramebuffer().getColorAttachmentView();
             GpuTextureView mainDepth = MinecraftClient.getInstance().getFramebuffer().getDepthAttachmentView();
-            RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
-            renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
+            Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 
-            try {
-                renderPass.setPipeline(pipeline);
+            if (starsVisible || constellationsVisible) {
+                matrices.push();
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
 
-                if (starsVisible) {
-                    draw(renderPass, starsBuffer, starsCount);
-                }
+                matrix4fStack.pushMatrix();
+                matrix4fStack.mul(matrices.peek().getPositionMatrix());
 
-                if (constellationsVisible) {
-                    draw(renderPass, constellationsBuffer, constellationsCount);
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
+                RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
+                renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 
-                    if (SpyglassAstronomyClient.isDrawingConstellation) {
-                        draw(renderPass, drawingBuffer, drawingCount);
-                    }
-                }
-
-                if (orbitingBodiesVisible && planetsCount > 0) {
-                    matrices.pop();
-                    matrices.push();
-                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f) * (1 - 1 / SpyglassAstronomyClient.earthOrbit.period) + 180));
-
-                    matrix4fStack.popMatrix();
-                    matrix4fStack.pushMatrix();
-                    matrix4fStack.mul(matrices.peek().getPositionMatrix());
-
-                    draw(renderPass, planetsBuffer, planetsCount);
-                }
-            } catch (Throwable e) {
                 try {
-                    renderPass.close();
+                    renderPass.setPipeline(pipeline);
+
+                    if (starsVisible) {
+                        draw(renderPass, starsBuffer, starsCount);
+                    }
+
+                    if (constellationsVisible) {
+                        draw(renderPass, constellationsBuffer, constellationsCount);
+
+                        if (SpyglassAstronomyClient.isDrawingConstellation) {
+                            draw(renderPass, drawingBuffer, drawingCount);
+                        }
+                    }
                 } catch (Throwable ignored) {}
+
+                renderPass.close();
+                matrices.pop();
+                matrix4fStack.popMatrix();
             }
 
-            matrices.pop();
-            matrix4fStack.popMatrix();
-            renderPass.close();
+            if (orbitingBodiesVisible && planetsCount > 0) {
+                matrices.push();
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f) * (1 - 1 / SpyglassAstronomyClient.earthOrbit.period) + 180));
+
+                matrix4fStack.pushMatrix();
+                matrix4fStack.mul(matrices.peek().getPositionMatrix());
+
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
+                RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
+                renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
+
+                try {
+                    renderPass.setPipeline(pipeline);
+                    draw(renderPass, planetsBuffer, planetsCount);
+                } catch (Throwable ignored) {}
+
+                renderPass.close();
+                matrices.pop();
+                matrix4fStack.popMatrix();
+            }
         }
     }
 
