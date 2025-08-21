@@ -183,6 +183,9 @@ public class SpaceRenderingManager {
         }
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
+        if (constellationsBuffer != null) {
+            constellationsBuffer.close();
+        }
         constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", 40, builtBuffer.getBuffer());
         constellationsCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
@@ -201,6 +204,9 @@ public class SpaceRenderingManager {
             star.setVertices(bufferBuilder);
         }
 
+        if (starsBuffer != null) {
+            starsBuffer.close();
+        }
         BuiltBuffer builtBuffer = bufferBuilder.end();
         starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", 40, builtBuffer.getBuffer());
         starsCount = builtBuffer.getDrawParameters().indexCount();
@@ -228,6 +234,9 @@ public class SpaceRenderingManager {
         }
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
+        if (planetsBuffer != null) {
+            planetsBuffer.close();
+        }
         planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", 40, builtBuffer.getBuffer());
         planetsCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
@@ -239,6 +248,9 @@ public class SpaceRenderingManager {
         SpyglassAstronomyClient.drawingConstellation.setVertices(bufferBuilder, true);
 
         BuiltBuffer builtBuffer = bufferBuilder.end();
+        if (drawingBuffer != null) {
+            drawingBuffer.close();
+        }
         drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", 40, builtBuffer.getBuffer());
         drawingCount = builtBuffer.getDrawParameters().indexCount();
         builtBuffer.close();
