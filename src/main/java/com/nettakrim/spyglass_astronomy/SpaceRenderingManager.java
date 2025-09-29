@@ -7,6 +7,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -26,6 +27,7 @@ import org.joml.Vector4f;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.OptionalDouble;
@@ -323,6 +325,23 @@ public class SpaceRenderingManager {
                 matrices.pop();
                 matrix4fStack.popMatrix();
             }
+        }
+    }
+
+    public static void assignIrisPipeline() {
+        try {
+            String irisApiPackage = "net.irisshaders.iris.api.v0.";
+
+            Class<?> irisApiClass = Class.forName(irisApiPackage + "IrisApi");
+            Object INSTANCE = irisApiClass.getMethod("getInstance").invoke(null);
+
+            Class<?> irisProgramClass = Class.forName(irisApiPackage + "IrisProgram");
+            Enum<?> SKY_BASIC = Enum.valueOf(irisProgramClass.asSubclass(Enum.class), "SKY_BASIC");
+
+            Method assignPipeline = irisApiClass.getMethod("assignPipeline", RenderPipeline.class, irisProgramClass);
+            assignPipeline.invoke(INSTANCE, pipeline, SKY_BASIC);
+        } catch (Exception ignored) {
+            SpyglassAstronomyClient.LOGGER.error("Failed to assign pipeline. Shader compatibility may be broken");
         }
     }
 
