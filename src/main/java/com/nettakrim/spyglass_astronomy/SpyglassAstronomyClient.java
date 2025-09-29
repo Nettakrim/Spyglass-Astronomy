@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.StarCountCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import com.nettakrim.spyglass_astronomy.OrbitingBody.OrbitingBodyType;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import net.minecraft.util.math.MathHelper;
@@ -77,6 +80,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> update());
 
         spyglassImprovementsIsLoaded = FabricLoader.getInstance().isModLoaded("spyglass-improvements");
+
+        if (FabricLoader.getInstance().isModLoaded("iris")) {
+            SpaceRenderingManager.assignIrisPipeline();
+        }
 	}
 
     public static void saveSpace() {
