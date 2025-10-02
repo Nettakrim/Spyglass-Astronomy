@@ -55,7 +55,7 @@ public class SelectCommand {
         if (constellation == null) {
             return -1;
         }
-        if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
+        if (SpyglassAstronomyClient.isntHoldingSpyglass()) {
             SpyglassAstronomyClient.say("commands.select.constellation.fail");
             return -1;
         }
@@ -69,7 +69,7 @@ public class SelectCommand {
         if (star == null) {
             return -1;
         }
-        if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
+        if (SpyglassAstronomyClient.isntHoldingSpyglass()) {
             SpyglassAstronomyClient.say("commands.select.star.fail");
             return -1;
         }
@@ -84,7 +84,7 @@ public class SelectCommand {
         if (orbitingBody == null) {
             return -1;
         }
-        if (!SpyglassAstronomyClient.isHoldingSpyglass()) {
+        if (SpyglassAstronomyClient.isntHoldingSpyglass()) {
             SpyglassAstronomyClient.say("commands.select."+(orbitingBody.isPlanet ? "planet" : "comet")+".fail");
             return -1;
         }

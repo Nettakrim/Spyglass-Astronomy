@@ -1,6 +1,5 @@
 package com.nettakrim.spyglass_astronomy;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.StarCountCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -20,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.nettakrim.spyglass_astronomy.OrbitingBody.OrbitingBodyType;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import net.minecraft.util.math.MathHelper;
@@ -246,6 +243,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 type = OrbitingBodyType.HABITABLE;
             } else {
                 int randomInnerType = lowPriorityRandom.nextBetween(0, 3);
+                //noinspection IntegerDivisionInFloatingPointContext
                 if (randomInnerType == 0 && x > innerPlanets/2) {
                     type = OrbitingBodyType.OCEANPLANET;
                 } else {
@@ -280,7 +278,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                     int isTerrestial = lowPriorityRandom.nextBetween(0, 3);
                     if (isTerrestial == 0) {
                         type = OrbitingBodyType.ICEPLANET;
-                    } else if (x > outerPlanets/2) {
+                    } else //noinspection IntegerDivisionInFloatingPointContext
+                        if (x > outerPlanets/2) {
                         type = OrbitingBodyType.ICEGIANT;
                     } else {
                         type = OrbitingBodyType.GASGIANT;
@@ -325,7 +324,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         int saturation = (int)(saturationRaw*saturationRaw*saturationAmount);
         if (saturation-lightness > -96 || MathHelper.abs(gradientPos-0.5f) < 0.25f) {
             lightness = 255-((255-lightness)/2);
-            saturation/=1.5f;
+            saturation -= saturation/3;
         }
 
         return new int[]{
@@ -387,6 +386,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static float getPositionInOrbit(float scale) {
         long time = world.getTimeOfDay();
+        //noinspection IntegerDivisionInFloatingPointContext
         return (((time/24000)%earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
     }
 
@@ -424,7 +424,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (isDrawingConstellation && spyglassImprovementsIsLoaded) updateDrawingConstellation();
         }
 
-        if (!isHoldingSpyglass()) {
+        if (isntHoldingSpyglass()) {
             editMode = 0;
         }
 
@@ -688,7 +688,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static float getHeight() {
         if (client.player == null) return 128;
-        return (float)client.player.getPos().y;
+        return (float)client.player.getEyeY();
     }
 
     public static void selectConstellation(Star star, boolean clear) {
@@ -738,9 +738,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         knowledge.updateOrbitKnowledge(orbitingBodies, planets, comets);
     }
 
-    public static boolean isHoldingSpyglass() {
-        if (!ready || client.player == null) return false;
-        return client.player.getMainHandStack().isOf(Items.SPYGLASS) || client.player.getOffHandStack().isOf(Items.SPYGLASS);
+    public static boolean isntHoldingSpyglass() {
+        if (!ready || client.player == null) return true;
+        return !client.player.getMainHandStack().isOf(Items.SPYGLASS) && !client.player.getOffHandStack().isOf(Items.SPYGLASS);
     }
 
     public static void setStarCount(int count) {

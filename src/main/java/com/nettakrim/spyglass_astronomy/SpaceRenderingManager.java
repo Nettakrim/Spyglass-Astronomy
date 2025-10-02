@@ -7,12 +7,12 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 
+import net.minecraft.client.render.state.SkyRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -133,7 +133,7 @@ public class SpaceRenderingManager {
         updateHeightScale();
         if (Constellation.selected != null) {
             ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-            if (player == null || !SpyglassAstronomyClient.isHoldingSpyglass()) {
+            if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
                 Constellation.deselect();
                 constellationsNeedsUpdate = true;
             }
@@ -145,14 +145,14 @@ public class SpaceRenderingManager {
 
         if (Star.selected != null) {
             ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-            if (player == null || !SpyglassAstronomyClient.isHoldingSpyglass()) {
+            if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
                 Star.deselect();
             }            
         }
 
         if (OrbitingBody.selected != null) {
             ClientPlayerEntity player = SpyglassAstronomyClient.client.player;
-            if (player == null || !SpyglassAstronomyClient.isHoldingSpyglass()) {
+            if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
                 OrbitingBody.deselect();
             }               
         }
@@ -258,8 +258,8 @@ public class SpaceRenderingManager {
         builtBuffer.close();
     }
 
-    public void render(MatrixStack matrices, float tickDelta) {
-        starVisibility = starsAlwaysVisible ? 1 : SpyglassAstronomyClient.world.getStarBrightness(tickDelta) * (1.0f - SpyglassAstronomyClient.world.getRainGradient(tickDelta));
+    public void render(MatrixStack matrices, SkyRenderState skyRenderState) {
+        starVisibility = starsAlwaysVisible ? 1 : skyRenderState.starBrightness;
         if (starVisibility > 0) {
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
 
