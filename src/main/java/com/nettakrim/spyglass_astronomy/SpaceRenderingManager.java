@@ -93,17 +93,16 @@ public class SpaceRenderingManager {
 
     private void loadData() {
         try {
-            if (data.createNewFile()) {
-                return;
+            if (data.exists()) {
+                Scanner scanner = new Scanner(data);
+                String s = scanner.nextLine();
+                scanner.close();
+                constellationsVisible = charTrue(s, 0);
+                starsVisible = charTrue(s, 1);
+                orbitingBodiesVisible = charTrue(s, 2);
+                oldStarsVisible = charTrue(s, 3);
+                starsAlwaysVisible = charTrue(s, 4);
             }
-            Scanner scanner = new Scanner(data);
-            String s = scanner.nextLine();
-            scanner.close();
-            constellationsVisible = charTrue(s, 0);
-            starsVisible = charTrue(s, 1);
-            orbitingBodiesVisible = charTrue(s, 2);
-            oldStarsVisible = charTrue(s, 3);
-            starsAlwaysVisible = charTrue(s, 4);
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to load data");
         }
@@ -116,8 +115,9 @@ public class SpaceRenderingManager {
     public void saveData() {
         try {
             if (data == null) {
-                Files.createDirectories(storagePath);
                 data = new File(fileName);
+                data.mkdirs();
+                data.createNewFile();
             }
             FileWriter writer = new FileWriter(data);
             String s = (constellationsVisible ? "1" : "0") + (starsVisible ? "1" : "0") + (orbitingBodiesVisible ? "1" : "0") + (oldStarsVisible ? "1" : "0") + (starsAlwaysVisible ? "1" : "0");
