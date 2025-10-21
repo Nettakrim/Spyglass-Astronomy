@@ -116,7 +116,7 @@ public class SpaceRenderingManager {
         try {
             if (data == null) {
                 data = new File(fileName);
-                data.mkdirs();
+                storagePath.toFile().mkdirs();
                 data.createNewFile();
             }
             FileWriter writer = new FileWriter(data);
