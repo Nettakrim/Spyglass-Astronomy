@@ -131,14 +131,14 @@
     "spyglass_astronomy.commands.info.orbitknowledge.toexpert" : "\nName %s Planets and %s Comets to learn more",
     "spyglass_astronomy.commands.info.orbitknowledge.tomaster" : "\nName %s Planets and %s Comets to learn more",    
 
-    "spyglass_astronomy.commands.info.moonphase.0" : "▉ Full Moon",
-    "spyglass_astronomy.commands.info.moonphase.1" : "▜ Waning Gibbous",
-    "spyglass_astronomy.commands.info.moonphase.2" : "▐ Last Quarter",
-    "spyglass_astronomy.commands.info.moonphase.3" : " ] Waning Crescent",
-    "spyglass_astronomy.commands.info.moonphase.4" : "[] New Moon",
-    "spyglass_astronomy.commands.info.moonphase.5" : "[ Waxing Crescent",
-    "spyglass_astronomy.commands.info.moonphase.6" : "▌  First Quarter",
-    "spyglass_astronomy.commands.info.moonphase.7" : "▛ Waxing Gibbous",
+    "spyglass_astronomy.commands.info.moonphase.0" : "'█' Full Moon",
+    "spyglass_astronomy.commands.info.moonphase.1" : "'\uD83E\uDF45\uD83E\uDF8B' Waning Gibbous",
+    "spyglass_astronomy.commands.info.moonphase.2" : "'▐' Last Quarter",
+    "spyglass_astronomy.commands.info.moonphase.3" : "' ]' Waning Crescent",
+    "spyglass_astronomy.commands.info.moonphase.4" : "'[]' New Moon",
+    "spyglass_astronomy.commands.info.moonphase.5" : "'[ ' Waxing Crescent",
+    "spyglass_astronomy.commands.info.moonphase.6" : "'▌ ' First Quarter",
+    "spyglass_astronomy.commands.info.moonphase.7" : "'\uD83E\uDF8B\uD83E\uDF61' Waxing Gibbous",
 
     "spyglass_astronomy.commands.info.nothingselected" : "Select an object or use /sga:info <x> to get Information on Something",
 

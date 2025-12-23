@@ -127,14 +127,14 @@
     "spyglass_astronomy.commands.info.orbitknowledge.toexpert": "\nНазовите %s планет и %s комет, чтобы узнать больше",
     "spyglass_astronomy.commands.info.orbitknowledge.tomaster": "\nНазовите %s планет и %s комет, чтобы узнать больше",    
 
-    "spyglass_astronomy.commands.info.moonphase.0": "▉ Полнолуние",
-    "spyglass_astronomy.commands.info.moonphase.1": "▜ Убывающая луна",
-    "spyglass_astronomy.commands.info.moonphase.2": "▐ Последняя четверть",
-    "spyglass_astronomy.commands.info.moonphase.3": " ] Убывающий серп",
-    "spyglass_astronomy.commands.info.moonphase.4": "[] Новолуние",
-    "spyglass_astronomy.commands.info.moonphase.5": "[ Растущий серп",
-    "spyglass_astronomy.commands.info.moonphase.6": "▌ Первая четверть",
-    "spyglass_astronomy.commands.info.moonphase.7": "▛ Растущая луна",
+    "spyglass_astronomy.commands.info.moonphase.0": "'█' Полнолуние",
+    "spyglass_astronomy.commands.info.moonphase.1": "'\uD83E\uDF45\uD83E\uDF8B' Убывающая луна",
+    "spyglass_astronomy.commands.info.moonphase.2": "'▐' Последняя четверть",
+    "spyglass_astronomy.commands.info.moonphase.3": "' ]' Убывающий серп",
+    "spyglass_astronomy.commands.info.moonphase.4": "'[]' Новолуние",
+    "spyglass_astronomy.commands.info.moonphase.5": "'[ ' Растущий серп",
+    "spyglass_astronomy.commands.info.moonphase.6": "'▌ ' Первая четверть",
+    "spyglass_astronomy.commands.info.moonphase.7": "'\uD83E\uDF8B\uD83E\uDF61' Растущая луна",
 
     "spyglass_astronomy.commands.info.nothingselected": "Выберите объект или используйте /sga:info <x> для получения информации",
 

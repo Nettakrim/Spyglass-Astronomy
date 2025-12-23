@@ -131,14 +131,14 @@
     "spyglass_astronomy.commands.info.orbitknowledge.toexpert" : "\n命名 %s 颗行星和 %s 颗彗星以了解更多",
     "spyglass_astronomy.commands.info.orbitknowledge.tomaster" : "\n命名 %s 颗行星和 %s 颗彗星以了解更多",    
 
-    "spyglass_astronomy.commands.info.moonphase.0" : "▉ 满月",
-    "spyglass_astronomy.commands.info.moonphase.1" : "▜ 渐亏凸月",
-    "spyglass_astronomy.commands.info.moonphase.2" : "▐ 下弦月",
-    "spyglass_astronomy.commands.info.moonphase.3" : " ] 残月",
-    "spyglass_astronomy.commands.info.moonphase.4" : "[] 新月",
-    "spyglass_astronomy.commands.info.moonphase.5" : "[ 蛾眉月",
-    "spyglass_astronomy.commands.info.moonphase.6" : "▌ 上弦月",
-    "spyglass_astronomy.commands.info.moonphase.7" : "▛ 渐盈凸月",
+    "spyglass_astronomy.commands.info.moonphase.0" : "'█' 满月",
+    "spyglass_astronomy.commands.info.moonphase.1" : "'\uD83E\uDF45\uD83E\uDF8B' 渐亏凸月",
+    "spyglass_astronomy.commands.info.moonphase.2" : "'▐' 下弦月",
+    "spyglass_astronomy.commands.info.moonphase.3" : "' ]' 残月",
+    "spyglass_astronomy.commands.info.moonphase.4" : "'[]' 新月",
+    "spyglass_astronomy.commands.info.moonphase.5" : "'[ ' 蛾眉月",
+    "spyglass_astronomy.commands.info.moonphase.6" : "'▌ ' 上弦月",
+    "spyglass_astronomy.commands.info.moonphase.7" : "'\uD83E\uDF8B\uD83E\uDF61' 渐盈凸月",
 
     "spyglass_astronomy.commands.info.nothingselected" : "选择一个对象并使用/sga:info <x> 以得到相关信息",
 
