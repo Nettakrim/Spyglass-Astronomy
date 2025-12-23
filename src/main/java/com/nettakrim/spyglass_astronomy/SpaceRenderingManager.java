@@ -280,7 +280,7 @@ public class SpaceRenderingManager {
                 matrix4fStack.pushMatrix();
                 matrix4fStack.mul(matrices.peek().getPositionMatrix());
 
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
                 RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
                 renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 
@@ -312,7 +312,7 @@ public class SpaceRenderingManager {
                 matrix4fStack.pushMatrix();
                 matrix4fStack.mul(matrices.peek().getPositionMatrix());
 
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f(), 0.0F);
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().write(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
                 RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty());
                 renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 

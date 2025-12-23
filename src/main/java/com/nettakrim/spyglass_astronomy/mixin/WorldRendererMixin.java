@@ -22,8 +22,8 @@ public class WorldRendererMixin {
         SpyglassAstronomyClient.spaceRenderingManager.updateSpace(ticks);
     }
 
-    @Inject(method = "method_62215", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/SkyRendering;renderCelestialBodies(Lnet/minecraft/client/util/math/MatrixStack;FIFF)V"))
-    public void renderSky(GpuBufferSlice gpuBufferSlice, SkyRenderState skyRenderState, CallbackInfo ci, @Local MatrixStack matrices) {
+    @Inject(method = "method_62215", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/SkyRendering;renderCelestialBodies(Lnet/minecraft/client/util/math/MatrixStack;FFFLnet/minecraft/world/MoonPhase;FF)V"))
+    private static void renderSky(GpuBufferSlice gpuBufferSlice, SkyRenderState skyRenderState, SkyRendering skyRendering, CallbackInfo ci, @Local MatrixStack matrices) {
         SpyglassAstronomyClient.spaceRenderingManager.render(matrices, skyRenderState);
     }
 }

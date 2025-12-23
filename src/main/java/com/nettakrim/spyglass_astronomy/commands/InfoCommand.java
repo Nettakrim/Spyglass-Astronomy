@@ -4,6 +4,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.text.Style;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.joml.Vector3f;
 
 import com.mojang.brigadier.Command;
@@ -181,7 +182,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         int[] flags = new int[] {-1, -1};
         MutableText text = Text.empty();
         text.append(translate("thisworld.time", getMinecraftTime()));
-        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.world.getMoonPhase(), SINGLE_SUCCESS)));
+        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.client.gameRenderer.getCamera().getEnvironmentAttributeInterpolator().get(EnvironmentAttributes.MOON_PHASE_VISUAL, 0).getIndex(), SINGLE_SUCCESS)));
         orbitInfo(text, SpyglassAstronomyClient.earthOrbit, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
