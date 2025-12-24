@@ -17,6 +17,7 @@ jobs:
         # and run on both Linux and Windows
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - name: checkout repository
         uses: actions/checkout@v2
