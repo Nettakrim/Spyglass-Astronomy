@@ -7,37 +7,37 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.SpaceRenderingManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class HideCommand implements Command<FabricClientCommandSource> {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> hideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> hideNode = ClientCommands
             .literal("sga:hide")
             .executes(new HideCommand())
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> constellationsHideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationsHideNode = ClientCommands
             .literal("constellations")
             .executes(HideCommand::hideConstellations)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> starsHideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starsHideNode = ClientCommands
             .literal("stars")
             .executes(HideCommand::hideStars)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodiesHideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodiesHideNode = ClientCommands
             .literal("planets")
             .executes(HideCommand::hideOrbitingBodies)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> oldStarsHideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> oldStarsHideNode = ClientCommands
             .literal("vanillastars")
             .executes(HideCommand::hideOldStars)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> dayTimeHideNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> dayTimeHideNode = ClientCommands
             .literal("daytime")
             .executes(HideCommand::hideDaytime)
             .build();

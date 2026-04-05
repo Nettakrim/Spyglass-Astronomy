@@ -1,6 +1,6 @@
 package com.nettakrim.spyglass_astronomy;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class KeplerLookup {
     public static final int eccentricitySize = 31;
@@ -44,19 +44,19 @@ public class KeplerLookup {
 
     public static float getAt(float e, float M) {
         if (M > 1) {
-            return MathHelper.TAU-getRaw(e*eccentricitySize, (2-M)*angleSize);
+            return Mth.TWO_PI -getRaw(e*eccentricitySize, (2-M)*angleSize);
         } else {
             return getRaw(e*eccentricitySize, M*angleSize);
         }
     }
 
     private static float getRaw(float e, float M) {
-        int upperE = MathHelper.ceil(e);
-        int lowerE = MathHelper.floor(e);
+        int upperE = Mth.ceil(e);
+        int lowerE = Mth.floor(e);
         float modE = e%1;
 
-        int upperM = MathHelper.ceil(M);
-        int lowerM = MathHelper.floor(M);
+        int upperM = Mth.ceil(M);
+        int lowerM = Mth.floor(M);
         float modM = M%1;
 
 

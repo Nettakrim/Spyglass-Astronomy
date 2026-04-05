@@ -7,31 +7,31 @@ import com.nettakrim.spyglass_astronomy.Constellation;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.StarLine;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.ArrayList;
 
 public class StarCountCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> starCountNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starCountNode = ClientCommands
             .literal("starcount")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommands
             .literal("query")
             .executes(StarCountCommand::queryStarCount)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> resetNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> resetNode = ClientCommands
             .literal("reset")
             .executes(StarCountCommand::resetStarCount)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommands
             .literal("set")
             .then(
-                ClientCommandManager.argument("amount", IntegerArgumentType.integer(0,4095))
+                ClientCommands.argument("amount", IntegerArgumentType.integer(0,4095))
                     .executes(StarCountCommand::setStarCount)
             )
             .build();

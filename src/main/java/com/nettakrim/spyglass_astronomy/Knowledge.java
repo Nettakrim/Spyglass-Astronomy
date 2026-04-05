@@ -2,8 +2,8 @@ package com.nettakrim.spyglass_astronomy;
 
 import java.util.ArrayList;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 
 public class Knowledge {
     public enum Level {
@@ -41,12 +41,12 @@ public class Knowledge {
         starKnowledge = Level.NOVICE;
     }
 
-    public MutableText getInstructionsToStarKnowledgeStage(int stage) {
+    public MutableComponent getInstructionsToStarKnowledgeStage(int stage) {
         return switch (stage) {
-            case 1 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toadept", "5");
-            case 2 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toexpert", "10", "3");
-            case 3 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.tomaster", "20", "8");
-            default -> Text.empty();
+            case 1 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toadept", "5");
+            case 2 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.toexpert", "10", "3");
+            case 3 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.starknowledge.tomaster", "20", "8");
+            default -> Component.empty();
         };
     }
 
@@ -76,12 +76,12 @@ public class Knowledge {
         orbitKnowledge = Level.NOVICE;
     }
 
-    public MutableText getInstructionsToOrbitKnowledgeStage(int stage) {
+    public MutableComponent getInstructionsToOrbitKnowledgeStage(int stage) {
         return switch (stage) {
-            case 1 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toadept", Integer.toString(planets / 3), "1");
-            case 2 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toexpert", Integer.toString(planets / 3 * 2), "2");
-            case 3 -> Text.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.tomaster", Integer.toString(planets - 1), Integer.toString(comets - 1));
-            default -> Text.empty();
+            case 1 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toadept", Integer.toString(planets / 3), "1");
+            case 2 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.toexpert", Integer.toString(planets / 3 * 2), "2");
+            case 3 -> Component.translatable(SpyglassAstronomyClient.MODID + ".commands.info.orbitknowledge.tomaster", Integer.toString(planets - 1), Integer.toString(comets - 1));
+            default -> Component.empty();
         };
     }
 
@@ -96,7 +96,7 @@ public class Knowledge {
         else flags[index] = Math.min(flags[index], current);
     }
 
-    public Text getKnowledgeInstructions(int[] flags) {
+    public Component getKnowledgeInstructions(int[] flags) {
         return getInstructionsToStarKnowledgeStage(flags[0]).append(getInstructionsToOrbitKnowledgeStage(flags[1]));
     }
 

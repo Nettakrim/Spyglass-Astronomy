@@ -5,29 +5,29 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class YearLengthCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> yearLengthNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> yearLengthNode = ClientCommands
             .literal("yearlength")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommands
             .literal("query")
             .executes(YearLengthCommand::queryYearLength)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> resetNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> resetNode = ClientCommands
             .literal("reset")
             .executes(YearLengthCommand::resetYearLength)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommands
             .literal("set")
             .then(
-                ClientCommandManager.argument("days", FloatArgumentType.floatArg(1f/8f))
+                ClientCommands.argument("days", FloatArgumentType.floatArg(1f/8f))
                     .executes(YearLengthCommand::setYearLength)
             )
             .build();

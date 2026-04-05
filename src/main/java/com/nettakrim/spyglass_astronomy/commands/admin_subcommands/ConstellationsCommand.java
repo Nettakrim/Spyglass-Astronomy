@@ -4,43 +4,43 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.*;
 import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 
 public class ConstellationsCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> constellationsNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationsNode = ClientCommands
             .literal("constellations")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> addNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> addNode = ClientCommands
             .literal("add")
             .then(
-                ClientCommandManager.argument("data", MessageArgumentType.message())
+                ClientCommands.argument("data", MessageArgument.message())
                     .executes(ConstellationsCommand::addConstellation)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> removeNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> removeNode = ClientCommands
             .literal("remove")
             .executes(ConstellationsCommand::removeSelectedConstellation)
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.constellations)
                     .executes(ConstellationsCommand::removeConstellation)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> removeAllNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> removeAllNode = ClientCommands
             .literal("removeall")
             .executes(ConstellationsCommand::removeAllConstellations)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> generateNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> generateNode = ClientCommands
             .literal("generate")
             .executes(ConstellationsCommand::generateConstellations)
             .build();
@@ -186,20 +186,20 @@ public class ConstellationsCommand {
     }
 
     private static int generateConstellations(CommandContext<FabricClientCommandSource> context) {
-        Random random = Random.create(SpyglassAstronomyClient.spaceDataManager.getStarSeed());
+        RandomSource random = RandomSource.create(SpyglassAstronomyClient.spaceDataManager.getStarSeed());
 
-        int constellations = random.nextBetween(15,20);
+        int constellations = random.nextIntBetweenInclusive(15,20);
         int spawned = 0;
         //https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
-        float phi = MathHelper.PI * (MathHelper.sqrt(5f) - 1f);
+        float phi = Mth.PI * (Mth.sqrt(5f) - 1f);
         for (int i = 0; i < constellations; i++) {
             float x = 1 - (i / (float)(constellations - 1)) * 2;
-            float radius = MathHelper.sqrt(1 - x * x);
+            float radius = Mth.sqrt(1 - x * x);
 
             float theta = phi * i;
 
-            float y = MathHelper.cos(theta) * radius;
-            float z = MathHelper.sin(theta) * radius;
+            float y = Mth.cos(theta) * radius;
+            float z = Mth.sin(theta) * radius;
 
             Vector3f position = new Vector3f(x, y, z);
             position.add((random.nextFloat()*0.3f)-0.15f, (random.nextFloat()*0.3f)-0.15f, (random.nextFloat()*0.3f)-0.15f);
@@ -216,12 +216,12 @@ public class ConstellationsCommand {
         return 1;
     }
 
-    private static boolean createRandomConstellation(Random random, Vector3f location) {
+    private static boolean createRandomConstellation(RandomSource random, Vector3f location) {
         Star lastStar = null;
         Vector3f lastPosition = location;
         int lines = 0;
-        int maxLines = random.nextBetween(4,8);
-        int maxConnections = random.nextBetween(3,5);
+        int maxLines = random.nextIntBetweenInclusive(4,8);
+        int maxConnections = random.nextIntBetweenInclusive(3,5);
         float maxAngle = maxLines <= 5 ? 0.98f : (maxConnections <= 3 ? 0.975f : 0.97f);
         Constellation constellation = new Constellation();
         while (lines < maxLines) {
@@ -238,7 +238,7 @@ public class ConstellationsCommand {
                     for (StarLine line : constellation.getLines()) {
                         if (line.intersects(star.index, lastStar.index)) {
                             Star[] stars = line.getStars();
-                            if (MathHelper.abs(direction.angleCos(stars[0].getPositionAsVector3f().sub(stars[1].getPositionAsVector3f()))) > maxAngle) {
+                            if (Mth.abs(direction.angleCos(stars[0].getPositionAsVector3f().sub(stars[1].getPositionAsVector3f()))) > maxAngle) {
                                 failedCheck = true;
                                 break;
                             }

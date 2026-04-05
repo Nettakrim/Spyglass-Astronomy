@@ -13,15 +13,15 @@ import java.util.Scanner;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
-import com.nettakrim.spyglass_astronomy.mixin.BiomeAccessAccessor;
+import com.nettakrim.spyglass_astronomy.mixin.BiomeManagerAccessor;
 
-import com.nettakrim.spyglass_astronomy.mixin.ClientWorldAccessor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.WorldSavePath;
+import com.nettakrim.spyglass_astronomy.mixin.ClientLevelAccessor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.world.level.storage.LevelResource;
 
 public class SpaceDataManager {
     public static final int SAVE_FORMAT = 1;
@@ -40,9 +40,9 @@ public class SpaceDataManager {
 
     private int changesMade;
 
-    public SpaceDataManager(ClientWorld world) {
+    public SpaceDataManager(ClientLevel world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
-        long seedHash = ((BiomeAccessAccessor) world.getBiomeAccess()).getSeed();
+        long seedHash = ((BiomeManagerAccessor) world.getBiomeManager()).getBiomeZoomSeed();
         boolean useDefault = true;
         Optional<Path> localPath = getLocalStorage();
         this.isWorldFolder = localPath.isPresent();
@@ -63,20 +63,20 @@ public class SpaceDataManager {
         }
     }
 
-    static public Path getGlobalStorage(ClientWorld world){
-        return SpyglassAstronomyClient.client.runDirectory.toPath()
+    static public Path getGlobalStorage(ClientLevel world){
+        return SpyglassAstronomyClient.client.gameDirectory.toPath()
             .resolve(".spyglass_astronomy")
             .resolve(getCurrentWorldOrServerName(world).replaceAll("[\\\\/:*?\"<>|]", "_"))
             ;
     }
 
     static public Optional<Path> getLocalStorage(){
-        IntegratedServer localServer = MinecraftClient.getInstance().getServer();
+        IntegratedServer localServer = Minecraft.getInstance().getSingleplayerServer();
         if (localServer == null)
             return Optional.empty();
 
         return Optional.of(
-            localServer.getSavePath(WorldSavePath.ROOT)
+            localServer.getWorldPath(LevelResource.ROOT)
                 .resolve("data")
                 .resolve("spyglass_astronomy")
         );
@@ -288,22 +288,22 @@ public class SpaceDataManager {
         this.yearLength = yearLength;
     }
 
-    private static String getCurrentWorldOrServerName(ClientWorld world) {
+    private static String getCurrentWorldOrServerName(ClientLevel world) {
         // https://github.com/Johni0702/bobby/blob/master/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L357
-        IntegratedServer integratedServer = SpyglassAstronomyClient.client.getServer();
+        IntegratedServer integratedServer = SpyglassAstronomyClient.client.getSingleplayerServer();
         if (integratedServer != null) {
-            return integratedServer.getSaveProperties().getLevelName();
+            return integratedServer.getWorldData().getLevelName();
         }
 
         if (world != null) {
-            ClientPlayNetworkHandler clientPlayNetworkHandler = ((ClientWorldAccessor)world).getNetworkHandler();
+            ClientPacketListener clientPlayNetworkHandler = ((ClientLevelAccessor)world).getConnection();
             if (clientPlayNetworkHandler != null) {
-                ServerInfo serverInfo = clientPlayNetworkHandler.getServerInfo();
+                ServerData serverInfo = clientPlayNetworkHandler.getServerData();
                 if (serverInfo != null) {
                     if (serverInfo.isRealm()) {
                         return "realm";
                     }
-                    return serverInfo.address.replace(':', '_');
+                    return serverInfo.ip.replace(':', '_');
                 }
             }
         }
