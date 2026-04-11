@@ -5,58 +5,58 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
-import com.nettakrim.spyglass_astronomy.mixin.BiomeAccessAccessor;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import com.nettakrim.spyglass_astronomy.mixin.BiomeManagerAccessor;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class SeedCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> seedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> seedNode = ClientCommands
             .literal("seed")
             .build();
 
 
-        LiteralCommandNode<FabricClientCommandSource> starNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starNode = ClientCommands
             .literal("star")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryStarSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> queryStarSeedNode = ClientCommands
             .literal("query")
             .executes(SeedCommand::queryStarSeed)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> resetStarSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> resetStarSeedNode = ClientCommands
             .literal("reset")
             .executes(SeedCommand::resetStarSeed)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> setStarSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> setStarSeedNode = ClientCommands
             .literal("set")
             .then(
-                ClientCommandManager.argument("seed", LongArgumentType.longArg())
+                ClientCommands.argument("seed", LongArgumentType.longArg())
                     .executes(SeedCommand::setStarSeed)
             )
             .build();
 
 
-        LiteralCommandNode<FabricClientCommandSource> planetNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> planetNode = ClientCommands
             .literal("planet")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryPlanetSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> queryPlanetSeedNode = ClientCommands
             .literal("query")
             .executes(SeedCommand::queryPlanetSeed)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> resetPlanetSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> resetPlanetSeedNode = ClientCommands
             .literal("reset")
             .executes(SeedCommand::resetPlanetSeed)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> setPlanetSeedNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> setPlanetSeedNode = ClientCommands
             .literal("set")
             .then(
-                ClientCommandManager.argument("seed", LongArgumentType.longArg())
+                ClientCommands.argument("seed", LongArgumentType.longArg())
                     .executes(SeedCommand::setPlanetSeed)
             )
             .build();
@@ -78,7 +78,7 @@ public class SeedCommand {
     }
 
     private static int resetStarSeed(CommandContext<FabricClientCommandSource> context) {
-        return setStarSeed(((BiomeAccessAccessor)SpyglassAstronomyClient.world.getBiomeAccess()).getSeed());
+        return setStarSeed(((BiomeManagerAccessor)SpyglassAstronomyClient.world.getBiomeManager()).getBiomeZoomSeed());
     }
 
     private static int queryStarSeed(CommandContext<FabricClientCommandSource> context) {
@@ -102,7 +102,7 @@ public class SeedCommand {
     }
 
     private static int resetPlanetSeed(CommandContext<FabricClientCommandSource> context) {
-        return setPlanetSeed(((BiomeAccessAccessor)SpyglassAstronomyClient.world.getBiomeAccess()).getSeed());
+        return setPlanetSeed(((BiomeManagerAccessor)SpyglassAstronomyClient.world.getBiomeManager()).getBiomeZoomSeed());
     }
 
 

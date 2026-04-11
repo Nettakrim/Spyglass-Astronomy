@@ -12,10 +12,10 @@ import com.nettakrim.spyglass_astronomy.Star;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType.MessageFormat;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.commands.arguments.MessageArgument.Message;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 
 public class SpyglassAstronomyCommands {
     public static final SuggestionProvider<FabricClientCommandSource> constellations = (context, builder) -> {
@@ -91,13 +91,13 @@ public class SpyglassAstronomyCommands {
 
     public static String getMessageText(CommandContext<FabricClientCommandSource> context, String name) {
         //a lot of digging through #SayCommand to make a MessageArgumentType that works clientside
-        MessageFormat messageFormat = context.getArgument(name, MessageFormat.class);
-        return messageFormat.contents();
+        Message messageFormat = context.getArgument(name, Message.class);
+        return messageFormat.text();
     }
 
-    public static Text getClickHere(String actionKey, String command, boolean run, Object... formatting) {
-        return Text.translatable(SpyglassAstronomyClient.MODID+".commands.share.click")
+    public static Component getClickHere(String actionKey, String command, boolean run, Object... formatting) {
+        return Component.translatable(SpyglassAstronomyClient.MODID+".commands.share.click")
                 .setStyle(Style.EMPTY.withClickEvent(run ? new ClickEvent.RunCommand(command) : new ClickEvent.SuggestCommand(command)).withColor(SpyglassAstronomyClient.buttonTextColor))
-                .append(Text.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor)));
+                .append(Component.translatable(SpyglassAstronomyClient.MODID+"."+actionKey, formatting).setStyle(Style.EMPTY.withColor(SpyglassAstronomyClient.textColor)));
     }
 }

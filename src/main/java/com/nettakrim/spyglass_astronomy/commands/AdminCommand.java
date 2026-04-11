@@ -3,12 +3,12 @@ package com.nettakrim.spyglass_astronomy.commands;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.*;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class AdminCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> adminNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> adminNode = ClientCommands
             .literal("sga:admin")
             .build();
 

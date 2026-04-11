@@ -2,8 +2,8 @@ package com.nettakrim.spyglass_astronomy;
 
 import org.joml.Vector3f;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.util.math.MathHelper;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.util.Mth;
 
 public class StarLine {
     public static float distance = 1.1f;
@@ -90,7 +90,7 @@ public class StarLine {
         float dirZ = direction.z;
         float sqrDistance = dirX * dirX + dirY * dirY + dirZ * dirZ;
         direction.normalize();
-        direction.mul(distance * (Math.min(MathHelper.sqrt(sqrDistance), 4f)/4));
+        direction.mul(distance * (Math.min(Mth.sqrt(sqrDistance), 4f)/4));
 
         Vector3f perpendicular = new Vector3f(direction);
         perpendicular.cross(starAPosition);
@@ -121,7 +121,7 @@ public class StarLine {
         if (vertexA1 == null) calculateVertices();
         float drawingMultipler = 1;
         if (starBIndex == -1) {
-            drawingMultipler = MathHelper.clamp((20000f-getSquaredLength())/5000f, 0f, 1f);
+            drawingMultipler = Mth.clamp((20000f-getSquaredLength())/5000f, 0f, 1f);
         }
         
         int ar = starAColor[0];
@@ -148,29 +148,29 @@ public class StarLine {
             ba = ba*2;
         }
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             vertexA1.x,
             vertexA1.y,
             vertexA1.z)
-        .color(ar, ag, ab, aa);
+        .setColor(ar, ag, ab, aa);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             vertexA2.x,
             vertexA2.y,
             vertexA2.z)
-        .color(ar, ag, ab, aa);
+        .setColor(ar, ag, ab, aa);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             vertexB1.x,
             vertexB1.y,
             vertexB1.z)
-        .color(br, bg, bb, ba);
+        .setColor(br, bg, bb, ba);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             vertexB2.x,
             vertexB2.y,
             vertexB2.z)
-        .color(br, bg, bb, ba);
+        .setColor(br, bg, bb, ba);
     }
 
     public void clear() {

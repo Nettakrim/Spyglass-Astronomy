@@ -1,9 +1,9 @@
 package com.nettakrim.spyglass_astronomy.commands;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.minecraft.command.argument.MessageArgumentType;
-import net.minecraft.text.Style;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.joml.Vector3f;
 
@@ -18,52 +18,52 @@ import com.nettakrim.spyglass_astronomy.Star;
 import com.nettakrim.spyglass_astronomy.Knowledge.Level;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 
 public class InfoCommand implements Command<FabricClientCommandSource> {
 
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> infoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> infoNode = ClientCommands
             .literal("sga:info")
             .executes(new InfoCommand())
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> constellationInfoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationInfoNode = ClientCommands
             .literal("constellation")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.constellations)
                     .executes(InfoCommand::getConstellationInfo)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> starInfoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starInfoNode = ClientCommands
             .literal("star")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.stars)
                     .executes(InfoCommand::getStarInfo)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodyInfoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodyInfoNode = ClientCommands
             .literal("planet")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.orbitingBodies)
                     .executes(InfoCommand::getOrbitingBodyInfo)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> earthInfoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> earthInfoNode = ClientCommands
             .literal("thisworld")
             .executes(InfoCommand::getEarthInfo)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> solarSystemInfoNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> solarSystemInfoNode = ClientCommands
             .literal("solarsystem")
             .executes(InfoCommand::getSolarSystemInfo)
             .build();
@@ -133,7 +133,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void displayInfo(Constellation constellation) {
         int[] flags = new int[] {-1, -1};
-        MutableText text = Text.empty();
+        MutableComponent text = Component.empty();
         text.append(translate("constellation.name", constellation.name));
 
         Vector3f position = constellation.getAveragePosition();
@@ -146,7 +146,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void displayInfo(Star star) {
         int[] flags = new int[] {-1, -1};
-        MutableText text = Text.empty();
+        MutableComponent text = Component.empty();
         text.append(translate("star.name", star.isUnnamed() ? "Unnamed" : star.name));
 
         Vector3f position = star.getPositionAsVector3f();
@@ -168,7 +168,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void displayInfo(OrbitingBody orbitingBody) {
         int[] flags = new int[] {-1, -1};
-        MutableText text = Text.empty();
+        MutableComponent text = Component.empty();
         text.append(translate("planet.name", orbitingBody.isUnnamed() ? "Unnamed" : orbitingBody.name));
         text.append(translate("planet.type."+orbitingBody.type.toString().toLowerCase()));
         orbitInfo(text, orbitingBody.orbit, flags);
@@ -180,9 +180,9 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void displayEarthInfo() {
         int[] flags = new int[] {-1, -1};
-        MutableText text = Text.empty();
+        MutableComponent text = Component.empty();
         text.append(translate("thisworld.time", getMinecraftTime()));
-        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.client.gameRenderer.getCamera().getEnvironmentAttributeInterpolator().get(EnvironmentAttributes.MOON_PHASE_VISUAL, 0).getIndex(), SINGLE_SUCCESS)));
+        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.client.gameRenderer.getMainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, 0).index(), SINGLE_SUCCESS)));
         orbitInfo(text, SpyglassAstronomyClient.earthOrbit, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
@@ -192,7 +192,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void displaySolarSystemInfo() {
         int[] flags = new int[] {-1, -1};
-        MutableText text = Text.empty();
+        MutableComponent text = Component.empty();
         text.append(translate("solarsystem.planets"));
         int stage = 0;
         for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
@@ -213,7 +213,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
 
         if (SpyglassAstronomyClient.knowledge.orbitKnowledgeAtleast(Level.EXPERT, flags)) {
-            text.append(translate("solarsystem.time", Long.toString(SpyglassAstronomyClient.getDay()), Float.toString(MathHelper.floor(SpyglassAstronomyClient.getDayFraction()*100)/100f).replace("0.","")));
+            text.append(translate("solarsystem.time", Long.toString(SpyglassAstronomyClient.getDay()), Float.toString(Mth.floor(SpyglassAstronomyClient.getDayFraction()*100)/100f).replace("0.","")));
         }
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
@@ -221,11 +221,11 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         SpyglassAstronomyClient.longSay(text);
     }
 
-    private static void staticVisibilityInfo(MutableText text, Vector3f position, int[] flags) {
+    private static void staticVisibilityInfo(MutableComponent text, Vector3f position, int[] flags) {
         Vector3f pos = new Vector3f(position);
-        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
-        pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
-        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+        pos.rotate(Axis.YP.rotationDegrees(45f));
+        pos.rotate(Axis.XP.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
+        pos.rotate(Axis.YP.rotationDegrees(-90.0f));
 
         float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
         float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
@@ -234,17 +234,17 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
             pos = new Vector3f(position);
-            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
-            pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
-            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
-            if (MathHelper.abs(pos.z) < 0.9f) {
+            pos.rotate(Axis.YP.rotationDegrees(45f));
+            pos.rotate(Axis.XP.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
+            pos.rotate(Axis.YP.rotationDegrees(-90.0f));
+            if (Mth.abs(pos.z) < 0.9f) {
                 //some of the values may be slightly innacurate (eg off by one) with fractional periods
                 float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
                 angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
                 if (referenceYaw < 0) angle = 180 - angle;
                 if (angle < 0) angle += 360;
                 float period = SpyglassAstronomyClient.earthOrbit.period;
-                angle = (period - MathHelper.floor((angle/360)*period+0.5f)) % period;
+                angle = (period - Mth.floor((angle/360)*period+0.5f)) % period;
                 int nearestDay = (int)angle;
                 if (period == 8) {
                     text.append(translate("visibility.time.moonphase")).append(translate("moonphase."+ nearestDay));
@@ -259,7 +259,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         }
     }
 
-    private static void orbitInfo(MutableText text, Orbit orbit, int[] flags) {
+    private static void orbitInfo(MutableComponent text, Orbit orbit, int[] flags) {
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.NOVICE, flags)) {
             text.append(translate("orbit.period", prettyFloat(orbit.period)));
         }
@@ -289,10 +289,10 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 pos.sub(earthPos);
                 float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(pos.x, pos.y, pos.z);
 
-                text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
+                text.append(translate("orbit.distance", prettyFloat(Mth.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
 
                 pos.normalize();
-                pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+                pos.rotate(Axis.ZP.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
                 float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
                 float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
@@ -324,7 +324,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
     }
 
     private static String prettyFloat(float f) {
-        if (f == MathHelper.floor(f)) {
+        if (f == Mth.floor(f)) {
             return Integer.toString((int)f);
         } else {
             f = Math.round(f*100);
@@ -334,7 +334,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     //https://github.com/Iru21/TimeDisplay/blob/master/src/main/kotlin/me/iru/timedisplay/TimeUtils.kt
     private static String getMinecraftTime() {
-        long timeDay = SpyglassAstronomyClient.world.getTimeOfDay();
+        long timeDay = SpyglassAstronomyClient.world.getDefaultClockTime();
         int dayTicks = (int)(timeDay % 24000);
         int hour = (dayTicks / 1000 + 6) % 24;
         int min = ((int)(dayTicks / 16.666666f)) % 60;
@@ -352,7 +352,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         return time;   
     }
 
-    private static Text translate(String key, Object... formatting) {
-        return Text.translatable(SpyglassAstronomyClient.MODID+".commands.info."+key, formatting);
+    private static Component translate(String key, Object... formatting) {
+        return Component.translatable(SpyglassAstronomyClient.MODID+".commands.info."+key, formatting);
     }
 }

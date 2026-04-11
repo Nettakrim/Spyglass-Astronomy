@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 
 public class OrbitingBody {
     public final Orbit orbit;
@@ -70,12 +70,12 @@ public class OrbitingBody {
     
         position.sub(referencePosition);
         float sqrDistance = SpyglassAstronomyClient.getSquaredDistance(position.x, position.y, position.z);
-        float inverseSqrt = MathHelper.inverseSqrt(sqrDistance);
+        float inverseSqrt = Mth.invSqrt(sqrDistance);
         position.mul(inverseSqrt);
 
         float distance = (1/inverseSqrt)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis;
 
-        float visibilityScale = Math.min(MathHelper.sqrt(distance),8);
+        float visibilityScale = Math.min(Mth.sqrt(distance),8);
 
         //this isn't needed to run every frame
         if ((ticks&7) == 0 || axis1 == null) {
@@ -87,9 +87,9 @@ public class OrbitingBody {
             axis1.normalize();
 
             axis2 = new Vector3f(axis1);
-            axis2.rotate(RotationAxis.of(position).rotationDegrees(90));
+            axis2.rotate(Axis.of(position).rotationDegrees(90));
         
-            float sizeScale = MathHelper.clamp(
+            float sizeScale = Mth.clamp(
                 (size/visibilityScale)*3,
             0.25f,1.5f);
 
@@ -115,7 +115,7 @@ public class OrbitingBody {
         }
         currentAlpha = (int)(alphaRaw*255);
 
-        Quaternionf rotation = RotationAxis.of(position).rotationDegrees(angle);
+        Quaternionf rotation = Axis.of(position).rotationDegrees(angle);
         Vector3f rotatedAxis1 = new Vector3f(axis1);
         Vector3f rotatedAxis2 = new Vector3f(axis2);
         rotatedAxis1.rotate(rotation);
@@ -146,7 +146,7 @@ public class OrbitingBody {
                     //ring
                     float ringOut = 1.3f;
                     float ringIn = 0.9f;
-                    Quaternionf slowOppositeRotation = RotationAxis.of(position).rotationDegrees(-angle / 2);
+                    Quaternionf slowOppositeRotation = Axis.of(position).rotationDegrees(-angle / 2);
                     Vector3f in1 = new Vector3f(axis1);
                     in1.rotate(slowOppositeRotation);
                     Vector3f out1 = new Vector3f(in1);
@@ -223,53 +223,53 @@ public class OrbitingBody {
         int b2 = secondaryColor[2] >> colorMul;
         int decorationAlpha = currentAlpha/3;
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad1vertex1.x,
             quad1vertex1.y,
             quad1vertex1.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).setColor(r1, g1, b1, currentAlpha);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad1vertex2.x,
             quad1vertex2.y,
             quad1vertex2.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).setColor(r1, g1, b1, currentAlpha);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad1vertex3.x,
             quad1vertex3.y,
             quad1vertex3.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).setColor(r1, g1, b1, currentAlpha);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad1vertex4.x,
             quad1vertex4.y,
             quad1vertex4.z
-        ).color(r1, g1, b1, currentAlpha);
+        ).setColor(r1, g1, b1, currentAlpha);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad2vertex1.x,
             quad2vertex1.y,
             quad2vertex1.z
-        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0);
+        ).setColor(r2, g2, b2, isPlanet ? decorationAlpha : 0);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad2vertex2.x,
             quad2vertex2.y,
             quad2vertex2.z
-        ).color(r2, g2, b2, isPlanet ? decorationAlpha : 0);
+        ).setColor(r2, g2, b2, isPlanet ? decorationAlpha : 0);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad2vertex3.x,
             quad2vertex3.y,
             quad2vertex3.z
-        ).color(r2, g2, b2, decorationAlpha);
+        ).setColor(r2, g2, b2, decorationAlpha);
 
-        bufferBuilder.vertex(
+        bufferBuilder.addVertex(
             quad2vertex4.x,
             quad2vertex4.y,
             quad2vertex4.z
-        ).color(r2, g2, b2, decorationAlpha);
+        ).setColor(r2, g2, b2, decorationAlpha);
     }
 
     public Vector3f getPosition() {

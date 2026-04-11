@@ -2,8 +2,8 @@ package com.nettakrim.spyglass_astronomy;
 
 import org.joml.Vector3f;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.util.math.MathHelper;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.util.Mth;
 
 //https://github.com/ZtereoHYPE/nicer-skies/blob/main/src/main/java/codes/ztereohype/nicerskies/sky/star/Star.java
 
@@ -60,14 +60,14 @@ public class Star {
         this.latitudeCos = (float) Math.cos(proj);
 
         this.size = size;
-        this.angle = rotationSpeed * MathHelper.PI;
+        this.angle = rotationSpeed * Mth.PI;
         this.rotationSpeed = rotationSpeed * 0.005f;
         this.twinkleSpeed = twinkleSpeed;
     }
 
     public void update(int ticks) {
         angle = (angle+rotationSpeed)%90;
-        float twinkle = 1 - 2.5f * Math.max(MathHelper.sin(ticks*twinkleSpeed) - 0.75f,0);
+        float twinkle = 1 - 2.5f * Math.max(Mth.sin(ticks*twinkleSpeed) - 0.75f,0);
         currentAlpha = (int) (getCurrentNonTwinkledAlpha() * twinkle * 255);
     }
 
@@ -81,8 +81,8 @@ public class Star {
     }
 
     public void setVertices(BufferBuilder bufferBuilder) {
-        float angleSin = MathHelper.sin(angle);
-        float angleCos = MathHelper.cos(angle);
+        float angleSin = Mth.sin(angle);
+        float angleCos = Mth.cos(angle);
         int colorMult = isSelected ? 1 : 0;
         for (int corner = 0; corner < 4; ++corner) {
            float x = ((corner & 2) - 1) * size;
@@ -93,7 +93,7 @@ public class Star {
            float rotatedBLat = -(rotatedA * latitudeCos);
            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.vertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).color(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha);
+           bufferBuilder.addVertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).setColor(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha);
         }
     }
 

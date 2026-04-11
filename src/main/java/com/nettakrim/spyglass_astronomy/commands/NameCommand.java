@@ -11,16 +11,16 @@ import com.nettakrim.spyglass_astronomy.Star;
 import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType;
+import net.minecraft.commands.arguments.MessageArgument;
 
 public class NameCommand implements Command<FabricClientCommandSource> {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> nameNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> nameNode = ClientCommands
             .literal("sga:name")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .executes(new NameCommand())
             )
             .build();

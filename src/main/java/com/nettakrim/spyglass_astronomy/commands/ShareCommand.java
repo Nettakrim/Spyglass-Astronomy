@@ -10,40 +10,40 @@ import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType;
-import net.minecraft.text.Text;
+import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.network.chat.Component;
 
 public class ShareCommand implements Command<FabricClientCommandSource> {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> shareNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> shareNode = ClientCommands
             .literal("sga:share")
             .executes(new ShareCommand())
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> constellationShareNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationShareNode = ClientCommands
             .literal("constellation")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.constellations)
                     .executes(ShareCommand::shareConstellation)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> starShareNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starShareNode = ClientCommands
             .literal("star")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.stars)
                     .executes(ShareCommand::shareStar)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodyShareNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodyShareNode = ClientCommands
             .literal("planet")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.orbitingBodies)
                     .executes(ShareCommand::shareOrbitingBody)
             )
@@ -101,7 +101,7 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
     }
 
     private static void share(Constellation constellation) {
-        Text text = SpyglassAstronomyCommands.getClickHere(
+        Component text = SpyglassAstronomyCommands.getClickHere(
             "commands.share.constellation",
             "sga:c_"+(SpaceDataManager.encodeConstellation(null, constellation).replace(" | ", "|"))+"|",
             false,
@@ -112,7 +112,7 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
 
     private static void share(Star star) {
         String starName = (star.isUnnamed() ? "Unnamed" : star.name);
-        Text text = SpyglassAstronomyCommands.getClickHere(
+        Component text = SpyglassAstronomyCommands.getClickHere(
             "commands.share.star",
             "sga:s_"+starName+"|"+ star.index +"|",
             false,
@@ -123,7 +123,7 @@ public class ShareCommand implements Command<FabricClientCommandSource> {
 
     private static void share(OrbitingBody orbitingBody) {
         String orbitingBodyName = (orbitingBody.isUnnamed() ? "Unnamed" : orbitingBody.name);
-        Text text = SpyglassAstronomyCommands.getClickHere(
+        Component text = SpyglassAstronomyCommands.getClickHere(
             "commands.share."+(orbitingBody.isPlanet ?"planet" : "comet"),
             "sga:p_"+orbitingBodyName+"|"+ SpyglassAstronomyClient.orbitingBodies.indexOf(orbitingBody) +"|",
             false,

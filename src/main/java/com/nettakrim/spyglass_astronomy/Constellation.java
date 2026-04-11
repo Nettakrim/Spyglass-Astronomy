@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.joml.Vector3f;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.util.math.MathHelper;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.util.Mth;
 
 public class Constellation {
     private final ArrayList<StarLine> lines = new ArrayList<>();
@@ -187,7 +187,7 @@ public class Constellation {
         float x = averagePositionBuffer.x;
         float y = averagePositionBuffer.y;
         float z = averagePositionBuffer.z;
-        float isqrt = MathHelper.inverseSqrt(x * x + y * y + z * z);
+        float isqrt = Mth.invSqrt(x * x + y * y + z * z);
         averagePositionBuffer.mul(isqrt);
         averagePositionValid = true;
 

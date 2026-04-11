@@ -7,38 +7,38 @@ import com.nettakrim.spyglass_astronomy.OrbitingBody;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import com.nettakrim.spyglass_astronomy.Star;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType;
+import net.minecraft.commands.arguments.MessageArgument;
 
 public class SelectCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> selectNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> selectNode = ClientCommands
             .literal("sga:select")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> constellationSelectNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationSelectNode = ClientCommands
             .literal("constellation")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.constellations)
                     .executes(SelectCommand::selectConstellation)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> starSelectNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starSelectNode = ClientCommands
             .literal("star")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.stars)
                     .executes(SelectCommand::selectStar)
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodySelectNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodySelectNode = ClientCommands
             .literal("planet")
             .then(
-                ClientCommandManager.argument("name", MessageArgumentType.message())
+                ClientCommands.argument("name", MessageArgument.message())
                     .suggests(SpyglassAstronomyCommands.orbitingBodies)
                     .executes(SelectCommand::selectOrbitingBody)
             )

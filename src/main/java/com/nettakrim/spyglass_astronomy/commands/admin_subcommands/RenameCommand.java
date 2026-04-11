@@ -3,44 +3,44 @@ package com.nettakrim.spyglass_astronomy.commands.admin_subcommands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.commands.NameCommand;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.argument.MessageArgumentType;
+import net.minecraft.commands.arguments.MessageArgument;
 
 public class RenameCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> renameNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> renameNode = ClientCommands
             .literal("rename")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> constellationNameNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> constellationNameNode = ClientCommands
             .literal("constellation")
             .then(
-                ClientCommandManager.argument("index", IntegerArgumentType.integer(0))
+                ClientCommands.argument("index", IntegerArgumentType.integer(0))
                     .then(
-                        ClientCommandManager.argument("name", MessageArgumentType.message())
+                        ClientCommands.argument("name", MessageArgument.message())
                             .executes(NameCommand::nameConstellation)
                     )
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> starNameNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> starNameNode = ClientCommands
             .literal("star")
             .then(
-                ClientCommandManager.argument("index", IntegerArgumentType.integer(0))
+                ClientCommands.argument("index", IntegerArgumentType.integer(0))
                     .then(
-                        ClientCommandManager.argument("name", MessageArgumentType.message())
+                        ClientCommands.argument("name", MessageArgument.message())
                             .executes(NameCommand::nameStar)
                     )
             )
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> orbitingBodyNameNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> orbitingBodyNameNode = ClientCommands
             .literal("planet")
             .then(
-                ClientCommandManager.argument("index", IntegerArgumentType.integer(0))
+                ClientCommands.argument("index", IntegerArgumentType.integer(0))
                     .then(
-                        ClientCommandManager.argument("name", MessageArgumentType.message())
+                        ClientCommands.argument("name", MessageArgument.message())
                             .executes(NameCommand::nameOrbitingBody)
                     )
             )

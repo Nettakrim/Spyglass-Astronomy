@@ -4,13 +4,13 @@ import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.StarCountComm
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.RandomSource;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -21,8 +21,8 @@ import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 
 import java.util.ArrayList;
 
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 
 public class SpyglassAstronomyClient implements ClientModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -35,8 +35,8 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static int starCount = 1024; //encoding will break at 4096, so stay at 4095 and below :)
 
-    public static MinecraftClient client;
-    public static ClientWorld world;
+    public static Minecraft client;
+    public static ClientLevel world;
 
     public static ArrayList<Star> stars;
 
@@ -70,7 +70,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-        client = MinecraftClient.getInstance();
+        client = Minecraft.getInstance();
 
         SpyglassAstronomyCommands.initialize();
 
@@ -96,7 +96,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         loadSpace(world, false);
     }
 
-    public static void loadSpace(ClientWorld clientWorld, boolean allowSave) {
+    public static void loadSpace(ClientLevel clientWorld, boolean allowSave) {
         if (spaceDataManager != null && allowSave) spaceDataManager.saveData();
 
         world = clientWorld;
@@ -115,7 +115,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void generateSpace(boolean reset) {
-        Random random = Random.create(0);
+        RandomSource random = RandomSource.create(0);
         generateStars(random, reset, reset);
         generatePlanets(random, reset);
 
@@ -127,9 +127,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceRenderingManager.updateSpace(0);
     }
 
-    public static void generateStars(Random random, boolean resetStars, boolean resetConstellations) {
+    public static void generateStars(RandomSource random, boolean resetStars, boolean resetConstellations) {
         if (random == null) {
-            random = Random.create(spaceDataManager.getStarSeed());
+            random = RandomSource.create(spaceDataManager.getStarSeed());
         } else {
             random.setSeed(spaceDataManager.getStarSeed());
         }
@@ -147,25 +147,25 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float posY = random.nextFloat() * 2.0f - 1.0f;
             float posZ = random.nextFloat() * 2.0f - 1.0f;
             float galaxyBias = 0.75f;
-            posX = (galaxyBias * posX * MathHelper.abs(posX))+((1-galaxyBias) * posX);
+            posX = (galaxyBias * posX * Mth.abs(posX))+((1-galaxyBias) * posX);
 
             //makes sure position is a uniform point in a sphere, then normalises position to the outside of a sphere
             float distance = posX * posX + posY * posY + posZ * posZ;
             if (!(distance < 1.0) || !(distance > 0.01)) continue;
-            distance = MathHelper.inverseSqrt(distance);
+            distance = Mth.invSqrt(distance);
             posX *= distance;
             posY *= distance;
             posZ *= distance;
 
             float sizeRaw = random.nextFloat();
             if (currentStars % 2 == 0) {
-                float galaxyCloseness = (0.12f/(MathHelper.abs(posX)+0.1f))-0.2f;
+                float galaxyCloseness = (0.12f/(Mth.abs(posX)+0.1f))-0.2f;
                 if (galaxyCloseness > 0) sizeRaw = (1-galaxyCloseness)*sizeRaw + galaxyCloseness*((sizeRaw*sizeRaw)/2);
             }
             float size = 0.15f + sizeRaw * 0.2f;
 
             float alphaRaw = random.nextFloat();
-            float alpha = Math.max(MathHelper.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
+            float alpha = Math.max(Mth.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
             alpha = (alpha + (alpha*alpha))/2;
 
             int [] color = generateRandomColor(random, 0.8f, 20, 16, 0, 2f);
@@ -183,14 +183,14 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager.loadStarDatas();
     }
 
-    public static void generatePlanets(Random random, boolean reset) {
+    public static void generatePlanets(RandomSource random, boolean reset) {
         if (random == null) {
-            random = Random.create(spaceDataManager.getPlanetSeed());
+            random = RandomSource.create(spaceDataManager.getPlanetSeed());
         } else {
             random.setSeed(spaceDataManager.getPlanetSeed());
         }
         //things with less importance and *could* change in the future and not be too bad like exact color that use their own random
-        Random lowPriorityRandom = Random.create(spaceDataManager.getPlanetSeed());
+        RandomSource lowPriorityRandom = RandomSource.create(spaceDataManager.getPlanetSeed());
 
         if (reset) {
             orbitingBodies = new ArrayList<>();
@@ -203,9 +203,9 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         //between 1 and 3 inner planets
         int innerPlanets = random.nextInt(3)+1;
         //between 4 and 8 outer planets for 1 inner, between 2 and 8 for 3 inner
-        int outerPlanets = random.nextBetween(5-innerPlanets, 8);
+        int outerPlanets = random.nextIntBetweenInclusive(5-innerPlanets, 8);
 
-        int comets = random.nextBetween(4, 6);
+        int comets = random.nextIntBetweenInclusive(4, 6);
 
         float yearLength = spaceDataManager.getYearLength();
 
@@ -218,7 +218,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float innerRoundAmount = 8;
         while (innerPlanets >= innerRoundAmount) innerRoundAmount *= 2;
 
-        int otherHabitable = random.nextBetween(0, 8); //0 means first inner planet habitable, 1 means first outer, all else mean none
+        int otherHabitable = random.nextIntBetweenInclusive(0, 8); //0 means first inner planet habitable, 1 means first outer, all else mean none
 
         float innerDistanceRange = 1f/innerPlanets;
         float[] innerPlanetPeriods = new float[innerPlanets];
@@ -227,7 +227,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float maxPeriod = (x/innerPlanets)+innerDistanceRange;
             float rawUnRoundedPeriod = random.nextFloat();
             float unRoundedPeriod = (1-rawUnRoundedPeriod)*minPeriod + rawUnRoundedPeriod*maxPeriod;
-            float period = (MathHelper.floor(unRoundedPeriod*(innerRoundAmount-1))+1)/innerRoundAmount;
+            float period = (Mth.floor(unRoundedPeriod*(innerRoundAmount-1))+1)/innerRoundAmount;
             for (int y = 0; y < x; y++) {
                 if (innerPlanetPeriods[y] == period) {
                     period += 1f/innerRoundAmount;
@@ -242,7 +242,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (otherHabitable == 0 && x == innerPlanets) {
                 type = OrbitingBodyType.HABITABLE;
             } else {
-                int randomInnerType = lowPriorityRandom.nextBetween(0, 3);
+                int randomInnerType = lowPriorityRandom.nextIntBetweenInclusive(0, 3);
                 //noinspection IntegerDivisionInFloatingPointContext
                 if (randomInnerType == 0 && x > innerPlanets/2) {
                     type = OrbitingBodyType.OCEANPLANET;
@@ -266,16 +266,16 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             if (otherHabitable == 1 && x == innerPlanets) {
                 type = OrbitingBodyType.HABITABLE;
             } else {
-                int canBeTerrestial = lowPriorityRandom.nextBetween(0, 1);
+                int canBeTerrestial = lowPriorityRandom.nextIntBetweenInclusive(0, 1);
                 if (x <= 4 && canBeTerrestial == 0) {
-                    int isIcy = x == 0 ? 1 : lowPriorityRandom.nextBetween(0, 1);
+                    int isIcy = x == 0 ? 1 : lowPriorityRandom.nextIntBetweenInclusive(0, 1);
                     if (isIcy == 1) {
                         type = OrbitingBodyType.ICEPLANET;
                     } else {
                         type = OrbitingBodyType.TERRESTIAL;
                     }
                 } else {
-                    int isTerrestial = lowPriorityRandom.nextBetween(0, 3);
+                    int isTerrestial = lowPriorityRandom.nextIntBetweenInclusive(0, 3);
                     if (isTerrestial == 0) {
                         type = OrbitingBodyType.ICEPLANET;
                     } else //noinspection IntegerDivisionInFloatingPointContext
@@ -309,7 +309,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceDataManager.loadOrbitingBodyDatas();
     }
 
-    private static int[] generateRandomColor(Random random, float hueRange, float lightnessRange, int saturationAmount, int forceHue, float forceHueAmount) {
+    private static int[] generateRandomColor(RandomSource random, float hueRange, float lightnessRange, int saturationAmount, int forceHue, float forceHueAmount) {
         float offsetRange = 2*hueRange-2;
         float gradientPos = random.nextFloat();
         if (forceHue == -1) {
@@ -322,7 +322,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         float lightness = 255 - (colorRaw * lightnessRange);
         float saturationRaw = (colorRaw*256)%1;
         int saturation = (int)(saturationRaw*saturationRaw*saturationAmount);
-        if (saturation-lightness > -96 || MathHelper.abs(gradientPos-0.5f) < 0.25f) {
+        if (saturation-lightness > -96 || Mth.abs(gradientPos-0.5f) < 0.25f) {
             lightness = 255-((255-lightness)/2);
             saturation -= saturation/3;
         }
@@ -334,7 +334,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         };
     }
 
-    private static void addRandomOrbitingBody(Random random, Random lowPriorityRandom, Orbit orbit, boolean isPlanet, IntTetrisBagRandom decorationRandom, OrbitingBodyType type) {
+    private static void addRandomOrbitingBody(RandomSource random, RandomSource lowPriorityRandom, Orbit orbit, boolean isPlanet, IntTetrisBagRandom decorationRandom, OrbitingBodyType type) {
         float size = random.nextFloat()+1;
         float albedo = (random.nextFloat()+1)/2;
         float rotationSpeed = random.nextFloat();
@@ -347,7 +347,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             albedo = (albedo+1)/2;
             hueForceAmount = type == OrbitingBodyType.OCEANPLANET ? 3.5f: 2.5f;
         } else {
-            int forceNonIcyColor = lowPriorityRandom.nextBetween(0, 2);
+            int forceNonIcyColor = lowPriorityRandom.nextIntBetweenInclusive(0, 2);
             if ((forceNonIcyColor != 0 && type == OrbitingBodyType.TERRESTIAL || type == OrbitingBodyType.HABITABLE) || type == OrbitingBodyType.GASGIANT) {
                 forceMainHue = -1;
                 hueForceAmount = 3f;
@@ -364,7 +364,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         orbitingBodies.add(new OrbitingBody(orbit, size, albedo, rotationSpeed, isPlanet, decoration, mainColor, secondaryColor, type));
     }
 
-    private static Orbit generateRandomOrbit(Random random, float period, float maxEccentricity, float maxAscension, float maxInclination, boolean isEarth) {
+    private static Orbit generateRandomOrbit(RandomSource random, float period, float maxEccentricity, float maxAscension, float maxInclination, boolean isEarth) {
         float eccentricityRaw = random.nextFloat();
         float rotationRaw = random.nextFloat();
         float ascensionRaw = (random.nextFloat()*2)-1;
@@ -385,37 +385,37 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static float getPositionInOrbit(float scale) {
-        long time = world.getTimeOfDay();
+        long time = world.getDefaultClockTime();
         //noinspection IntegerDivisionInFloatingPointContext
         return (((time/24000)%earthOrbit.period) * scale) + (((time%24000)/24000.0f) * scale);
     }
 
     public static Long getDay() {
-        long time = world.getTimeOfDay();
+        long time = world.getDefaultClockTime();
         return time/24000;
     }
 
     public static float getDayFraction() {
-        long time = world.getTimeOfDay();
+        long time = world.getDefaultClockTime();
         return ((time%24000)/24000.0f);
     }
 
     public static void update() {
         if (!ready || client.player == null) return;
-        boolean spyglassing = client.player.isUsingSpyglass();
-        boolean toggle = client.options.pickItemKey.isPressed();
+        boolean spyglassing = client.player.isScoping();
+        boolean toggle = client.options.keyPickItem.isDown();
 
         if (spyglassing && toggle && !lastToggle) {
             toggleEditMode();
         }
 
-        if (spyglassing && editMode == 1 && client.options.attackKey.isPressed()) {
+        if (spyglassing && editMode == 1 && client.options.keyAttack.isDown()) {
             if (!isDrawingConstellation) SpyglassAstronomyClient.startDrawingConstellation();
         } else if (isDrawingConstellation) {
             stopDrawingConstellation();
         }
 
-        if (spyglassing && editMode == 2 && client.options.attackKey.isPressed()) {
+        if (spyglassing && editMode == 2 && client.options.keyAttack.isDown()) {
             selectAstralObject();
         }
 
@@ -597,25 +597,25 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (client.player == null) {
             return new Vector3f(0,0,1);
         }
-        float pitch = client.player.getPitch() / 180 * MathHelper.PI;
-        float yaw = client.player.getYaw() / 180 * MathHelper.PI;
-        float x = -MathHelper.sin(yaw);
-        float y = -MathHelper.sin(pitch);
-        float z =  MathHelper.cos(yaw);
-        float scale = MathHelper.cos(pitch);
+        float pitch = client.player.getXRot() / 180 * Mth.PI;
+        float yaw = client.player.getYRot() / 180 * Mth.PI;
+        float x = -Mth.sin(yaw);
+        float y = -Mth.sin(pitch);
+        float z =  Mth.cos(yaw);
+        float scale = Mth.cos(pitch);
         x *= scale;
         z *= scale;
         return new Vector3f(x, y, z);
     }
 
     public static void rotateVectorToStarRotation(Vector3f vector) {
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(90.0f));
-        vector.rotate(RotationAxis.POSITIVE_X.rotationDegrees(getStarAngle()*-1));
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45f));
+        vector.rotate(Axis.YP.rotationDegrees(90.0f));
+        vector.rotate(Axis.XP.rotationDegrees(getStarAngle()*-1));
+        vector.rotate(Axis.YP.rotationDegrees(-45f));
     }
 
     public static void rotateVectorToOrbitingBodyRotation(Vector3f vector) {
-        vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+        vector.rotate(Axis.ZP.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
     }
 
     public static Star getNearestStar(float x, float y, float z) {
@@ -705,26 +705,26 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
     }
 
-    private static void say(Text text) {
+    private static void say(Component text) {
         if (client.player == null) return;
-        client.player.sendMessage(text, false);
+        client.player.sendSystemMessage(text);
     }
 
     public static void say(String key, Object... args) {
-        say(Text.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(Text.translatable(MODID+"."+key, args).setStyle(Style.EMPTY.withColor(textColor))));
+        say(Component.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(Component.translatable(MODID+"."+key, args).setStyle(Style.EMPTY.withColor(textColor))));
     }
 
-    public static void sayText(Text text) {
-        say(Text.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
+    public static void sayText(Component text) {
+        say(Component.translatable(MODID+".say").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
     }
 
-    public static void longSay(Text text) {
-        say(Text.translatable(MODID+".longsay").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
+    public static void longSay(Component text) {
+        say(Component.translatable(MODID+".longsay").setStyle(Style.EMPTY.withColor(nameTextColor)).append(text));
     }
 
     public static void sayActionBar(String key, Object... args) {
         if (client.player == null) return;
-        client.player.sendMessage(Text.translatable(MODID+"."+key, args), true);
+        client.player.sendOverlayMessage(Component.translatable(MODID+"."+key, args));
     }
 
     public static void updateKnowledge() {
@@ -740,7 +740,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static boolean isntHoldingSpyglass() {
         if (!ready || client.player == null) return true;
-        return !client.player.getMainHandStack().isOf(Items.SPYGLASS) && !client.player.getOffHandStack().isOf(Items.SPYGLASS);
+        return !client.player.getMainHandItem().is(Items.SPYGLASS) && !client.player.getOffhandItem().is(Items.SPYGLASS);
     }
 
     public static void setStarCount(int count) {

@@ -4,26 +4,26 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.nettakrim.spyglass_astronomy.SpaceDataManager;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class ChangesCommand {
     public static LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
-        LiteralCommandNode<FabricClientCommandSource> changesNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> changesNode = ClientCommands
             .literal("changes")
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> discardNode = ClientCommands
             .literal("discard")
             .executes(ChangesCommand::discardUnsavedChanges)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> saveNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> saveNode = ClientCommands
             .literal("save")
             .executes(ChangesCommand::saveChanges)
             .build();
 
-        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommandManager
+        LiteralCommandNode<FabricClientCommandSource> queryNode = ClientCommands
             .literal("query")
             .executes(ChangesCommand::queryChanges)
             .build();
