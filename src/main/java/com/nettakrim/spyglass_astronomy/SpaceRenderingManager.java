@@ -13,9 +13,9 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
+import java.lang.reflect.Method;
 
 public class SpaceRenderingManager {
     private final VertexBuffer starsBuffer = new VertexBuffer(Usage.STATIC);
@@ -42,6 +43,47 @@ public class SpaceRenderingManager {
     private final BufferBuilder planetsBufferBuilder = Tessellator.getInstance().getBuffer();
 
     private static float heightScale = 1;
+
+    private static Boolean shaderModLoaded = null;
+
+    private static boolean isShaderModLoaded() {
+        if (shaderModLoaded == null) {
+            try {
+                Class<?> loaderClass = Class.forName("net.fabricmc.loader.api.FabricLoader");
+                Object loader = loaderClass.getMethod("getInstance").invoke(null);
+                boolean iris = (boolean) loaderClass.getMethod("isModLoaded", String.class).invoke(loader, "iris");
+                boolean oculus = (boolean) loaderClass.getMethod("isModLoaded", String.class).invoke(loader, "oculus");
+                shaderModLoaded = iris || oculus;
+            } catch (Exception e) {
+                shaderModLoaded = false;
+            }
+        }
+        return shaderModLoaded;
+    }
+
+    public static boolean isShadersActive() {
+        if (!isShaderModLoaded()) return false;
+        try {
+            Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = apiClass.getMethod("getInstance").invoke(null);
+            Method m = apiClass.getMethod("isShaderPackInUse");
+            return (boolean) m.invoke(api);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isRenderingShadowPass() {
+        if (!isShaderModLoaded()) return false;
+        try {
+            Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = apiClass.getMethod("getInstance").invoke(null);
+            Method m = apiClass.getMethod("isRenderingShadowPass");
+            return (boolean) m.invoke(api);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public static boolean constellationsVisible;
 	public static boolean starsVisible;
@@ -205,9 +247,9 @@ public class SpaceRenderingManager {
         if (starVisibility > 0) {
             matrices.pop();
             matrices.push();
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
+            matrices.multiply(new Quaternionf().rotationY((float) Math.toRadians(-90.0)));
+            matrices.multiply(new Quaternionf().rotationX((float) Math.toRadians(SpyglassAstronomyClient.getStarAngle())));
+            matrices.multiply(new Quaternionf().rotationY((float) Math.toRadians(45.0)));
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
             RenderSystem.setShaderColor(colorScale, colorScale, colorScale, starVisibility);
             BackgroundRenderer.clearFog();
@@ -232,7 +274,7 @@ public class SpaceRenderingManager {
             if (orbitingBodiesVisible) {
                 matrices.pop();
                 matrices.push();
-                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+                matrices.multiply(new Quaternionf().rotationZ((float) Math.toRadians(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
                 planetsBuffer.bind();
                 planetsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionColorProgram());

@@ -7,7 +7,6 @@ import org.joml.Vector3f;
 
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 
 public class OrbitingBody {
     public final Orbit orbit;
@@ -87,7 +86,7 @@ public class OrbitingBody {
             axis1.normalize();
 
             axis2 = new Vector3f(axis1);
-            axis2.rotate(RotationAxis.of(position).rotationDegrees(90));
+            axis2.rotate(new Quaternionf().rotationAxis((float)Math.toRadians(90), position));
         
             float sizeScale = MathHelper.clamp(
                 (size/visibilityScale)*3,
@@ -115,7 +114,7 @@ public class OrbitingBody {
         }
         currentAlpha = (int)(alphaRaw*255);
 
-        Quaternionf rotation = RotationAxis.of(position).rotationDegrees(angle);
+        Quaternionf rotation = new Quaternionf().rotationAxis((float)Math.toRadians(angle), position);
         Vector3f rotatedAxis1 = new Vector3f(axis1);
         Vector3f rotatedAxis2 = new Vector3f(axis2);
         rotatedAxis1.rotate(rotation);
@@ -146,7 +145,7 @@ public class OrbitingBody {
                     //ring
                     float ringOut = 1.3f;
                     float ringIn = 0.9f;
-                    Quaternionf slowOppositeRotation = RotationAxis.of(position).rotationDegrees(-angle / 2);
+                    Quaternionf slowOppositeRotation = new Quaternionf().rotationAxis((float)Math.toRadians(-angle / 2), position);
                     Vector3f in1 = new Vector3f(axis1);
                     in1.rotate(slowOppositeRotation);
                     Vector3f out1 = new Vector3f(in1);

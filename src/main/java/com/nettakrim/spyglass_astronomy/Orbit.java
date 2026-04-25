@@ -3,7 +3,7 @@ package com.nettakrim.spyglass_astronomy;
 import org.joml.Vector3f;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import org.joml.Quaternionf;
 
 public class Orbit {
     public final float period;
@@ -55,9 +55,9 @@ public class Orbit {
     }
 
     public void rotateLocalPosition(Vector3f vector) {
-        vector.rotate(RotationAxis.POSITIVE_X.rotationDegrees(inclination));
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(ascension));
-        vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
+        vector.rotate(new Quaternionf().rotationX((float)Math.toRadians(inclination)));
+        vector.rotate(new Quaternionf().rotationY((float)Math.toRadians(ascension)));
+        vector.rotate(new Quaternionf().rotationZ((float)Math.toRadians(rotation)));
     }
 
     public Vector3f getLastRotatedPosition() {

@@ -3,7 +3,9 @@ package com.nettakrim.spyglass_astronomy;
 import com.nettakrim.spyglass_astronomy.commands.admin_subcommands.StarCountCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Items;
@@ -22,7 +24,7 @@ import com.nettakrim.spyglass_astronomy.commands.SpyglassAstronomyCommands;
 import java.util.ArrayList;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import org.joml.Quaternionf;
 
 public class SpyglassAstronomyClient implements ClientModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -75,6 +77,19 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         SpyglassAstronomyCommands.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> update());
+
+        // When a shader pack is active, render after Iris's composite passes so vertex colors
+        // reach the output framebuffer directly instead of going through the deferred GBuffer pipeline.
+        WorldRenderEvents.LAST.register(context -> {
+            if (!SpaceRenderingManager.isShadersActive()) return;
+            if (SpaceRenderingManager.isRenderingShadowPass()) return;
+            if (spaceRenderingManager == null) return;
+            net.minecraft.client.util.math.MatrixStack matrices = context.matrixStack();
+            matrices.push();
+            spaceRenderingManager.Render(matrices, context.projectionMatrix(), context.tickDelta(), context.camera(), false, () -> {});
+            matrices.pop();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        });
 
         spyglassImprovementsIsLoaded = FabricLoader.getInstance().isModLoaded("spyglass-improvements");
 	}
@@ -598,13 +613,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void rotateVectorToStarRotation(Vector3f vector) {
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(90.0f));
-        vector.rotate(RotationAxis.POSITIVE_X.rotationDegrees(getStarAngle()*-1));
-        vector.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-45f));
+        vector.rotate(new Quaternionf().rotationY((float)Math.toRadians(90.0)));
+        vector.rotate(new Quaternionf().rotationX((float)Math.toRadians(getStarAngle()*-1)));
+        vector.rotate(new Quaternionf().rotationY((float)Math.toRadians(-45.0)));
     }
 
     public static void rotateVectorToOrbitingBodyRotation(Vector3f vector) {
-        vector.rotate(RotationAxis.POSITIVE_Z.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180));
+        vector.rotate(new Quaternionf().rotationZ((float)Math.toRadians(SpyglassAstronomyClient.getPositionInOrbit(-360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
     }
 
     public static Star getNearestStar(float x, float y, float z) {
