@@ -20,7 +20,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import org.joml.Quaternionf;
 
 public class InfoCommand implements Command<FabricClientCommandSource> {
 
@@ -222,9 +222,9 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
     private static void staticVisibilityInfo(MutableText text, Vector3f position, int[] flags) {
         Vector3f pos = new Vector3f(position);
-        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
-        pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
-        pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+        pos.rotate(new Quaternionf().rotationY((float)Math.toRadians(45.0)));
+        pos.rotate(new Quaternionf().rotationX((float)Math.toRadians(SpyglassAstronomyClient.getStarAngle())));
+        pos.rotate(new Quaternionf().rotationY((float)Math.toRadians(-90.0)));
 
         float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
         float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
@@ -233,9 +233,9 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
 
         if (SpyglassAstronomyClient.knowledge.starKnowledgeAtleast(Level.ADEPT, flags)) {
             pos = new Vector3f(position);
-            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(45f));
-            pos.rotate(RotationAxis.POSITIVE_X.rotationDegrees(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period)));
-            pos.rotate(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
+            pos.rotate(new Quaternionf().rotationY((float)Math.toRadians(45.0)));
+            pos.rotate(new Quaternionf().rotationX((float)Math.toRadians(SpyglassAstronomyClient.starAngleMultiplier*(0.75f/SpyglassAstronomyClient.earthOrbit.period))));
+            pos.rotate(new Quaternionf().rotationY((float)Math.toRadians(-90.0)));
             if (MathHelper.abs(pos.z) < 0.9f) {
                 float referenceYaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
                 angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
@@ -290,7 +290,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
                 text.append(translate("orbit.distance", prettyFloat(MathHelper.sqrt(sqrDistance)/SpyglassAstronomyClient.earthOrbit.semiMajorAxis)));
 
                 pos.normalize();
-                pos.rotate(RotationAxis.POSITIVE_Z.rotationDegrees((SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
+                pos.rotate(new Quaternionf().rotationZ((float)Math.toRadians(SpyglassAstronomyClient.getPositionInOrbit(360f)*(1-1/SpyglassAstronomyClient.earthOrbit.period)+180)));
 
                 float yaw = (float)(Math.atan2(pos.x, pos.z)*-180d/Math.PI);
                 float angle = (float)(Math.atan2(Math.sqrt(pos.x * pos.x + pos.z * pos.z), pos.y)*180d/Math.PI)-90;
