@@ -74,7 +74,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         SpyglassAstronomyCommands.initialize();
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> update());
+        ClientTickEvents.START_LEVEL_TICK.register(_ -> {
+            if (spaceRenderingManager != null)
+            {
+                spaceRenderingManager.updateSpace();
+            }
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(_ -> update());
 
         spyglassImprovementsIsLoaded = FabricLoader.getInstance().isModLoaded("spyglass-improvements");
 
@@ -124,7 +130,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         }
 
         spaceRenderingManager = new SpaceRenderingManager();
-        spaceRenderingManager.updateSpace(0);
+        spaceRenderingManager.updateSpace();
     }
 
     public static void generateStars(RandomSource random, boolean resetStars, boolean resetConstellations) {

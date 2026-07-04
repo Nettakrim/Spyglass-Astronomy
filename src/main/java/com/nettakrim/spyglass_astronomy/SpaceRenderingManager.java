@@ -35,6 +35,7 @@ import java.util.OptionalDouble;
 import java.util.Scanner;
 
 public class SpaceRenderingManager {
+    private int ticks = 0;
     private final RenderSystem.AutoStorageIndexBuffer indexBuffer;
 
     private GpuBuffer starsBuffer;
@@ -134,7 +135,9 @@ public class SpaceRenderingManager {
         }
     }
 
-    public void updateSpace(int ticks) {
+    public void updateSpace() {
+        ticks++;
+
         updateHeightScale();
         if (Constellation.selected != null) {
             LocalPlayer player = SpyglassAstronomyClient.client.player;
