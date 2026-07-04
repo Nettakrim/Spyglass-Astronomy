@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.SkyRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +23,7 @@ public class LevelRendererMixin {
     }
 
     @Inject(method = "lambda$addSkyPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSunMoonAndStars(Lcom/mojang/blaze3d/vertex/PoseStack;FFFLnet/minecraft/world/level/MoonPhase;FF)V"))
-    private static void renderSky(GpuBufferSlice skyFog, SkyRenderState state, SkyRenderer skyRenderer, CallbackInfo ci, @Local(name = "poseStack") PoseStack poseStack) {
+    private static void renderSky(GpuBufferSlice skyFog, SkyRenderState state, CallbackInfo ci, @Local(name = "poseStack") PoseStack poseStack) {
         SpyglassAstronomyClient.spaceRenderingManager.render(poseStack, state);
     }
 }

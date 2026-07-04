@@ -182,7 +182,7 @@ public class InfoCommand implements Command<FabricClientCommandSource> {
         int[] flags = new int[] {-1, -1};
         MutableComponent text = Component.empty();
         text.append(translate("thisworld.time", getMinecraftTime()));
-        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.client.gameRenderer.getMainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, 0).index(), SINGLE_SUCCESS)));
+        text.append(translate("thisworld.moonphase")).append(translate("moonphase."+Integer.toString(SpyglassAstronomyClient.client.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, 0).index(), SINGLE_SUCCESS)));
         orbitInfo(text, SpyglassAstronomyClient.earthOrbit, flags);
 
         text.append(SpyglassAstronomyClient.knowledge.getKnowledgeInstructions(flags));
