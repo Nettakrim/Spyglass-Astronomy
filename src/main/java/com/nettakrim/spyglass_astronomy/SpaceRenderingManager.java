@@ -11,6 +11,7 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.player.LocalPlayer;
@@ -52,6 +53,70 @@ public class SpaceRenderingManager {
     private int planetsCount = 0;
 
     private static float heightScale = 1;
+
+
+    private static Boolean shaderModLoaded = null;
+    private static SkyRenderState skyRenderState;
+    private static Matrix4f lastPose;
+
+    private static boolean isShaderModLoaded() {
+        if (shaderModLoaded == null) {
+            try {
+                Class<?> loaderClass = Class.forName("net.fabricmc.loader.api.FabricLoader");
+                Object loader = loaderClass.getMethod("getInstance").invoke(null);
+                boolean iris = (boolean) loaderClass.getMethod("isModLoaded", String.class).invoke(loader, "iris");
+                boolean oculus = (boolean) loaderClass.getMethod("isModLoaded", String.class).invoke(loader, "oculus");
+                shaderModLoaded = iris || oculus;
+            } catch (Exception e) {
+                shaderModLoaded = false;
+            }
+        }
+        return shaderModLoaded;
+    }
+
+    public static boolean isShadersActive() {
+        if (!isShaderModLoaded()) return false;
+        try {
+            Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = apiClass.getMethod("getInstance").invoke(null);
+            Method m = apiClass.getMethod("isShaderPackInUse");
+            return (boolean) m.invoke(api);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isRenderingShadowPass() {
+        if (!isShaderModLoaded()) return false;
+        try {
+            Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Object api = apiClass.getMethod("getInstance").invoke(null);
+            Method m = apiClass.getMethod("isRenderingShadowPass");
+            return (boolean) m.invoke(api);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void captureState(SkyRenderState skyRenderState, PoseStack poseStack) {
+        SpaceRenderingManager.skyRenderState = skyRenderState;
+        SpaceRenderingManager.lastPose = poseStack.last().pose();
+    }
+
+    // When a shader pack is active, render after Iris's composite passes so vertex colors
+    // reach the output framebuffer directly instead of going through the deferred GBuffer pipeline.
+    public static void lateRender(LevelRenderContext context) {
+        if (!SpaceRenderingManager.isShadersActive()) return;
+        if (SpaceRenderingManager.isRenderingShadowPass()) return;
+        if (SpyglassAstronomyClient.spaceRenderingManager == null) return;
+        PoseStack matrices = context.poseStack();
+        matrices.pushPose();
+        matrices.setIdentity();
+        matrices.mulPose(lastPose);
+        SpyglassAstronomyClient.spaceRenderingManager.render(matrices, skyRenderState);
+        matrices.popPose();
+        context.bufferSource().endBatch();
+    }
 
     public static boolean constellationsVisible;
 	public static boolean starsVisible;
