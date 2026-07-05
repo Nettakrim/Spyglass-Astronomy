@@ -10,7 +10,7 @@
     "CameraMixin",
     "ChatComponentMixin",
     "ClientLevelAccessor",
-    "GuiMixin",
+    "HudMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "MouseHandlerMixin",
