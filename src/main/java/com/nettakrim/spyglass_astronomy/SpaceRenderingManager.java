@@ -198,13 +198,13 @@ public class SpaceRenderingManager {
                 constellation.setVertices(bufferBuilder, false);
             }
 
-            MeshData builtBuffer = bufferBuilder.buildOrThrow();
             if (constellationsBuffer != null) {
                 constellationsBuffer.close();
             }
-            constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", 40, builtBuffer.vertexBuffer());
-            constellationsCount = builtBuffer.drawState().indexCount();
-            builtBuffer.close();
+            try (MeshData mesh = bufferBuilder.buildOrThrow()) {
+                constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", 40, mesh.vertexBuffer());
+                constellationsCount = mesh.drawState().indexCount();
+            }
         }
     }
 
@@ -227,10 +227,10 @@ public class SpaceRenderingManager {
             if (starsBuffer != null) {
                 starsBuffer.close();
             }
-            MeshData builtBuffer = bufferBuilder.buildOrThrow();
-            starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", 40, builtBuffer.vertexBuffer());
-            starsCount = builtBuffer.drawState().indexCount();
-            builtBuffer.close();
+            try (MeshData mesh = bufferBuilder.buildOrThrow()) {
+                starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", 40, mesh.vertexBuffer());
+                starsCount = mesh.drawState().indexCount();
+            }
         }
     }
 
@@ -257,13 +257,13 @@ public class SpaceRenderingManager {
                 orbitingBody.setVertices(bufferBuilder);
             }
 
-            MeshData builtBuffer = bufferBuilder.buildOrThrow();
             if (planetsBuffer != null) {
                 planetsBuffer.close();
             }
-            planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", 40, builtBuffer.vertexBuffer());
-            planetsCount = builtBuffer.drawState().indexCount();
-            builtBuffer.close();
+            try (MeshData mesh = bufferBuilder.buildOrThrow()) {
+                planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", 40, mesh.vertexBuffer());
+                planetsCount = mesh.drawState().indexCount();
+            }
         }
     }
 
@@ -275,13 +275,13 @@ public class SpaceRenderingManager {
 
             SpyglassAstronomyClient.drawingConstellation.setVertices(bufferBuilder, true);
 
-            MeshData builtBuffer = bufferBuilder.buildOrThrow();
             if (drawingBuffer != null) {
                 drawingBuffer.close();
             }
-            drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", 40, builtBuffer.vertexBuffer());
-            drawingCount = builtBuffer.drawState().indexCount();
-            builtBuffer.close();
+            try (MeshData mesh = bufferBuilder.buildOrThrow()) {
+                drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", 40, mesh.vertexBuffer());
+                drawingCount = mesh.drawState().indexCount();
+            }
         }
     }
 
@@ -299,6 +299,8 @@ public class SpaceRenderingManager {
             GpuTextureView mainDepth = renderTarget.getDepthTextureView();
             Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 
+            assert mainColor != null;
+
             if (starsVisible || constellationsVisible) {
                 matrices.pushPose();
                 matrices.mulPose(Axis.YP.rotationDegrees(-90.0f));
@@ -309,11 +311,10 @@ public class SpaceRenderingManager {
                 matrix4fStack.mul(matrices.last().pose());
 
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
-                RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty());
-                renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-
-                try {
+                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(pipeline);
+                    RenderSystem.bindDefaultUniforms(renderPass);
+                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 
                     if (starsVisible) {
                         draw(renderPass, starsBuffer, starsCount);
@@ -327,8 +328,6 @@ public class SpaceRenderingManager {
                         }
                     }
                 } catch (Throwable ignored) {}
-
-                renderPass.close();
                 matrices.popPose();
                 matrix4fStack.popMatrix();
             }
@@ -340,16 +339,15 @@ public class SpaceRenderingManager {
                 matrix4fStack.pushMatrix();
                 matrix4fStack.mul(matrices.last().pose());
 
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
-                RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty());
-                renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-
-                try {
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility));
+                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(pipeline);
+                    RenderSystem.bindDefaultUniforms(renderPass);
+                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
+
                     draw(renderPass, planetsBuffer, planetsCount);
                 } catch (Throwable ignored) {}
 
-                renderPass.close();
                 matrices.popPose();
                 matrix4fStack.popMatrix();
             }
