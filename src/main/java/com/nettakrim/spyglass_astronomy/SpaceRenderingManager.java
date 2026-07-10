@@ -4,12 +4,12 @@ import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.*;
-import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.player.LocalPlayer;
 
@@ -66,14 +66,14 @@ public class SpaceRenderingManager {
     private final Path storagePath;
     private final String fileName;
 
-    private static final RenderPipeline pipeline = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+    private static final RenderPipeline pipeline = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withLocation("pipeline/sga_stars")
             .withVertexShader("core/position_color")
             .withFragmentShader("core/position_color")
             .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
-            .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
             .build();
 
     public SpaceRenderingManager() {
@@ -297,7 +297,7 @@ public class SpaceRenderingManager {
             RenderTarget renderTarget = Minecraft.getInstance().gameRenderer.mainRenderTarget();
             GpuTextureView mainColor = renderTarget.getColorTextureView();
             GpuTextureView mainDepth = renderTarget.getDepthTextureView();
-            Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 
             assert mainColor != null;
 
@@ -307,14 +307,14 @@ public class SpaceRenderingManager {
                 matrices.mulPose(Axis.XP.rotationDegrees(SpyglassAstronomyClient.getStarAngle()));
                 matrices.mulPose(Axis.YP.rotationDegrees(45f));
 
-                matrix4fStack.pushMatrix();
-                matrix4fStack.mul(matrices.last().pose());
+                modelViewStack.pushMatrix();
+                modelViewStack.mul(matrices.last().pose());
 
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
+                GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), new Vector4f(colorScale, colorScale, colorScale, starVisibility), new Vector3f(), new Matrix4f());
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(pipeline);
                     RenderSystem.bindDefaultUniforms(renderPass);
-                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
+                    renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 
                     if (starsVisible) {
                         draw(renderPass, starsBuffer, starsCount);
@@ -329,17 +329,17 @@ public class SpaceRenderingManager {
                     }
                 } catch (Throwable ignored) {}
                 matrices.popPose();
-                matrix4fStack.popMatrix();
+                modelViewStack.popMatrix();
             }
 
             if (orbitingBodiesVisible && planetsCount > 0) {
                 matrices.pushPose();
                 matrices.mulPose(Axis.ZP.rotationDegrees(SpyglassAstronomyClient.getPositionInOrbit(360f) * (1 - 1 / SpyglassAstronomyClient.earthOrbit.period) + 180));
 
-                matrix4fStack.pushMatrix();
-                matrix4fStack.mul(matrices.last().pose());
+                modelViewStack.pushMatrix();
+                modelViewStack.mul(matrices.last().pose());
 
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(matrix4fStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility));
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(modelViewStack, new Vector4f(colorScale, colorScale, colorScale, starVisibility));
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(pipeline);
                     RenderSystem.bindDefaultUniforms(renderPass);
@@ -349,7 +349,7 @@ public class SpaceRenderingManager {
                 } catch (Throwable ignored) {}
 
                 matrices.popPose();
-                matrix4fStack.popMatrix();
+                modelViewStack.popMatrix();
             }
         }
     }
