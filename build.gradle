@@ -15,6 +15,11 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+
+	exclusiveContent {
+		forRepository {maven {url "https://api.modrinth.com/maven"}}
+		filter {includeGroup "maven.modrinth"}
+	}
 }
 
 dependencies {
@@ -24,6 +29,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	compileOnly "maven.modrinth:cosmos-mod:${project.cosmos_version}"
 }
 
 processResources {

@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy;
 
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -66,8 +67,13 @@ public class Star {
     }
 
     public void update(int ticks) {
-        angle = (angle+rotationSpeed)%90;
-        float twinkle = 1 - 2.5f * Math.max(Mth.sin(ticks*twinkleSpeed) - 0.75f,0);
+        float twinkle;
+        if (SpyglassAstronomyClient.cosmosIsLoaded) {
+            twinkle = 1.0f;
+        } else {
+            angle = (angle+rotationSpeed)%90;
+            twinkle = 1 - 2.5f * Math.max(Mth.sin(ticks*twinkleSpeed) - 0.75f,0);
+        }
         currentAlpha = (int) (getCurrentNonTwinkledAlpha() * twinkle * 255);
     }
 
@@ -80,20 +86,23 @@ public class Star {
         return (brightness + (0.5f * alpha + 0.5f))/2;      
     }
 
-    public void setVertices(BufferBuilder bufferBuilder) {
+    public void setVertices(BufferBuilder bufferBuilder, TextureAtlasSprite sprite) {
         float angleSin = Mth.sin(angle);
         float angleCos = Mth.cos(angle);
         int colorMult = isSelected ? 1 : 0;
         for (int corner = 0; corner < 4; ++corner) {
-           float x = ((corner & 2) - 1) * size;
-           float y = ((corner + 1 & 2) - 1) * size;
-           float rotatedA = x * angleCos - y * angleSin;
-           float rotatedB = y * angleCos + x * angleSin;
-           float rotatedALat = rotatedA * latitudeSin;
-           float rotatedBLat = -(rotatedA * latitudeCos);
-           float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
-           float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
-           bufferBuilder.addVertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).setColor(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha);
+            float x = ((corner & 2) - 1) * size;
+            float y = ((corner + 1 & 2) - 1) * size;
+            float rotatedA = x * angleCos - y * angleSin;
+            float rotatedB = y * angleCos + x * angleSin;
+            float rotatedALat = rotatedA * latitudeSin;
+            float rotatedBLat = -(rotatedA * latitudeCos);
+            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
+            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
+            bufferBuilder.addVertex(xCoord*100 + vertexPosX, yCoord*100 + rotatedALat, zCoord*100 + vertexPosZ).setColor(r >> colorMult, g << colorMult, b >> colorMult, currentAlpha);
+            if (sprite != null) {
+                bufferBuilder.setUv(sprite.getU((corner & 2) >> 1), sprite.getV(((corner + 1) & 2) >> 1));
+            }
         }
     }
 
