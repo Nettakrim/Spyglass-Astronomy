@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.player.LocalPlayer;
 
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
@@ -73,15 +74,15 @@ public class SpaceRenderingManager {
     private final Path storagePath;
     private final String fileName;
 
-    private static final RenderPipeline pipeline = RenderPipeline.builder(GLOBALS_SNIPPET)
+    private static final RenderPipeline pipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
             .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
-            .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID, "pipeline/sga_stars"))
+            .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID, "pipeline/sga_objects"))
             .withVertexShader("core/position_color")
             .withFragmentShader("core/position_color")
             .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
-            .build();
+            .build());
 
     public SpaceRenderingManager() {
         storagePath = SpyglassAstronomyClient.client.gameDirectory.toPath().resolve(".spyglass_astronomy");
@@ -342,6 +343,7 @@ public class SpaceRenderingManager {
                         // colorScale will brighten the stars further when high up, so it acts similarly to the default CosmosConfig.brightnessMultiplier
                         // cosmos brightness may as well be used anyway, but such that the default value works for sgas intended gameplay (so, darker than vanilla cosmos when low down)
                         float boost = CosmosConfig.brightnessMultiplier / 1.75f;
+                        assert Minecraft.getInstance().level != null;
                         float time = Minecraft.getInstance().level.getGameTime() % 24000 / 20.0F;
                         starModulator = new Vector4f(colorScale * boost, CosmosConfig.twinkleFrequency.getFirst().floatValue(), CosmosConfig.twinkleFrequency.get(1).floatValue(), time);
                         starPipeline = CosmosStarRendering.COSMOS_STARS;
