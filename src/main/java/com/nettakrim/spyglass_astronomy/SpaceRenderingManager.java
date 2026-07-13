@@ -74,7 +74,18 @@ public class SpaceRenderingManager {
     private final Path storagePath;
     private final String fileName;
 
-    private static final RenderPipeline pipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
+    public static final RenderPipeline starsPipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+            .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"pipeline/stars"))
+            .withVertexShader(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"core/stars"))
+            .withFragmentShader(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"core/stars"))
+            .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            .build()
+    );
+
+    private static final RenderPipeline objectsPipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
             .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID, "pipeline/sga_objects"))
             .withVertexShader("core/position_color")
@@ -186,7 +197,7 @@ public class SpaceRenderingManager {
             }
         }
 
-        updateStars(ticks);
+        updateStars();
 
         updateOrbits(ticks);
     }
@@ -229,7 +240,7 @@ public class SpaceRenderingManager {
         }
     }
 
-    private void updateStars(int ticks) {
+    private void updateStars() {
         if (SpyglassAstronomyClient.stars.isEmpty()) {
             starsCount = 0;
             return;
@@ -237,10 +248,8 @@ public class SpaceRenderingManager {
 
         int size = SpyglassAstronomyClient.stars.size();
 
-        VertexFormat format = SpyglassAstronomyClient.cosmosIsActive ? DefaultVertexFormat.POSITION_TEX_COLOR : DefaultVertexFormat.POSITION_COLOR;
-
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(format.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, format);
+        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized( DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * size * 4)) {
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,  DefaultVertexFormat.POSITION_TEX_COLOR);
 
             TextureAtlasSprite sprite;
             if (SpyglassAstronomyClient.cosmosIsActive) {
@@ -251,7 +260,7 @@ public class SpaceRenderingManager {
             }
 
             for (Star star : SpyglassAstronomyClient.stars) {
-                star.update(ticks);
+                star.update();
                 star.setVertices(bufferBuilder, sprite);
             }
 
@@ -337,19 +346,20 @@ public class SpaceRenderingManager {
                 modelViewStack.mul(matrices.last().pose());
 
                 if (starsVisible) {
+                    assert Minecraft.getInstance().level != null;
+                    float time = Minecraft.getInstance().level.getGameTime() % 24000 / 20.0F;
+
                     Vector4f starModulator;
                     RenderPipeline starPipeline;
                     if (SpyglassAstronomyClient.cosmosIsActive) {
                         // colorScale will brighten the stars further when high up, so it acts similarly to the default CosmosConfig.brightnessMultiplier
                         // cosmos brightness may as well be used anyway, but such that the default value works for sgas intended gameplay (so, darker than vanilla cosmos when low down)
                         float boost = CosmosConfig.brightnessMultiplier / 1.75f;
-                        assert Minecraft.getInstance().level != null;
-                        float time = Minecraft.getInstance().level.getGameTime() % 24000 / 20.0F;
                         starModulator = new Vector4f(colorScale * boost, CosmosConfig.twinkleFrequency.getFirst().floatValue(), CosmosConfig.twinkleFrequency.get(1).floatValue(), time);
                         starPipeline = CosmosStarRendering.COSMOS_STARS;
                     } else {
-                        starModulator = defaultModulator;
-                        starPipeline = pipeline;
+                        starModulator = new Vector4f(time, heightScale, colorScale, starVisibility);
+                        starPipeline = starsPipeline;
                     }
 
                     GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), starModulator);
@@ -368,7 +378,7 @@ public class SpaceRenderingManager {
                 if (constellationsVisible) {
                     GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator);
                     try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Constellations", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
-                        renderPass.setPipeline(pipeline);
+                        renderPass.setPipeline(objectsPipeline);
                         RenderSystem.bindDefaultUniforms(renderPass);
                         renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 
@@ -392,7 +402,7 @@ public class SpaceRenderingManager {
 
                 GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator);
                 try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
-                    renderPass.setPipeline(pipeline);
+                    renderPass.setPipeline(objectsPipeline);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
 
@@ -416,7 +426,7 @@ public class SpaceRenderingManager {
             Enum<?> SKY_BASIC = Enum.valueOf(irisProgramClass.asSubclass(Enum.class), "SKY_BASIC");
 
             Method assignPipeline = irisApiClass.getMethod("assignPipeline", RenderPipeline.class, irisProgramClass);
-            assignPipeline.invoke(INSTANCE, pipeline, SKY_BASIC);
+            assignPipeline.invoke(INSTANCE, objectsPipeline, SKY_BASIC);
         } catch (Exception ignored) {
             SpyglassAstronomyClient.LOGGER.error("Failed to assign pipeline. Shader compatibility may be broken");
         }

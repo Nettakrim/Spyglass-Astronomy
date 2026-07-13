@@ -201,10 +201,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
                 color = generateRandomColor(random, 0.8f, 20, 16, 0, 2f);
             }
 
-            float rotationSpeed = (random.nextFloat() * 2f)-1;
-            float twinkleSpeed = random.nextFloat()*0.025f+0.035f;
-
-            stars.add(new Star(currentStars, posX, posY, posZ, size, rotationSpeed, color, alpha, twinkleSpeed));
+            stars.add(new Star(currentStars, posX, posY, posZ, size, color, alpha, random.nextFloat(), random.nextFloat()));
 
             currentStars++;
         }
