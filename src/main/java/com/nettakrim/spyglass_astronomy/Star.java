@@ -68,7 +68,7 @@ public class Star {
 
     public void update(int ticks) {
         float twinkle;
-        if (SpyglassAstronomyClient.cosmosIsLoaded) {
+        if (SpyglassAstronomyClient.cosmosIsActive) {
             twinkle = 1.0f;
         } else {
             angle = (angle+rotationSpeed)%90;

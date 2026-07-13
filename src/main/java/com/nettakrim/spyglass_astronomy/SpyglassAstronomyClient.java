@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hollowed.cosmos.config.CosmosConfig;
+import net.hollowed.cosmos.renderer.CosmosStarRendering;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.item.Items;
@@ -69,7 +70,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     private static boolean spyglassImprovementsIsLoaded;
 
-    public static boolean cosmosIsLoaded;
+    public static boolean cosmosIsActive;
 
 	@Override
 	public void onInitializeClient() {
@@ -86,7 +87,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(_ -> update());
 
         spyglassImprovementsIsLoaded = FabricLoader.getInstance().isModLoaded("spyglass-improvements");
-        cosmosIsLoaded = FabricLoader.getInstance().isModLoaded("cosmos");
+        cosmosIsActive = FabricLoader.getInstance().isModLoaded("cosmos") && CosmosConfig.enabled;
 
         if (FabricLoader.getInstance().isModLoaded("iris")) {
             SpaceRenderingManager.assignIrisPipeline();
@@ -177,7 +178,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             }
             float sizeMin;
             float sizeMax;
-            if (cosmosIsLoaded) {
+            if (cosmosIsActive) {
                 sizeMin = CosmosConfig.sizeRange.getFirst().floatValue();
                 sizeMax = CosmosConfig.sizeRange.get(1).floatValue();
             } else {
@@ -190,13 +191,12 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             float alpha = Math.max(Mth.sqrt(alphaRaw*sizeRaw),(2*sizeRaw-1.5f)/(alphaRaw+0.5f));
             alpha = (alpha + (alpha*alpha))/2;
 
-            // random still needs to be called when using cosmos, so the stars stay synced
             int[] color;
-            if (cosmosIsLoaded) {
+            if (cosmosIsActive) {
                 String colorString = CosmosConfig.colors.get(random.nextInt(CosmosConfig.colors.size()));
                 // advance random an extra time, since generateRandomColor does 2
                 random.nextFloat();
-                color = hexToRGB(colorString);
+                color = CosmosStarRendering.hexToRGB(colorString);
             } else {
                 color = generateRandomColor(random, 0.8f, 20, 16, 0, 2f);
             }
@@ -212,18 +212,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         ready = true;
 
         spaceDataManager.loadStarDatas();
-    }
-
-    private static int[] hexToRGB(String hexColor) {
-        if (hexColor.startsWith("#")) {
-            hexColor = hexColor.substring(1);
-        }
-
-        int red = Integer.parseInt(hexColor.substring(0, 2), 16);
-        int green = Integer.parseInt(hexColor.substring(2, 4), 16);
-        int blue = Integer.parseInt(hexColor.substring(4, 6), 16);
-
-        return new int[] { red, green, blue };
     }
 
     public static void generatePlanets(RandomSource random, boolean reset) {

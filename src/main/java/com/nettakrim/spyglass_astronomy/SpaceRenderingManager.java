@@ -8,10 +8,11 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
+import net.hollowed.cosmos.Cosmos;
 import net.hollowed.cosmos.config.CosmosConfig;
+import net.hollowed.cosmos.renderer.CosmosStarRendering;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BindGroupLayouts;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.player.LocalPlayer;
 
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -81,8 +82,6 @@ public class SpaceRenderingManager {
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
             .build();
-
-    private static RenderPipeline starPipeline;
 
     public SpaceRenderingManager() {
         storagePath = SpyglassAstronomyClient.client.gameDirectory.toPath().resolve(".spyglass_astronomy");
@@ -237,15 +236,15 @@ public class SpaceRenderingManager {
 
         int size = SpyglassAstronomyClient.stars.size();
 
-        VertexFormat format = SpyglassAstronomyClient.cosmosIsLoaded ? DefaultVertexFormat.POSITION_TEX_COLOR : DefaultVertexFormat.POSITION_COLOR;
+        VertexFormat format = SpyglassAstronomyClient.cosmosIsActive ? DefaultVertexFormat.POSITION_TEX_COLOR : DefaultVertexFormat.POSITION_COLOR;
 
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(format.getVertexSize() * size * 4)) {
             BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, format);
 
             TextureAtlasSprite sprite;
-            if (SpyglassAstronomyClient.cosmosIsLoaded) {
+            if (SpyglassAstronomyClient.cosmosIsActive) {
                 TextureAtlas atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.CELESTIALS);
-                sprite = atlas.getSprite(Identifier.fromNamespaceAndPath("cosmos", "star"));
+                sprite = atlas.getSprite(Cosmos.id("star"));
             } else {
                 sprite = null;
             }
@@ -311,19 +310,6 @@ public class SpaceRenderingManager {
     }
 
     public void render(PoseStack matrices, float starBrightness, TextureAtlas celestialsAtlas) {
-        if (starPipeline == null) {
-            starPipeline = pipeline;
-            if (SpyglassAstronomyClient.cosmosIsLoaded) {
-                Identifier location = Identifier.withDefaultNamespace("pipeline/stars");
-                for (RenderPipeline pipeline : RenderPipelines.getStaticPipelines()) {
-                    if (pipeline.getLocation().equals(location)) {
-                        starPipeline = pipeline;
-                        break;
-                    }
-                }
-            }
-        }
-
         starVisibility = starsAlwaysVisible ? 1 : starBrightness;
         if (starVisibility > 0) {
             float colorScale = starVisibility+Math.min(heightScale, 0.5f);
@@ -351,14 +337,17 @@ public class SpaceRenderingManager {
 
                 if (starsVisible) {
                     Vector4f starModulator;
-                    if (SpyglassAstronomyClient.cosmosIsLoaded) {
+                    RenderPipeline starPipeline;
+                    if (SpyglassAstronomyClient.cosmosIsActive) {
                         // colorScale will brighten the stars further when high up, so it acts similarly to the default CosmosConfig.brightnessMultiplier
                         // cosmos brightness may as well be used anyway, but such that the default value works for sgas intended gameplay (so, darker than vanilla cosmos when low down)
                         float boost = CosmosConfig.brightnessMultiplier / 1.75f;
                         float time = Minecraft.getInstance().level.getGameTime() % 24000 / 20.0F;
                         starModulator = new Vector4f(colorScale * boost, CosmosConfig.twinkleFrequency.getFirst().floatValue(), CosmosConfig.twinkleFrequency.get(1).floatValue(), time);
+                        starPipeline = CosmosStarRendering.COSMOS_STARS;
                     } else {
                         starModulator = defaultModulator;
+                        starPipeline = pipeline;
                     }
 
                     GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), starModulator);
@@ -366,7 +355,7 @@ public class SpaceRenderingManager {
                         renderPass.setPipeline(starPipeline);
                         RenderSystem.bindDefaultUniforms(renderPass);
                         renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-                        if (SpyglassAstronomyClient.cosmosIsLoaded) {
+                        if (SpyglassAstronomyClient.cosmosIsActive) {
                             renderPass.bindTexture("Sampler0", celestialsAtlas.getTextureView(), celestialsAtlas.getSampler());
                         }
 
