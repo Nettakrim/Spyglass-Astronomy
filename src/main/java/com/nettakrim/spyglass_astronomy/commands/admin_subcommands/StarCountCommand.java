@@ -56,8 +56,10 @@ public class StarCountCommand {
         boolean reducedStars = amount < SpyglassAstronomyClient.getStarCount();
         SpyglassAstronomyClient.say("commands.admin.starcount.set", Integer.toString(amount), Integer.toString(SpyglassAstronomyClient.getStarCount()));
         SpyglassAstronomyClient.setStarCount(amount);
+        SpyglassAstronomyClient.spaceDataManager.backupStars();
         SpyglassAstronomyClient.generateStars(null, true, false);
 
+        // fix constellations
         if (reducedStars) {
             ArrayList<Constellation> validConstellations = new ArrayList<>(SpyglassAstronomyClient.constellations.size());
             for (Constellation constellation : SpyglassAstronomyClient.constellations) {
@@ -100,7 +102,7 @@ public class StarCountCommand {
                     validConstellations.add(constellation);
                 }
             }
-            if (validConstellations.size() != 0) {
+            if (!validConstellations.isEmpty()) {
                 int validated = 0;
                 for (Constellation constellation : validConstellations) {
                     if (ConstellationsCommand.addConstellation(constellation, false, false) == 1) {

@@ -264,6 +264,16 @@ public class SpaceDataManager {
         return new StarLine(starA, starB, false);
     }
 
+    public void backupStars() {
+        // regenerating space clears star names, for them to be returned, starDatas needs to be populated
+        starDatas = new ArrayList<>();
+        for (Star star : SpyglassAstronomyClient.stars) {
+            if (!star.isUnnamed()) {
+                starDatas.add(new StarData(star.index, star.name));
+            }
+        }
+    }
+
     public long getStarSeed() {
         return starSeed;
     }
@@ -314,7 +324,9 @@ public class SpaceDataManager {
     public void loadStarDatas() {
         if (starDatas == null) return;
         for (StarData starData : starDatas) {
-            SpyglassAstronomyClient.stars.get(starData.index).name = starData.name;
+            if (starData.index < SpyglassAstronomyClient.stars.size()) {
+                SpyglassAstronomyClient.stars.get(starData.index).name = starData.name;
+            }
         }
         starDatas = null;
     }

@@ -14,6 +14,7 @@ public class CosmosConfigMixin {
         // only update cosmos activeness when closing the ui, so that it doesnt change rendering behaviour before recreating the buffers
         SpyglassAstronomyClient.cosmosIsActive = CosmosConfig.enabled;
         // star sizes and colors are different depending on if cosmos is enabled, so they need to be remade
+        SpyglassAstronomyClient.spaceDataManager.backupStars();
         SpyglassAstronomyClient.generateStars(null, true, false);
         SpyglassAstronomyClient.spaceRenderingManager.updateSpace();
     }
