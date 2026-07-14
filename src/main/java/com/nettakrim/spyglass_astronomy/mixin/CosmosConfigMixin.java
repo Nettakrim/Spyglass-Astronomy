@@ -1,5 +1,6 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
+import com.nettakrim.spyglass_astronomy.Constellation;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 import net.hollowed.cosmos.config.CosmosConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +17,9 @@ public class CosmosConfigMixin {
         // star sizes and colors are different depending on if cosmos is enabled, so they need to be remade
         SpyglassAstronomyClient.spaceDataManager.backupStars();
         SpyglassAstronomyClient.generateStars(null,  false);
+        for (Constellation constellation : SpyglassAstronomyClient.constellations) {
+            constellation.initaliseStarLines();
+        }
         SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
         SpyglassAstronomyClient.spaceRenderingManager.updateSpace();
     }

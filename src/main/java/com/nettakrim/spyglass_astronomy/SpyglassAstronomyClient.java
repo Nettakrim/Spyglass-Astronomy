@@ -132,8 +132,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         spaceRenderingManager = new SpaceRenderingManager();
 
         RandomSource random = RandomSource.create(0);
-        generateStars(random, true);
+        generateStars(random, false);
         generatePlanets(random);
+
+        for (Constellation constellation : constellations) {
+            constellation.initaliseStarLines();
+        }
+
         spaceRenderingManager.updateSpace();
     }
 
@@ -205,10 +210,6 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         ready = true;
 
         spaceDataManager.loadStarDatas();
-
-        for (Constellation constellation : constellations) {
-            constellation.initaliseStarLines();
-        }
     }
 
     public static void generatePlanets(RandomSource random) {
