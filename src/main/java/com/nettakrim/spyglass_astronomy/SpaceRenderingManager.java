@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
+import net.fabricmc.loader.api.FabricLoader;
 import net.hollowed.cosmos.Cosmos;
 import net.hollowed.cosmos.config.CosmosConfig;
 import net.hollowed.cosmos.renderer.CosmosStarRendering;
@@ -443,6 +444,10 @@ public class SpaceRenderingManager {
 
             Method assignPipeline = irisApiClass.getMethod("assignPipeline", RenderPipeline.class, irisProgramClass);
             assignPipeline.invoke(INSTANCE, objectsPipeline, SKY_BASIC);
+            assignPipeline.invoke(INSTANCE, starsPipeline, SKY_BASIC);
+            if (FabricLoader.getInstance().isModLoaded("cosmos")) {
+                assignPipeline.invoke(INSTANCE, CosmosStarRendering.COSMOS_STARS, SKY_BASIC);
+            }
         } catch (Exception ignored) {
             SpyglassAstronomyClient.LOGGER.error("Failed to assign pipeline. Shader compatibility may be broken");
         }
