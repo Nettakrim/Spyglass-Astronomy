@@ -44,7 +44,7 @@ public class StarLine {
         this.starBColor = starB.getColor();
         starB.connect();
 
-        calculateVertices();        
+        calculateVertices();
     }
 
     public StarLine(Star startStar) {
@@ -127,18 +127,18 @@ public class StarLine {
         int ar = starAColor[0];
         int br = starBColor[0];
 
-        int bg = starAColor[1];
-        int ag = starBColor[1];
+        int ag = starAColor[1];
+        int bg = starBColor[1];
 
-        int bb = starAColor[2];
-        int ab = starBColor[2];
+        int ab = starAColor[2];
+        int bb = starBColor[2];
 
         int aa = (int)(starAColor[3] * visibilityMultiplier * drawingMultipler);
         int ba = (int)(starBColor[3] * visibilityMultiplier * drawingMultipler);
 
         if (isSelected) {
-            ar = (int)(ag*0.8f);
-            br = (int)(bg*0.8f);
+            ar = (int)(ar*0.8f);
+            br = (int)(br*0.8f);
             ag = (int)(ag*0.5f);
             bg = (int)(bg*0.5f);
             ab = (int)Math.min(ab*1.5f, 255f);
