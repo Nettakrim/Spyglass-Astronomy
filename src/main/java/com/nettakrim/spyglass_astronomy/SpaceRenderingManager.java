@@ -355,7 +355,8 @@ public class SpaceRenderingManager {
 
                 if (starsVisible) {
                     assert Minecraft.getInstance().level != null;
-                    float time = Minecraft.getInstance().level.getGameTime() % 24000 / 20.0F;
+                    float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
+                    float time = ((Minecraft.getInstance().level.getGameTime() % 24000) + partial) / 20.0F;
 
                     Vector4f starModulator;
                     RenderPipeline starPipeline;
