@@ -57,7 +57,7 @@ public class StarCountCommand {
         SpyglassAstronomyClient.say("commands.admin.starcount.set", Integer.toString(amount), Integer.toString(SpyglassAstronomyClient.getStarCount()));
         SpyglassAstronomyClient.setStarCount(amount);
         SpyglassAstronomyClient.spaceDataManager.backupStars();
-        SpyglassAstronomyClient.generateStars(null, true, false);
+        SpyglassAstronomyClient.generateStars(null, false);
 
         // fix constellations
         if (reducedStars) {

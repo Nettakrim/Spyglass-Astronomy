@@ -89,7 +89,7 @@ public class SeedCommand {
     private static int setStarSeed(long seed) {
         SpyglassAstronomyClient.say("commands.admin.seed.star.set", Long.toString(seed), Long.toString(SpyglassAstronomyClient.spaceDataManager.getStarSeed()));
         SpyglassAstronomyClient.spaceDataManager.setStarSeed(seed);
-        SpyglassAstronomyClient.generateStars(null, true, true);
+        SpyglassAstronomyClient.generateStars(null, true);
         StarCountCommand.invalidatedConstellations.clear();
         SpaceDataManager.makeChange();
         return 1;
@@ -114,7 +114,7 @@ public class SeedCommand {
     private static int setPlanetSeed(long seed) {
         SpyglassAstronomyClient.say("commands.admin.seed.planet.set", Long.toString(seed), Long.toString(SpyglassAstronomyClient.spaceDataManager.getPlanetSeed()));
         SpyglassAstronomyClient.spaceDataManager.setPlanetSeed(seed);
-        SpyglassAstronomyClient.generatePlanets(null, true);
+        SpyglassAstronomyClient.generatePlanets(null);
         SpaceDataManager.makeChange();
         return 1;
     }

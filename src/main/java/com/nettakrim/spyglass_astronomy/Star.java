@@ -26,7 +26,7 @@ public class Star {
 
     private int currentAlpha;
 
-    private int connectedStars = 0;
+    private int connectedLines = 0;
 
     public static Star selected;
     private boolean isSelected;
@@ -55,7 +55,7 @@ public class Star {
     public float calculateAlpha() {
         float heightScale = SpaceRenderingManager.getHeightScale();
         float brightness = heightScale*Math.max(alpha/2 + heightScale/2, 2*alpha-1) + (1-heightScale) * alpha * alpha * alpha;
-        if (connectedStars != 0) {
+        if (connectedLines != 0) {
             brightness = (brightness + (0.5f * alpha + 0.5f))/2;
         }
         currentAlpha = (int)(brightness * 255);
@@ -100,7 +100,7 @@ public class Star {
                 float offsetAlpha = 0.125f+alpha;
                 bufferBuilder.addVertex(xCoord, yCoord, zCoord)
                         .setColor(r >> colorMultiplier, g << colorMultiplier, b >> colorMultiplier, seed)
-                        .setUv(size/100.0f, connectedStars != 0 ? -offsetAlpha : offsetAlpha);
+                        .setUv(size/100.0f, connectedLines != 0 ? -offsetAlpha : offsetAlpha);
             }
         }
     }
@@ -122,15 +122,15 @@ public class Star {
     }
 
     public void connect() {
-        connectedStars++;
+        connectedLines++;
     }
 
     public void disconnect() {
-        if (connectedStars > 0) connectedStars -= 2;
+        if (connectedLines > 0) connectedLines -= 2;
     }
 
     public void clearAllConnections() {
-        connectedStars = 0;
+        connectedLines = 0;
     }
 
     public float getAlpha() {

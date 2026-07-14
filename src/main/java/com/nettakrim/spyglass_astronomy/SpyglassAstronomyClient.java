@@ -118,40 +118,35 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         spaceDataManager = new SpaceDataManager(clientWorld);
 
-        generateSpace(false);
+        generateSpace();
         StarCountCommand.invalidatedConstellations.clear();
 
         knowledge = new Knowledge();
         updateKnowledge();
     }
 
-    public static void generateSpace(boolean reset) {
-        RandomSource random = RandomSource.create(0);
-        generateStars(random, reset, reset);
-        generatePlanets(random, reset);
-
-        for (Constellation constellation : constellations) {
-            constellation.initaliseStarLines();
-        }
-
+    public static void generateSpace() {
         if (spaceRenderingManager != null) {
             spaceRenderingManager.close();
         }
         spaceRenderingManager = new SpaceRenderingManager();
+
+        RandomSource random = RandomSource.create(0);
+        generateStars(random, true);
+        generatePlanets(random);
         spaceRenderingManager.updateSpace();
     }
 
-    public static void generateStars(RandomSource random, boolean resetStars, boolean resetConstellations) {
+    public static void generateStars(RandomSource random, boolean resetConstellations) {
         if (random == null) {
             random = RandomSource.create(spaceDataManager.getStarSeed());
         } else {
             random.setSeed(spaceDataManager.getStarSeed());
         }
 
-        if (resetStars) {
-            stars = new ArrayList<>();
-            spaceRenderingManager.scheduleStarsUpdate();
-        }
+        stars = new ArrayList<>();
+        spaceRenderingManager.scheduleStarsUpdate();
+
         if (resetConstellations) {
             constellations = new ArrayList<>();
             spaceRenderingManager.scheduleConstellationsUpdate();
@@ -210,9 +205,13 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         ready = true;
 
         spaceDataManager.loadStarDatas();
+
+        for (Constellation constellation : constellations) {
+            constellation.initaliseStarLines();
+        }
     }
 
-    public static void generatePlanets(RandomSource random, boolean reset) {
+    public static void generatePlanets(RandomSource random) {
         if (random == null) {
             random = RandomSource.create(spaceDataManager.getPlanetSeed());
         } else {
@@ -221,9 +220,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         //things with less importance and *could* change in the future and not be too bad like exact color that use their own random
         RandomSource lowPriorityRandom = RandomSource.create(spaceDataManager.getPlanetSeed());
 
-        if (reset) {
-            orbitingBodies = new ArrayList<>();
-        }
+        orbitingBodies = new ArrayList<>();
 
         IntTetrisBagRandom planetDesignRandom = new IntTetrisBagRandom(random, 3);
         IntTetrisBagRandom cometDesignRandom = new IntTetrisBagRandom(random, 2);

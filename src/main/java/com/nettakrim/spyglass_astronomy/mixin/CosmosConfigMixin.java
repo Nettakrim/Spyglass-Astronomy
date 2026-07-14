@@ -15,7 +15,8 @@ public class CosmosConfigMixin {
         SpyglassAstronomyClient.cosmosIsActive = CosmosConfig.enabled;
         // star sizes and colors are different depending on if cosmos is enabled, so they need to be remade
         SpyglassAstronomyClient.spaceDataManager.backupStars();
-        SpyglassAstronomyClient.generateStars(null, true, false);
+        SpyglassAstronomyClient.generateStars(null,  false);
+        SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
         SpyglassAstronomyClient.spaceRenderingManager.updateSpace();
     }
 }

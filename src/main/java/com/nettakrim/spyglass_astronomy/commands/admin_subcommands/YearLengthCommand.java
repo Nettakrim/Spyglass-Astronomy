@@ -49,7 +49,7 @@ public class YearLengthCommand {
     public static int setYearLength(float yearLength) {
         SpyglassAstronomyClient.say("commands.admin.yearlength.set", Float.toString(yearLength), Float.toString(SpyglassAstronomyClient.spaceDataManager.getYearLength()));
         SpyglassAstronomyClient.spaceDataManager.setYearLength(yearLength);
-        SpyglassAstronomyClient.generatePlanets(null, true);
+        SpyglassAstronomyClient.generatePlanets(null);
         SpaceDataManager.makeChange();
         return 1;
     }
