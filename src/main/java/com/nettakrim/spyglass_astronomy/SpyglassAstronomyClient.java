@@ -150,6 +150,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         if (resetStars) {
             stars = new ArrayList<>();
+            spaceRenderingManager.scheduleStarsUpdate();
         }
         if (resetConstellations) {
             constellations = new ArrayList<>();
