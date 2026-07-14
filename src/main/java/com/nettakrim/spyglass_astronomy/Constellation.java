@@ -204,9 +204,11 @@ public class Constellation {
     }
 
     public static void deselect() {
-        if (selected != null) selected.isSelected = false;
-        selected = null;
-        SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        if (selected != null) {
+            selected.isSelected = false;
+            selected = null;
+            SpyglassAstronomyClient.spaceRenderingManager.scheduleConstellationsUpdate();
+        }
     }
 
     public boolean isUnnamed() {

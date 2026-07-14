@@ -68,7 +68,8 @@ public class SpaceRenderingManager {
 
     private float starVisibility;
 
-    private boolean constellationsNeedsUpdate = true;
+    private boolean constellationsNeedUpdate = true;
+    private boolean starsNeedUpdate = false;
 
     private File data = null;
     private final Path storagePath;
@@ -171,25 +172,19 @@ public class SpaceRenderingManager {
         ticks++;
 
         updateHeightScale();
+
         if (Constellation.selected != null) {
             LocalPlayer player = SpyglassAstronomyClient.client.player;
             if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
                 Constellation.deselect();
-                constellationsNeedsUpdate = true;
             }
         }
-        if (constellationsNeedsUpdate) {
-            updateConstellations();
-            constellationsNeedsUpdate = false;
-        }
-
         if (Star.selected != null) {
             LocalPlayer player = SpyglassAstronomyClient.client.player;
             if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
                 Star.deselect();
             }
         }
-
         if (OrbitingBody.selected != null) {
             LocalPlayer player = SpyglassAstronomyClient.client.player;
             if (player == null || SpyglassAstronomyClient.isntHoldingSpyglass()) {
@@ -197,13 +192,27 @@ public class SpaceRenderingManager {
             }
         }
 
-        updateStars();
+        if (constellationsNeedUpdate) {
+            updateConstellations();
+            constellationsNeedUpdate = false;
+            starsNeedUpdate = true;
+        }
+
+        // update stars after constellations are updated, on selection, or always when cosmos is on
+        if (starsNeedUpdate || SpyglassAstronomyClient.cosmosIsActive) {
+            updateStars();
+            starsNeedUpdate = false;
+        }
 
         updateOrbits(ticks);
     }
 
     public void scheduleConstellationsUpdate() {
-        constellationsNeedsUpdate = true;
+        constellationsNeedUpdate = true;
+    }
+
+    public void scheduleStarsUpdate() {
+        starsNeedUpdate = true;
     }
 
     public void cancelDrawing() {
@@ -260,7 +269,6 @@ public class SpaceRenderingManager {
             }
 
             for (Star star : SpyglassAstronomyClient.stars) {
-                star.update();
                 star.setVertices(bufferBuilder, sprite);
             }
 

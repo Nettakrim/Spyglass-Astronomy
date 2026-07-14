@@ -661,7 +661,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
         if (nearestDistance > 0.0005f) return null;
 
-        if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
+        if (nearestStar.calculateAlpha() < 0.1f) return null;
 
         return nearestStar;
     }
@@ -706,7 +706,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
         if (nearestDistance > 0.0005f) return null;
 
         if (isStar) {
-            if (nearestStar.getCurrentNonTwinkledAlpha() < 0.1f) return null;
+            if (nearestStar.calculateAlpha() < 0.1f) return null;
             return new AstralObject(nearestStar);
         } else {
             if (nearestOrbitingBody.getCurrentNonTwinkledAlpha() < 0.1f) return null;

@@ -289,8 +289,10 @@ public class OrbitingBody {
     }
 
     public static void deselect() {
-        if (selected != null) selected.isSelected = false;
-        selected = null;
+        if (selected != null) {
+            selected.isSelected = false;
+            selected = null;
+        }
     }
 
     public boolean isUnnamed() {

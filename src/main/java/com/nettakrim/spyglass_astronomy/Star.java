@@ -23,8 +23,6 @@ public class Star {
     private final float angle;
     private final float size;
     private final int seed;
-    private final float rotationRate;
-    private final float twinkleRate;
 
     private int currentAlpha;
 
@@ -52,22 +50,16 @@ public class Star {
         this.size = size;
 
         this.seed = Mth.floor(rotationSeed*15) + Mth.floor(twinkleSeed*15)*16;
-
-        this.rotationRate = normalisedRotation * 0.005f;
-        this.twinkleRate = twinkleSeed *0.025f+0.035f;
     }
 
-    public void update() {
+    public float calculateAlpha() {
         float heightScale = SpaceRenderingManager.getHeightScale();
         float brightness = heightScale*Math.max(alpha/2 + heightScale/2, 2*alpha-1) + (1-heightScale) * alpha * alpha * alpha;
         if (connectedStars != 0) {
             brightness = (brightness + (0.5f * alpha + 0.5f))/2;
         }
         currentAlpha = (int)(brightness * 255);
-    }
-
-    public float getCurrentNonTwinkledAlpha() {
-        return ((float)currentAlpha)/255;
+        return brightness;
     }
 
     public void setVertices(BufferBuilder bufferBuilder, TextureAtlasSprite sprite) {
@@ -85,6 +77,8 @@ public class Star {
             double proj = Math.atan2(Math.sqrt(xCoord * xCoord + zCoord * zCoord), yCoord);
             float latitudeSin = (float) Math.sin(proj);
             float latitudeCos = (float) Math.cos(proj);
+
+            calculateAlpha();
 
             for (int corner = 0; corner < 4; ++corner) {
                 float x = ((corner & 2) - 1) * size;
@@ -149,11 +143,15 @@ public class Star {
         if (selected != null) selected.isSelected = false;
         isSelected = true;
         selected = this;
+        SpyglassAstronomyClient.spaceRenderingManager.scheduleStarsUpdate();
     }
 
     public static void deselect() {
-        if (selected != null) selected.isSelected = false;
-        selected = null;
+        if (selected != null) {
+            selected.isSelected = false;
+            selected = null;
+            SpyglassAstronomyClient.spaceRenderingManager.scheduleStarsUpdate();
+        }
     }
 
     public boolean isUnnamed() {
