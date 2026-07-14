@@ -264,16 +264,6 @@ public class SpaceDataManager {
         return new StarLine(starA, starB, false);
     }
 
-    public void backupStars() {
-        // regenerating space clears star names, for them to be returned, starDatas needs to be populated
-        starDatas = new ArrayList<>();
-        for (Star star : SpyglassAstronomyClient.stars) {
-            if (!star.isUnnamed()) {
-                starDatas.add(new StarData(star.index, star.name));
-            }
-        }
-    }
-
     public long getStarSeed() {
         return starSeed;
     }
@@ -321,6 +311,16 @@ public class SpaceDataManager {
         return "unknown";
     }
 
+    public void backupStars() {
+        // regenerating space clears star names, for them to be returned, starDatas needs to be populated
+        starDatas = new ArrayList<>();
+        for (Star star : SpyglassAstronomyClient.stars) {
+            if (!star.isUnnamed()) {
+                starDatas.add(new StarData(star.index, star.name));
+            }
+        }
+    }
+
     public void loadStarDatas() {
         if (starDatas == null) return;
         for (StarData starData : starDatas) {
@@ -329,6 +329,17 @@ public class SpaceDataManager {
             }
         }
         starDatas = null;
+    }
+
+    public void backupOrbitingBodies() {
+        orbitingBodyDatas = new ArrayList<>();
+        int i = 0;
+        for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+            if (!orbitingBody.isUnnamed()) {
+                orbitingBodyDatas.add(new OrbitingBodyData(i, orbitingBody.name));
+            }
+            i++;
+        }
     }
 
     public void loadOrbitingBodyDatas() {
