@@ -8,7 +8,6 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
-import net.fabricmc.loader.api.FabricLoader;
 import net.hollowed.cosmos.Cosmos;
 import net.hollowed.cosmos.config.CosmosConfig;
 import net.hollowed.cosmos.renderer.CosmosStarRendering;
@@ -77,17 +76,6 @@ public class SpaceRenderingManager {
     private final String fileName;
 
     private long lastTime = -200;
-
-    public static final RenderPipeline starsPipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
-            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
-            .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"pipeline/stars"))
-            .withVertexShader(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"core/stars"))
-            .withFragmentShader(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"core/stars"))
-            .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
-            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
-            .withPrimitiveTopology(PrimitiveTopology.QUADS)
-            .build()
-    );
 
     private static final RenderPipeline objectsPipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
             .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
@@ -202,10 +190,10 @@ public class SpaceRenderingManager {
         }
 
         // update stars after constellations are updated, on selection, or always when cosmos is on
-        if (starsNeedUpdate || SpyglassAstronomyClient.cosmosIsActive) {
-            updateStars();
-            starsNeedUpdate = false;
-        }
+        //if (starsNeedUpdate || SpyglassAstronomyClient.cosmosIsActive) {
+            updateStars(ticks);
+        //    starsNeedUpdate = false;
+        //}
 
         updateOrbits(ticks);
     }
@@ -252,7 +240,7 @@ public class SpaceRenderingManager {
         }
     }
 
-    private void updateStars() {
+    private void updateStars(int ticks) {
         if (SpyglassAstronomyClient.stars.isEmpty()) {
             starsCount = 0;
             return;
@@ -260,8 +248,10 @@ public class SpaceRenderingManager {
 
         int size = SpyglassAstronomyClient.stars.size();
 
-        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized( DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS,  DefaultVertexFormat.POSITION_TEX_COLOR);
+        VertexFormat format = SpyglassAstronomyClient.cosmosIsActive ? DefaultVertexFormat.POSITION_TEX_COLOR : DefaultVertexFormat.POSITION_COLOR;
+
+        try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(format.getVertexSize() * size * 4)) {
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, format);
 
             TextureAtlasSprite sprite;
             if (SpyglassAstronomyClient.cosmosIsActive) {
@@ -272,6 +262,7 @@ public class SpaceRenderingManager {
             }
 
             for (Star star : SpyglassAstronomyClient.stars) {
+                star.update(ticks);
                 star.setVertices(bufferBuilder, sprite);
             }
 
@@ -375,8 +366,8 @@ public class SpaceRenderingManager {
                     starModulator = new Vector4f( starVisibility * colorScale * CosmosConfig.brightnessMultiplier, CosmosConfig.twinkleFrequency.getFirst().floatValue(), CosmosConfig.twinkleFrequency.get(1).floatValue(), time);
                     starPipeline = CosmosStarRendering.COSMOS_STARS;
                 } else {
-                    starModulator = new Vector4f(time, heightScale, colorScale, starVisibility);
-                    starPipeline = starsPipeline;
+                    starModulator = defaultModulator;
+                    starPipeline = objectsPipeline;
                 }
 
                 GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), starModulator);
@@ -444,10 +435,6 @@ public class SpaceRenderingManager {
 
             Method assignPipeline = irisApiClass.getMethod("assignPipeline", RenderPipeline.class, irisProgramClass);
             assignPipeline.invoke(INSTANCE, objectsPipeline, SKY_BASIC);
-            assignPipeline.invoke(INSTANCE, starsPipeline, SKY_BASIC);
-            if (FabricLoader.getInstance().isModLoaded("cosmos")) {
-                assignPipeline.invoke(INSTANCE, CosmosStarRendering.COSMOS_STARS, SKY_BASIC);
-            }
         } catch (Exception ignored) {
             SpyglassAstronomyClient.LOGGER.error("Failed to assign pipeline. Shader compatibility may be broken");
         }

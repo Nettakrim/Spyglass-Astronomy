@@ -20,11 +20,13 @@ public class Star {
     private final int b;
     private final float alpha;
 
-    private final float angle;
     private final float size;
-    private final int seed;
 
-    private int currentAlpha;
+    private final float rotationRate;
+    private final float twinkleRate;
+
+    private float angle;
+    private float twinkle;
 
     private int connectedLines = 0;
 
@@ -49,58 +51,58 @@ public class Star {
         this.angle = normalisedRotation * Mth.PI;
         this.size = size;
 
-        this.seed = Mth.floor(rotationSeed*15) + Mth.floor(twinkleSeed*15)*16;
+        this.rotationRate = normalisedRotation * 0.005f;
+        this.twinkleRate = twinkleSeed * 0.025f + 0.035f;
     }
 
-    public float calculateAlpha() {
+    public void update(int ticks) {
+        if (SpyglassAstronomyClient.cosmosIsActive) {
+            twinkle = 1.0f;
+        } else {
+            angle = (angle+rotationRate)%90;
+            twinkle = 1 - 2.5f * Math.max(Mth.sin(ticks*twinkleRate) - 0.75f,0);
+        }
+    }
+
+    public float calculateBrightness() {
         float heightScale = SpaceRenderingManager.getHeightScale();
         float brightness = heightScale*Math.max(alpha/2 + heightScale/2, 2*alpha-1) + (1-heightScale) * alpha * alpha * alpha;
         if (connectedLines != 0) {
             brightness = (brightness + (0.5f * alpha + 0.5f))/2;
         }
-        currentAlpha = (int)(brightness * 255);
         return brightness;
     }
 
     public void setVertices(BufferBuilder bufferBuilder, TextureAtlasSprite sprite) {
         int colorMultiplier = isSelected ? 1 : 0;
 
-        if (sprite != null) {
-            // cosmos
-            float angleSin = Mth.sin(angle);
-            float angleCos = Mth.cos(angle);
+        float angleSin = Mth.sin(angle);
+        float angleCos = Mth.cos(angle);
 
-            double polarAngle = Math.atan2(xCoord, zCoord);
-            float longitudeSin = (float) Math.sin(polarAngle);
-            float longitudeCos = (float) Math.cos(polarAngle);
+        double polarAngle = Math.atan2(xCoord, zCoord);
+        float longitudeSin = (float) Math.sin(polarAngle);
+        float longitudeCos = (float) Math.cos(polarAngle);
 
-            double proj = Math.atan2(Math.sqrt(xCoord * xCoord + zCoord * zCoord), yCoord);
-            float latitudeSin = (float) Math.sin(proj);
-            float latitudeCos = (float) Math.cos(proj);
+        double proj = Math.atan2(Math.sqrt(xCoord * xCoord + zCoord * zCoord), yCoord);
+        float latitudeSin = (float) Math.sin(proj);
+        float latitudeCos = (float) Math.cos(proj);
 
-            calculateAlpha();
+        for (int corner = 0; corner < 4; ++corner) {
+            float x = ((corner & 2) - 1) * size;
+            float y = ((corner + 1 & 2) - 1) * size;
+            float rotatedA = x * angleCos - y * angleSin;
+            float rotatedB = y * angleCos + x * angleSin;
+            float rotatedALat = rotatedA * latitudeSin;
+            float rotatedBLat = -(rotatedA * latitudeCos);
+            float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
+            float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
 
-            for (int corner = 0; corner < 4; ++corner) {
-                float x = ((corner & 2) - 1) * size;
-                float y = ((corner + 1 & 2) - 1) * size;
-                float rotatedA = x * angleCos - y * angleSin;
-                float rotatedB = y * angleCos + x * angleSin;
-                float rotatedALat = rotatedA * latitudeSin;
-                float rotatedBLat = -(rotatedA * latitudeCos);
-                float vertexPosX = rotatedBLat * longitudeSin - rotatedB * longitudeCos;
-                float vertexPosZ = rotatedB * longitudeSin + rotatedBLat * longitudeCos;
+            bufferBuilder
+                    .addVertex(xCoord * 100 + vertexPosX, yCoord * 100 + rotatedALat, zCoord * 100 + vertexPosZ)
+                    .setColor(r >> colorMultiplier, g << colorMultiplier, b >> colorMultiplier, (int)(calculateBrightness() * twinkle * 255));
 
-                bufferBuilder.addVertex(xCoord * 100 + vertexPosX, yCoord * 100 + rotatedALat, zCoord * 100 + vertexPosZ)
-                        .setColor(r >> colorMultiplier, g << colorMultiplier, b >> colorMultiplier, currentAlpha)
-                        .setUv(sprite.getU((corner & 2) >> 1), sprite.getV(((corner + 1) & 2) >> 1));
-            }
-        } else {
-            // default
-            for (int corner = 0; corner < 4; ++corner) {
-                float offsetAlpha = 0.125f+alpha;
-                bufferBuilder.addVertex(xCoord, yCoord, zCoord)
-                        .setColor(r >> colorMultiplier, g << colorMultiplier, b >> colorMultiplier, seed)
-                        .setUv(size/100.0f, connectedLines != 0 ? -offsetAlpha : offsetAlpha);
+            if (sprite != null) {
+                bufferBuilder.setUv(sprite.getU((corner & 2) >> 1), sprite.getV(((corner + 1) & 2) >> 1));
             }
         }
     }
