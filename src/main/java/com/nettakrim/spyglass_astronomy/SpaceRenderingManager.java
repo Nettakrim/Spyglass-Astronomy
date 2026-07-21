@@ -70,6 +70,7 @@ public class SpaceRenderingManager {
 
     private boolean constellationsNeedUpdate = true;
     private boolean starsNeedUpdate = false;
+    private boolean buffersNeedRebuild = false;
 
     private File data = null;
     private final Path storagePath;
@@ -126,16 +127,25 @@ public class SpaceRenderingManager {
     }
 
     public void close() {
-        closeBuffer(starsBuffer);
-        closeBuffer(constellationsBuffer);
-        closeBuffer(drawingBuffer);
-        closeBuffer(planetsBuffer);
+        starsBuffer = closeBuffer(starsBuffer);
+        constellationsBuffer = closeBuffer(constellationsBuffer);
+        drawingBuffer = closeBuffer(drawingBuffer);
+        planetsBuffer = closeBuffer(planetsBuffer);
+
+        // the counts have to be cleared too, otherwise draw would try to use the closed buffers before they get rebuilt
+        starsCount = 0;
+        constellationsCount = 0;
+        drawingCount = 0;
+        planetsCount = 0;
+
+        buffersNeedRebuild = true;
     }
 
-    private void closeBuffer(GpuBuffer gpuBuffer) {
+    private GpuBuffer closeBuffer(GpuBuffer gpuBuffer) {
         if (gpuBuffer != null) {
             gpuBuffer.close();
         }
+        return null;
     }
 
     private boolean charTrue(String s, int index) {
@@ -230,9 +240,8 @@ public class SpaceRenderingManager {
                 constellation.setVertices(bufferBuilder, false);
             }
 
-            if (constellationsBuffer != null) {
-                constellationsBuffer.close();
-            }
+            constellationsBuffer = closeBuffer(constellationsBuffer);
+            constellationsCount = 0;
             try (MeshData mesh = bufferBuilder.buildOrThrow()) {
                 constellationsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Constellations Buffer", 40, mesh.vertexBuffer());
                 constellationsCount = mesh.drawState().indexCount();
@@ -266,7 +275,8 @@ public class SpaceRenderingManager {
                 star.setVertices(bufferBuilder, sprite);
             }
 
-            closeBuffer(starsBuffer);
+            starsBuffer = closeBuffer(starsBuffer);
+            starsCount = 0;
             try (MeshData mesh = bufferBuilder.buildOrThrow()) {
                 starsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Stars Buffer", 40, mesh.vertexBuffer());
                 starsCount = mesh.drawState().indexCount();
@@ -297,7 +307,8 @@ public class SpaceRenderingManager {
                 orbitingBody.setVertices(bufferBuilder);
             }
 
-            closeBuffer(planetsBuffer);
+            planetsBuffer = closeBuffer(planetsBuffer);
+            planetsCount = 0;
             try (MeshData mesh = bufferBuilder.buildOrThrow()) {
                 planetsBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Planets Buffer", 40, mesh.vertexBuffer());
                 planetsCount = mesh.drawState().indexCount();
@@ -313,7 +324,8 @@ public class SpaceRenderingManager {
 
             SpyglassAstronomyClient.drawingConstellation.setVertices(bufferBuilder, true);
 
-            closeBuffer(drawingBuffer);
+            drawingBuffer = closeBuffer(drawingBuffer);
+            drawingCount = 0;
             try (MeshData mesh = bufferBuilder.buildOrThrow()) {
                 drawingBuffer = RenderSystem.getDevice().createBuffer(() -> "SGA Drawing Buffer", 40, mesh.vertexBuffer());
                 drawingCount = mesh.drawState().indexCount();
@@ -333,6 +345,15 @@ public class SpaceRenderingManager {
         }
 
         float colorScale = starVisibility + Math.min(heightScale, 0.5f);
+
+        // the buffers get closed when the sky renderer does, which happens on resource reloads.
+        // rebuilding here rather than waiting for the next updateSpace matters because reloads usually happen from a menu, where level ticks are paused
+        if (buffersNeedRebuild) {
+            buffersNeedRebuild = false;
+            updateConstellations();
+            updateStars(ticks);
+            updateOrbits(ticks);
+        }
 
         if (constellationsVisible && SpyglassAstronomyClient.isDrawingConstellation || drawingCount > 0) {
             updateDrawingConstellation();
@@ -453,7 +474,7 @@ public class SpaceRenderingManager {
     }
 
     private void draw(RenderPass renderPass, GpuBuffer gpuBuffer, int count) {
-        if (count == 0) return;
+        if (count == 0 || gpuBuffer == null || gpuBuffer.isClosed()) return;
 
         renderPass.setVertexBuffer(0, gpuBuffer.slice());
         renderPass.setIndexBuffer(indexBuffer.getBuffer(count), indexBuffer.type());
