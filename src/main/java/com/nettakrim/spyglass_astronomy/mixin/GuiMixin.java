@@ -3,8 +3,8 @@ package com.nettakrim.spyglass_astronomy.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.nettakrim.spyglass_astronomy.SpyglassAstronomyClient;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Hud;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Hud.class)
-public class HudMixin {
+@Mixin(Gui.class)
+public class GuiMixin {
     @Unique
     private static final Identifier CONSTELLATION_SPYGLASS_SCOPE = Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"textures/constellation_spyglass_scope.png");
     @Unique

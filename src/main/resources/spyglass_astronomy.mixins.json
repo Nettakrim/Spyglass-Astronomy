@@ -10,7 +10,7 @@
     "ChatComponentMixin",
     "ClientLevelAccessor",
     "CosmosConfigMixin",
-    "HudMixin",
+    "GuiMixin",
     "MinecraftMixin",
     "MouseHandlerMixin",
     "SkyRendererMixin"

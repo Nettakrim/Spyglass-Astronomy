@@ -1,9 +1,9 @@
 package com.nettakrim.spyglass_astronomy;
 
-import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.*;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
@@ -12,7 +12,6 @@ import net.hollowed.cosmos.Cosmos;
 import net.hollowed.cosmos.config.CosmosConfig;
 import net.hollowed.cosmos.renderer.CosmosStarRendering;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.player.LocalPlayer;
 
 import net.minecraft.client.renderer.RenderPipelines;
@@ -36,11 +35,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Scanner;
 
-import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
+import static net.minecraft.client.renderer.RenderPipelines.*;
 
 public class SpaceRenderingManager {
     private int ticks = 0;
@@ -78,14 +77,13 @@ public class SpaceRenderingManager {
 
     private long lastTime = -200;
 
-    private static final RenderPipeline objectsPipeline = RenderPipelines.register(RenderPipeline.builder(GLOBALS_SNIPPET)
-            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+    private static final RenderPipeline objectsPipeline = RenderPipelines.register(RenderPipeline.builder(MATRICES_PROJECTION_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID, "pipeline/sga_objects"))
             .withVertexShader("core/position_color")
             .withFragmentShader("core/position_color")
-            .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
-            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
             .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
+            .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
             .build());
 
     public SpaceRenderingManager() {
@@ -106,7 +104,7 @@ public class SpaceRenderingManager {
             }
         }
 
-        indexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
+        indexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
     }
 
     private void loadData() {
@@ -234,7 +232,7 @@ public class SpaceRenderingManager {
         }
 
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(DefaultVertexFormat.POSITION_COLOR.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             for (Constellation constellation : SpyglassAstronomyClient.constellations) {
                 constellation.setVertices(bufferBuilder, false);
@@ -260,7 +258,7 @@ public class SpaceRenderingManager {
         VertexFormat format = SpyglassAstronomyClient.cosmosIsActive ? DefaultVertexFormat.POSITION_TEX_COLOR : DefaultVertexFormat.POSITION_COLOR;
 
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(format.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, format);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, format);
 
             TextureAtlasSprite sprite;
             if (SpyglassAstronomyClient.cosmosIsActive) {
@@ -293,7 +291,7 @@ public class SpaceRenderingManager {
         int size = SpyglassAstronomyClient.orbitingBodies.size() * 2;
 
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(DefaultVertexFormat.POSITION_COLOR.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             Long day = SpyglassAstronomyClient.getDay();
             float dayFraction = SpyglassAstronomyClient.getDayFraction();
@@ -320,7 +318,7 @@ public class SpaceRenderingManager {
         int size = 1;
 
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(DefaultVertexFormat.POSITION_COLOR.getVertexSize() * size * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             SpyglassAstronomyClient.drawingConstellation.setVertices(bufferBuilder, true);
 
@@ -359,7 +357,7 @@ public class SpaceRenderingManager {
             updateDrawingConstellation();
         }
 
-        RenderTarget renderTarget = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+        RenderTarget renderTarget = Minecraft.getInstance().gameRenderer.getMinecraft().getMainRenderTarget();
         GpuTextureView mainColor = renderTarget.getColorTextureView();
         GpuTextureView mainDepth = renderTarget.getDepthTextureView();
         Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
@@ -391,8 +389,8 @@ public class SpaceRenderingManager {
                     starPipeline = objectsPipeline;
                 }
 
-                GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), starModulator);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
+                GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), starModulator, new Vector3f(0,0,0), new Matrix4f());
+                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Stars", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(starPipeline);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", dynamicTransforms);
@@ -405,8 +403,8 @@ public class SpaceRenderingManager {
             }
 
             if (constellationsVisible) {
-                GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Constellations", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
+                GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator, new Vector3f(0,0,0), new Matrix4f());
+                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Constellations", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty())) {
                     renderPass.setPipeline(objectsPipeline);
                     RenderSystem.bindDefaultUniforms(renderPass);
                     renderPass.setUniform("DynamicTransforms", dynamicTransforms);
@@ -429,8 +427,8 @@ public class SpaceRenderingManager {
             modelViewStack.pushMatrix();
             modelViewStack.mul(matrices.last().pose());
 
-            GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator);
-            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, Optional.empty(), mainDepth, OptionalDouble.empty())) {
+            GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), defaultModulator, new Vector3f(0,0,0), new Matrix4f());
+            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Planets", mainColor, OptionalInt.empty(), mainDepth, OptionalDouble.empty())) {
                 renderPass.setPipeline(objectsPipeline);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
@@ -476,8 +474,8 @@ public class SpaceRenderingManager {
     private void draw(RenderPass renderPass, GpuBuffer gpuBuffer, int count) {
         if (count == 0 || gpuBuffer == null || gpuBuffer.isClosed()) return;
 
-        renderPass.setVertexBuffer(0, gpuBuffer.slice());
+        renderPass.setVertexBuffer(0, gpuBuffer);
         renderPass.setIndexBuffer(indexBuffer.getBuffer(count), indexBuffer.type());
-        renderPass.drawIndexed(count, 1, 0, 0, 0);
+        renderPass.drawIndexed(0, 0, count, 1);
     }
 }
