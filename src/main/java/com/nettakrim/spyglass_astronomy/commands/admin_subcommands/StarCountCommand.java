@@ -53,9 +53,9 @@ public class StarCountCommand {
     }
 
     private static int setStarCount(int amount) {
-        boolean reducedStars = amount < SpyglassAstronomyClient.getStarCount();
-        SpyglassAstronomyClient.say("commands.admin.starcount.set", Integer.toString(amount), Integer.toString(SpyglassAstronomyClient.getStarCount()));
-        SpyglassAstronomyClient.setStarCount(amount);
+        boolean reducedStars = amount < SpyglassAstronomyClient.spaceDataManager.getStarCount();
+        SpyglassAstronomyClient.say("commands.admin.starcount.set", Integer.toString(amount), Integer.toString(SpyglassAstronomyClient.spaceDataManager.getStarCount()));
+        SpyglassAstronomyClient.spaceDataManager.setStarCount(amount);
         SpyglassAstronomyClient.spaceDataManager.backupStars();
         SpyglassAstronomyClient.generateStars(null, false);
 
@@ -122,7 +122,7 @@ public class StarCountCommand {
     }
 
     private static int queryStarCount(CommandContext<FabricClientCommandSource> context) {
-        SpyglassAstronomyClient.say("commands.admin.starcount.query", Integer.toString(SpyglassAstronomyClient.getStarCount()));
+        SpyglassAstronomyClient.say("commands.admin.starcount.query", Integer.toString(SpyglassAstronomyClient.spaceDataManager.getStarCount()));
         return 1;
     }
 }

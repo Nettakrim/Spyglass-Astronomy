@@ -35,13 +35,10 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static boolean ready;
 
-    private static int starCount = 1024; //encoding will break at 4096, so stay at 4095 and below :)
-
     public static Minecraft client;
     public static ClientLevel world;
 
     public static ArrayList<Star> stars;
-
     public static ArrayList<Constellation> constellations;
 
     public static SpaceRenderingManager spaceRenderingManager;
@@ -96,7 +93,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
 
     public static void saveSpace() {
         if (spaceDataManager != null) {
-            spaceDataManager.saveData();
+            spaceDataManager.saveDataToFile();
         }
         if (spaceRenderingManager != null) {
             spaceRenderingManager.saveData();
@@ -108,7 +105,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     }
 
     public static void loadSpace(ClientLevel clientWorld, boolean allowSave) {
-        if (spaceDataManager != null && allowSave) spaceDataManager.saveData();
+        if (spaceDataManager != null && allowSave) spaceDataManager.saveDataToFile();
 
         world = clientWorld;
 
@@ -157,7 +154,7 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
             spaceRenderingManager.scheduleConstellationsUpdate();
         }
         int currentStars = 0;
-        while (currentStars < starCount) {
+        while (currentStars < spaceDataManager.getStarCount()) {
             float posX = random.nextFloat() * 2.0f - 1.0f;
             float posY = random.nextFloat() * 2.0f - 1.0f;
             float posZ = random.nextFloat() * 2.0f - 1.0f;
@@ -768,13 +765,5 @@ public class SpyglassAstronomyClient implements ClientModInitializer {
     public static boolean isntHoldingSpyglass() {
         if (!ready || client.player == null) return true;
         return !client.player.getMainHandItem().is(Items.SPYGLASS) && !client.player.getOffhandItem().is(Items.SPYGLASS);
-    }
-
-    public static void setStarCount(int count) {
-        starCount = count;
-    }
-
-    public static int getStarCount() {
-        return starCount;
     }
 }
