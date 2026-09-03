@@ -60,7 +60,7 @@ public class ConstellationsCommand {
             return -1;
         }
         Constellation constellation = SpaceDataManager.decodeConstellation(null, dataRaw.substring(index+1), dataRaw.substring(0, index));
-        if (constellation.getLines().size() == 0) {
+        if (constellation.getLines().isEmpty()) {
             SpyglassAstronomyClient.say("commands.admin.constellations.add.fail.data", constellation.name);
             return -1;
         }
@@ -70,9 +70,9 @@ public class ConstellationsCommand {
             int star = line.getOtherStar(-1);
             max = Math.max(Math.max(line.getOtherStar(star), star), max);
         }
-        if (max >= SpyglassAstronomyClient.getStarCount()) {
+        if (max >= SpyglassAstronomyClient.spaceDataManager.getStarCount()) {
             if (max < 4096) {
-                SpyglassAstronomyClient.say("commands.admin.constellations.add.fail.stars", constellation.name, max, SpyglassAstronomyClient.getStarCount());
+                SpyglassAstronomyClient.say("commands.admin.constellations.add.fail.stars", constellation.name, max, SpyglassAstronomyClient.spaceDataManager.getStarCount());
             } else {
                 SpyglassAstronomyClient.say("commands.admin.constellations.add.fail.data", constellation.name);
             }
