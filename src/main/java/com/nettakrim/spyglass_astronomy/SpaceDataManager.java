@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
@@ -21,6 +18,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelResource;
 
 public class SpaceDataManager {
@@ -29,38 +27,31 @@ public class SpaceDataManager {
     private long starSeed;
     private long planetSeed;
     private float yearLength;
+    private int starCount; // encoding will break at 4096, so stay at 4095 and below :)
 
+    private final long seedHash;
     private final File data;
     private final Path storagePath;
-    private final String fileName;
     private final boolean isWorldFolder;
 
-    public ArrayList<StarData> starDatas;
-    public ArrayList<OrbitingBodyData> orbitingBodyDatas;
+    private ArrayList<StarData> starDatas;
+    private ArrayList<OrbitingBodyData> orbitingBodyDatas;
 
     private int changesMade;
 
     public SpaceDataManager(ClientLevel world) {
         //https://github.com/Johni0702/bobby/blob/d2024a2d63c63d0bccf2eafcab17dd7bf9d26710/src/main/java/de/johni0702/minecraft/bobby/FakeChunkManager.java#L86
-        long seedHash = ((BiomeManagerAccessor) world.getBiomeManager()).getBiomeZoomSeed();
-        boolean useDefault = true;
+        seedHash = ((BiomeManagerAccessor)world.getBiomeManager()).getBiomeZoomSeed();
+
         Optional<Path> localPath = getLocalStorage();
         this.isWorldFolder = localPath.isPresent();
         storagePath = localPath.orElse(getGlobalStorage(world));
 
-        fileName = storagePath +"/"+seedHash + ".txt";
+        String fileName = storagePath + "/" + seedHash + ".txt";
         data = new File(fileName);
 
         tryMigrateOldData();
-        if (data.exists()) {
-            useDefault = !loadData();
-        }
-
-        if (useDefault) {
-            starSeed = seedHash;
-            planetSeed = seedHash;
-            yearLength = 8f;
-        }
+        loadDataFromFile();
     }
 
     static public Path getGlobalStorage(ClientLevel world){
@@ -94,129 +85,163 @@ public class SpaceDataManager {
                 SpyglassAstronomyClient.LOGGER.info(isWorldFolder ? "Migrated old astronomy data into the world's folder." : "Migrated old astronomy data to the correct server folder.");
             }
             catch (IOException e){
-                SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data: {}", e);
+                SpyglassAstronomyClient.LOGGER.error("Failed to migrate old data:", e);
             }
         }
     }
 
-    public boolean loadData() {
+    public void loadDataFromFile() {
+        if (!data.exists()) {
+            loadDataFromLineIterator(null);
+            return;
+        }
+
         try {
-            data.createNewFile();
             Scanner scanner = new Scanner(data);
-            int stage = 0;
-            Decoder decoder = Base64.getDecoder();
-            int starIndex = 0;
-            starDatas = new ArrayList<>();
-            orbitingBodyDatas = new ArrayList<>();
-            changesMade = 0;
-            boolean useDefault = false;
-            while (scanner.hasNextLine()) {
-                String s = scanner.nextLine();
-                if (s.equals("---")) {
-                    stage++;
-                    continue;
+
+            loadDataFromLineIterator(new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return scanner.hasNextLine();
                 }
-                try {
-                    switch (stage) {
-                        case 0 -> {
-                            int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
-                            if (format == 0) useDefault = true;
-                        }
-                        case 1 -> {
-                            String[] seeds = s.split(" ");
-                            if (seeds.length == 1) {
-                                starSeed = Long.parseLong(s);
-                                planetSeed = starSeed;
-                            } else {
-                                starSeed = Long.parseLong(seeds[0]);
-                                planetSeed = Long.parseLong(seeds[1]);
-                            }
-                        }
-                        case 2 -> {
-                            String[] constellationParts = s.split(" \\| ");
-                            SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
-                        }
-                        case 3 -> {
-                            int starSplit = s.indexOf(' ');
-                            starIndex += Integer.parseInt(s.substring(0, starSplit));
-                            String starName = s.substring(starSplit + 1);
-                            starDatas.add(new StarData(starIndex, starName));
-                        }
-                        case 4 -> {
-                            int orbitingBodySplit = s.indexOf(' ');
-                            int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
-                            String orbitingBodyName = s.substring(orbitingBodySplit + 1);
-                            orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
-                        }
-                        case 5 -> {
-                            String[] parts = s.split(" ");
-                            SpyglassAstronomyClient.setStarCount(Integer.parseInt(parts[0]));
-                            if (parts.length > 1) setYearLength(Float.parseFloat(parts[1]));
-                            else yearLength = 8;
-                        }
-                    }
-                } catch (Exception e) {
-                    SpyglassAstronomyClient.LOGGER.info("Failed to load line in stage "+stage);
+
+                @Override
+                public String next() {
+                    return scanner.nextLine();
                 }
-            }
+            });
+
             scanner.close();
-            return !useDefault;
+            changesMade = 0;
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to load data");
         }
-        return false;
     }
 
-    public void saveData() {
+    public void saveDataToFile() {
         if (changesMade == 0) return;
         try {
             if (!data.exists()) {
                 Files.createDirectories(storagePath);
             }
             FileWriter writer = new FileWriter(data);
-            StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
-            s.append("\n---\n");
-            s.append(starSeed);
-            if (planetSeed != starSeed) {
-                s.append(' ');
-                s.append(planetSeed);
-            }
-            s.append("\n---");
-            Encoder encoder = Base64.getEncoder();
-            for (Constellation constellation : SpyglassAstronomyClient.constellations) {
-                s.append('\n');
-                s.append(encodeConstellation(encoder, constellation));
-            }
-            s.append("\n---");
-            int lastIndex = 0;
-            for (Star star : SpyglassAstronomyClient.stars) {
-                if (!star.isUnnamed()) {
-                    s.append('\n');
-                    s.append(star.index - lastIndex).append(" ").append(star.name);
-                    lastIndex = star.index;
-                }
-            }
-            s.append("\n---");
-            int index = 0;
-            for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
-                if (!orbitingBody.isUnnamed()) {
-                    s.append('\n');
-                    s.append(index).append(" ").append(orbitingBody.name);
-                }
-                index++;
-            }
-            s.append("\n---\n");
-            s.append(SpyglassAstronomyClient.getStarCount());
-            s.append(" ");
-            s.append(yearLength);
-            s.append("\n---");
 
-            writer.write(s.toString());
+            writer.write(dataToString());
             writer.close();
             changesMade = 0;
         } catch (IOException e) {
             SpyglassAstronomyClient.LOGGER.info("Failed to save data");
         }
+    }
+
+    public void loadDataFromLineIterator(Iterator<String> lineIterator) {
+        // default settings, for new worlds, or when loading fails
+        starSeed = seedHash;
+        planetSeed = seedHash;
+        yearLength = 8f;
+        starCount = 1024;
+        starDatas = new ArrayList<>();
+        orbitingBodyDatas = new ArrayList<>();
+
+        if (lineIterator == null) {
+            return;
+        }
+
+        int stage = 0;
+        int starIndex = 0;
+        Decoder decoder = Base64.getDecoder();
+
+        while (lineIterator.hasNext()) {
+            String s = lineIterator.next();
+            if (s.equals("---")) {
+                stage++;
+                continue;
+            }
+            try {
+                switch (stage) {
+                    case 0 -> {
+                        //int format = Integer.parseInt(s.replace("Spyglass Astronomy - Format: ", ""));
+                        // format == 0 will be missing some data, but defaulting accounts for this
+                    }
+                    case 1 -> {
+                        String[] seeds = s.split(" ");
+                        if (seeds.length == 1) {
+                            starSeed = Long.parseLong(s);
+                            planetSeed = starSeed;
+                        } else {
+                            starSeed = Long.parseLong(seeds[0]);
+                            planetSeed = Long.parseLong(seeds[1]);
+                        }
+                    }
+                    case 2 -> {
+                        String[] constellationParts = s.split(" \\| ");
+                        SpyglassAstronomyClient.constellations.add(decodeConstellation(decoder, constellationParts[0], constellationParts[1]));
+                    }
+                    case 3 -> {
+                        int starSplit = s.indexOf(' ');
+                        starIndex += Integer.parseInt(s.substring(0, starSplit));
+                        String starName = s.substring(starSplit + 1);
+                        starDatas.add(new StarData(starIndex, starName));
+                    }
+                    case 4 -> {
+                        int orbitingBodySplit = s.indexOf(' ');
+                        int orbitingBodyIndex = Integer.parseInt(s.substring(0, orbitingBodySplit));
+                        String orbitingBodyName = s.substring(orbitingBodySplit + 1);
+                        orbitingBodyDatas.add(new OrbitingBodyData(orbitingBodyIndex, orbitingBodyName));
+                    }
+                    case 5 -> {
+                        String[] parts = s.split(" ");
+                        setStarCount(Integer.parseInt(parts[0]));
+                        if (parts.length > 1) {
+                            setYearLength(Float.parseFloat(parts[1]));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                SpyglassAstronomyClient.LOGGER.info("Failed to load line in stage "+stage);
+            }
+        }
+    }
+
+    public String dataToString() {
+        StringBuilder s = new StringBuilder("Spyglass Astronomy - Format: "+SAVE_FORMAT);
+        s.append("\n---\n");
+        s.append(starSeed);
+        if (planetSeed != starSeed) {
+            s.append(' ');
+            s.append(planetSeed);
+        }
+        s.append("\n---");
+        Encoder encoder = Base64.getEncoder();
+        for (Constellation constellation : SpyglassAstronomyClient.constellations) {
+            s.append('\n');
+            s.append(encodeConstellation(encoder, constellation));
+        }
+        s.append("\n---");
+        int lastIndex = 0;
+        for (Star star : SpyglassAstronomyClient.stars) {
+            if (!star.isUnnamed()) {
+                s.append('\n');
+                s.append(star.index - lastIndex).append(" ").append(star.name);
+                lastIndex = star.index;
+            }
+        }
+        s.append("\n---");
+        int index = 0;
+        for (OrbitingBody orbitingBody : SpyglassAstronomyClient.orbitingBodies) {
+            if (!orbitingBody.isUnnamed()) {
+                s.append('\n');
+                s.append(index).append(" ").append(orbitingBody.name);
+            }
+            index++;
+        }
+        s.append("\n---\n");
+        s.append(starCount);
+        s.append(" ");
+        s.append(yearLength);
+        s.append("\n---");
+
+        return s.toString();
     }
 
     public static String encodeConstellation(Encoder encoder, Constellation constellation) {
@@ -268,12 +293,12 @@ public class SpaceDataManager {
         return starSeed;
     }
 
-    public long getPlanetSeed() {
-        return planetSeed;
-    }
-
     public void setStarSeed(long starSeed) {
         this.starSeed = starSeed;
+    }
+
+    public long getPlanetSeed() {
+        return planetSeed;
     }
 
     public void setPlanetSeed(long planetSeed) {
@@ -286,6 +311,14 @@ public class SpaceDataManager {
 
     public void setYearLength(float yearLength) {
         this.yearLength = yearLength;
+    }
+
+    public void setStarCount(int starCount) {
+        this.starCount = Mth.clamp(starCount,0,4095);
+    }
+
+    public int getStarCount() {
+        return starCount;
     }
 
     private static String getCurrentWorldOrServerName(ClientLevel world) {
