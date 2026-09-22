@@ -31,7 +31,7 @@ public class StarCountCommand {
         LiteralCommandNode<FabricClientCommandSource> setNode = ClientCommands
             .literal("set")
             .then(
-                ClientCommands.argument("amount", IntegerArgumentType.integer(0,4095))
+                ClientCommands.argument("amount", IntegerArgumentType.integer(0,32768))
                     .executes(StarCountCommand::setStarCount)
             )
             .build();

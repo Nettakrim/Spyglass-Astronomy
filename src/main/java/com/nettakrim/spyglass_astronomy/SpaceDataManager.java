@@ -27,7 +27,7 @@ public class SpaceDataManager {
     private long starSeed;
     private long planetSeed;
     private float yearLength;
-    private int starCount; // encoding will break at 4096, so stay at 4095 and below :)
+    private int starCount; // old style encoding would break at 4096, but theres actually space for 32768 stars!
 
     private final long seedHash;
     private final File data;
@@ -258,11 +258,16 @@ public class SpaceDataManager {
     private static String encodeStarLine(Encoder encoder, Star[] stars) {
         int starA = stars[0].index;
         int starB = stars[1].index;
-        int combined = starA + (starB << 12);
-        ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
-        bb.putInt(combined);
+
+        // 0-4095
+        long combined = ((starA & 4095L) << 8L) | ((starB & 4095L) << 20L);
+        // 4096-32768
+        int extra = (starA >> 12) | ((starB >> 12) << 3);
+
+        ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
+        bb.putLong(combined | ((extra & 15L) << 4L) | ((extra & 48L) << 28L));
         byte[] array = bb.array();
-        return encoder.encodeToString(array).substring(1,6);
+        return encoder.encodeToString(array).substring(5,10);
     }
 
     public static Constellation decodeConstellation(Decoder decoder, String name, String lines) {
@@ -279,13 +284,21 @@ public class SpaceDataManager {
     }
 
     private static StarLine decodeStarLine(Decoder decoder, String s) {
-        byte[] array = decoder.decode("A"+s+"==");
-        ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
+        byte[] array = decoder.decode("AAAAA"+s+"A");
+        ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
         bb.put(array);
         bb.rewind();
-        int combined = bb.getInt();
-        int starB = combined >> 12;
-        int starA = combined - (starB << 12);
+        long combined = bb.getLong();
+
+        // 0-4095
+        int starA = (int)((combined >> 8) & 4095);
+        int starB = (int)((combined >> 20) & 4095);
+
+        // 4096-32768
+        int extra = (int)(((combined >> 28L) & 48L) | ((combined >> 4L) & 15L));
+        starA += (extra & 7) << 12;
+        starB += (extra & 56) << 9;
+
         return new StarLine(starA, starB, false);
     }
 
@@ -314,7 +327,7 @@ public class SpaceDataManager {
     }
 
     public void setStarCount(int starCount) {
-        this.starCount = Mth.clamp(starCount,0,4095);
+        this.starCount = Mth.clamp(starCount,0,32768);
     }
 
     public int getStarCount() {
