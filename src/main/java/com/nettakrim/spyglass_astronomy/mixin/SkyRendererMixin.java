@@ -1,6 +1,7 @@
 package com.nettakrim.spyglass_astronomy.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import com.nettakrim.spyglass_astronomy.SpaceRenderingManager;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,15 +24,15 @@ public class SkyRendererMixin {
 
     @WrapWithCondition(
         method = "renderSunMoonAndStars",
-        at = @At(value = "INVOKE", target= "Lnet/minecraft/client/renderer/SkyRenderer;renderStars(FLcom/mojang/blaze3d/vertex/PoseStack;)V")
+        at = @At(value = "INVOKE", target= "Lnet/minecraft/client/renderer/SkyRenderer;renderStars(Lcom/mojang/renderpearl/api/commands/RenderPass;FLcom/mojang/blaze3d/vertex/PoseStack;)V")
     )
-	private boolean stopStarRender(SkyRenderer instance, float starBrightness, PoseStack poseStack) {
+	private boolean stopStarRender(SkyRenderer instance, RenderPass renderPass, float starBrightness, PoseStack poseStack) {
         return SpaceRenderingManager.oldStarsVisible;
     }
 
     @Inject(method = "renderSunMoonAndStars", at = @At("TAIL"))
-    private void renderCustomStars(PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci) {
-        SpyglassAstronomyClient.spaceRenderingManager.render(poseStack, starBrightness, celestialsAtlas);
+    private void renderCustomStars(RenderPass renderPass, PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci) {
+        SpyglassAstronomyClient.spaceRenderingManager.render(renderPass, poseStack, starBrightness, celestialsAtlas);
     }
 
     @Inject(method = "close", at = @At("HEAD"))

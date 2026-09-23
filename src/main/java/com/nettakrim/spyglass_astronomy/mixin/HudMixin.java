@@ -21,7 +21,7 @@ public class HudMixin {
     @Unique
     private static final Identifier STAR_SPYGLASS_SCOPE = Identifier.fromNamespaceAndPath(SpyglassAstronomyClient.MODID,"textures/star_spyglass_scope.png");
 
-    @Inject(method = "extractSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;fill(Lcom/mojang/blaze3d/pipeline/RenderPipeline;IIIII)V", ordinal = 0))
+    @Inject(method = "extractSpyglassOverlay",at = @At(value = "INVOKE",target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;fill(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;IIIII)V", ordinal = 0))
     public void renderSpyglassMode(GuiGraphicsExtractor graphics, float scale, CallbackInfo ci, @Local(name = "left") int left, @Local(name = "top") int top, @Local(name = "width") int width, @Local(name = "height") int height){
         if (SpyglassAstronomyClient.editMode != 0) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, SpyglassAstronomyClient.editMode == 1 ? CONSTELLATION_SPYGLASS_SCOPE : STAR_SPYGLASS_SCOPE, left, top, 0.0F, 0.0F, width, height, width, height);
