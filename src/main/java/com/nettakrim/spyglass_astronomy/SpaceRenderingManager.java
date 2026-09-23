@@ -1,6 +1,5 @@
 package com.nettakrim.spyglass_astronomy;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
@@ -10,7 +9,6 @@ import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.hollowed.cosmos.Cosmos;
 import net.hollowed.cosmos.config.CosmosConfig;
@@ -362,12 +360,8 @@ public class SpaceRenderingManager {
             updateDrawingConstellation();
         }
 
-        RenderTarget renderTarget = Minecraft.getInstance().gameRenderer.mainRenderTarget();
-        GpuTextureView mainColor = renderTarget.getColorTextureView();
-        GpuTextureView mainDepth = renderTarget.getDepthTextureView();
         Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 
-        assert mainColor != null;
         Vector4f defaultModulator = new Vector4f(colorScale, colorScale, colorScale, starVisibility);
 
         if (starsVisible || constellationsVisible) {
